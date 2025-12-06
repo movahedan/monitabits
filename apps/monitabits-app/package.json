@@ -1,0 +1,24 @@
+{
+	"private": true,
+	"name": "monitabits-app",
+	"description": "Monitabits Next.js application",
+	"type": "module",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"check:types": "tsc --noEmit",
+		"start": "next start"
+	},
+	"dependencies": {
+		"@repo/utils": "workspace:*",
+		"@repo/ui": "workspace:*",
+		"next": "15.4.7",
+		"react": "19.1.1",
+		"react-dom": "19.1.1"
+	},
+	"devDependencies": {
+		"@repo/typescript-config": "workspace:*",
+		"@types/react": "19.1.17",
+		"@types/react-dom": "19.1.11"
+	}
+}

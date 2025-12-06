@@ -1,0 +1,148 @@
+name: repo
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+    driver: local
+  turbo_cache:
+    driver: local
+  bun_cache:
+    driver: local
+  vscode_cache:
+    driver: local
+
+services:
+  # Apps runtime environment - shared container for all applications
+  apps:
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+      # Enable BuildKit for advanced caching
+      x-bake:
+        contexts:
+          buildkit: docker-container://buildkit
+      # Enable BuildKit cache from environment
+      cache_from:
+        - type=gha
+      # Increase memory limits to help with node_modules I/O
+      shm_size: '1gb'
+    env_file:
+      - path: ./.env
+        required: true
+    volumes:
+      # Use environment-aware volume mounts (works from host or devcontainer)
+      - ${PROJECT_ROOT:-./}/apps:/app/apps:cached
+      - ${PROJECT_ROOT:-./}/packages:/app/packages:cached
+      - ${PROJECT_ROOT:-./}/scripts:/app/scripts:cached
+      - ${PROJECT_ROOT:-./}/package.json:/app/package.json:cached
+      - ${PROJECT_ROOT:-./}/bun.lock:/app/bun.lock:cached
+      - ${PROJECT_ROOT:-./}/turbo.json:/app/turbo.json:cached
+      # Override volumes
+      - node_modules:/app/node_modules:delegated
+      - turbo_cache:/app/.turbo:delegated
+      - bun_cache:/root/.bun:delegated
+      - vscode_cache:/app/.vscode:delegated
+    command: sleep infinity
+    # Use init for better signal handling
+    init: true
+    profiles: ["apps"]
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD", "ps", "aux"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Lightweight app containers that inherit from apps runtime
+  monitabits-app:
+    extends:
+      service: apps
+    expose:
+      - "3002"
+    ports:
+      - "3002:3002"
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      PORT: "3002"
+      HOST: "0.0.0.0"
+    command: bun run dev --filter=monitabits-app -- --hostname 0.0.0.0 --port 3002
+    profiles: ["monitabits-app", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://monitabits-app:3002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  monitabits-api:
+    extends:
+      service: apps
+    expose:
+      - "3003"
+    ports:
+      - "3003:3003"
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      PORT: "3003"
+      HOST: "0.0.0.0"
+    command: bun run dev --filter=monitabits-api
+    profiles: ["monitabits-api", "all"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://monitabits-api:3003/status | grep -q '\"ok\":true'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  ui:
+    extends:
+      service: apps
+    expose:
+      - "3004"
+    ports:
+      - "3004:3004"
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      PORT: "3004"
+      HOST: "0.0.0.0"
+    command: bun run dev --filter=@repo/ui
+    profiles: ["ui", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ui:3004"]
+
+  vscode-service:
+    build:
+      context: ./
+      dockerfile: .devcontainer/Dockerfile.vscode
+    env_file:
+      - path: ./.env
+        required: true
+    volumes:
+      - ${PROJECT_ROOT:-./}:/app:cached
+      # Override volumes
+      - node_modules:/app/node_modules:delegated
+      - turbo_cache:/app/.turbo:delegated
+      - bun_cache:/root/.bun:delegated
+      - vscode_cache:/app/.vscode:delegated
+    command: sleep infinity
+    # Use init for better signal handling
+    init: true
+    networks:
+      - dev-network
+    profiles: ["vscode-service"]
+    healthcheck:
+      test: ["CMD", "ps", "aux"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,31 @@
+{
+	"private": false,
+	"version": "0.1.0",
+	"name": "monitabits-api",
+	"description": "Monitabits NestJS API server",
+	"type": "module",
+	"scripts": {
+		"start": "bun dist/index.js",
+		"dev": "tsup src/index.ts --watch --onSuccess 'bun dist/index.js'",
+		"build": "tsup src/index.ts",
+		"check:types": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@nestjs/common": "latest",
+		"@nestjs/core": "latest",
+		"@nestjs/platform-express": "latest",
+		"@repo/utils": "workspace:*",
+		"reflect-metadata": "latest",
+		"rxjs": "latest"
+	},
+	"devDependencies": {
+		"@nestjs/cli": "latest",
+		"@nestjs/testing": "latest",
+		"@repo/test-preset": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@types/node": "latest",
+		"@types/supertest": "6.0.3",
+		"supertest": "7.1.4",
+		"tsup": "8.5.0"
+	}
+}

@@ -1,0 +1,66 @@
+name: repo-prod
+
+networks:
+  prod-network:
+    driver: bridge
+
+services:
+  monitabits-app:
+    build:
+      context: .
+      dockerfile: apps/monitabits-app/Dockerfile
+    ports:
+      - "5002:5002"
+    networks:
+      - prod-network
+    environment:
+      - PORT=5002
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://monitabits-api:5003
+    depends_on:
+      - monitabits-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  monitabits-api:
+    build:
+      context: .
+      dockerfile: apps/monitabits-api/Dockerfile
+    ports:
+      - "5003:5003"
+    networks:
+      - prod-network
+    environment:
+      - PORT=5003
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  ui:
+    build:
+      context: .
+      dockerfile: packages/ui/Dockerfile
+    ports:
+      - "5006:5006"
+    networks:
+      - prod-network
+    environment:
+      - PORT=5006
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

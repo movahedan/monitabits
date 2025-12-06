@@ -1,0 +1,55 @@
+{
+	"private": true,
+	"name": "@repo/ui",
+	"type": "module",
+	"main": "./src/index.ts",
+	"files": [
+		"src/**"
+	],
+	"exports": {
+		"./login-form": "./src/login-form/login-form.tsx",
+		"./card": "./src/card/card.tsx",
+		"./input": "./src/input/input.tsx",
+		"./label": "./src/label/label.tsx",
+		"./button": "./src/button/button.tsx",
+		"./link": "./src/link/link.tsx",
+		"./counter-button": "./src/counter-button/counter-button.tsx",
+		".": "./index.ts"
+	},
+	"scripts": {
+		"check:types": "tsc --noEmit",
+		"dev": "bun run scripts/dev.ts",
+		"dev:storybook": "bunx --bun storybook dev --no-open",
+		"prebuild": "intershell update-package-json",
+		"build:storybook": "bunx --bun storybook build -o dist-storybook",
+		"start": "bun run build:storybook && bunx --bun serve dist-storybook"
+	},
+	"dependencies": {
+		"@radix-ui/react-label": "2.1.7",
+		"@radix-ui/react-slot": "1.2.3",
+		"@repo/utils": "workspace:*",
+		"@types/react": "19.1.16",
+		"@types/react-dom": "19.1.9",
+		"class-variance-authority": "0.7.1",
+		"clsx": "2.1.1",
+		"lucide-react": "0.532.0",
+		"react": "19.1.1",
+		"react-dom": "19.1.1",
+		"tailwind-merge": "3.3.1"
+	},
+	"devDependencies": {
+		"@repo/test-preset": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@storybook/addon-a11y": "9.0.18",
+		"@storybook/addon-links": "9.0.18",
+		"@storybook/addon-themes": "9.0.18",
+		"@storybook/react": "9.0.18",
+		"@storybook/react-vite": "9.0.18",
+		"@storybook/testing-library": "0.2.2",
+		"autoprefixer": "10.4.21",
+		"serve": "14.2.5",
+		"storybook": "9.0.18",
+		"tailwindcss": "4.1.15",
+		"tailwindcss-animate": "1.0.7"
+	}
+}
