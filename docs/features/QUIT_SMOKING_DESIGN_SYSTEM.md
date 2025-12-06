@@ -1,0 +1,480 @@
+# 🏗️ Cigarette Quitting Application - System Design
+
+> Technical architecture, system components, and infrastructure design for the quit smoking accountability application.
+
+## 📋 Table of Contents
+
+- [System Architecture Overview](#-system-architecture-overview)
+- [Technology Stack](#-technology-stack)
+- [System Components](#-system-components)
+- [Data Flow](#-data-flow)
+- [Security Architecture](#-security-architecture)
+- [Deployment Architecture](#-deployment-architecture)
+- [Infrastructure](#-infrastructure)
+- [Integration Points](#-integration-points)
+- [Scalability Considerations](#-scalability-considerations)
+
+## 🏗️ System Architecture Overview
+
+### High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Client Layer                          │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Next.js Frontend (Port 3002)                       │   │
+│  │  - React 19 + App Router                           │   │
+│  │  - Tailwind CSS + shadcn/ui                         │   │
+│  │  - PWA Capabilities                                 │   │
+│  └──────────────────────────────────────────────────────┘   │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        │ HTTPS/REST API
+                        │
+┌───────────────────────▼─────────────────────────────────────┐
+│                      API Layer                                │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  NestJS Backend (Port 3003)                          │   │
+│  │  - RESTful API                                       │   │
+│  │  - Time Validation Service                           │   │
+│  │  - Security Middleware                               │   │
+│  └───────────────────────┬──────────────────────────────┘   │
+└───────────────────────────┼──────────────────────────────────┘
+                            │
+                            │
+┌───────────────────────────▼──────────────────────────────────┐
+│                    Data Layer                                 │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  PostgreSQL Database                                  │   │
+│  │  - User Sessions                                      │   │
+│  │  - Check-ins & Actions                                │   │
+│  │  - Settings                                           │   │
+│  │  - Security Logs                                      │   │
+│  └──────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Architecture Principles
+
+1. **Server-Side Authority**: All time-sensitive operations validated server-side
+2. **Stateless API**: RESTful API with device-based identification
+3. **Single-User Design**: Device-based authentication, no multi-user complexity
+4. **Security-First**: Anti-cheat mechanisms at every layer
+5. **Progressive Enhancement**: PWA capabilities for offline support
+
+## 🛠️ Technology Stack
+
+### Frontend Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Next.js** | 15.4.7 | React framework with App Router |
+| **React** | 19.1.1 | UI library |
+| **TypeScript** | 5.9.3 | Type safety |
+| **Tailwind CSS** | Latest | Utility-first CSS framework |
+| **shadcn/ui** | Latest | Component library |
+| **Bun** | 1.3.1 | Runtime and package manager |
+
+### Backend Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **NestJS** | Latest | Node.js framework |
+| **TypeScript** | 5.9.3 | Type safety |
+| **PostgreSQL** | 15+ | Relational database |
+| **TypeORM/Prisma** | Latest | ORM (recommended: Prisma) |
+| **Bun** | 1.3.1 | Runtime and package manager |
+
+### Infrastructure
+
+| Technology | Purpose |
+|------------|---------|
+| **Docker** | Containerization |
+| **Docker Compose** | Local development |
+| **Nginx** | Reverse proxy (production) |
+| **GitHub Actions** | CI/CD |
+
+## 🧩 System Components
+
+### Frontend Components
+
+#### 1. Next.js Application (`monitabits-app`)
+- **Location**: `apps/monitabits-app/`
+- **Port**: 3002
+- **Responsibilities**:
+  - User interface rendering
+  - Client-side state management
+  - API communication
+  - Device ID management
+  - Time synchronization
+  - Auto-save functionality
+  - PWA service worker
+
+#### 2. Shared UI Package (`@repo/ui`)
+- **Location**: `packages/ui/`
+- **Port**: 3004 (Storybook)
+- **Responsibilities**:
+  - Reusable React components
+  - Component documentation (Storybook)
+  - Design system implementation
+
+### Backend Components
+
+#### 1. NestJS API Server (`monitabits-api`)
+- **Location**: `apps/monitabits-api/`
+- **Port**: 3003
+- **Responsibilities**:
+  - RESTful API endpoints
+  - Business logic
+  - Time validation
+  - Security enforcement
+  - Database operations
+  - Session management
+
+#### 2. Database (PostgreSQL)
+- **Purpose**: Persistent data storage
+- **Schema**: See [Database & API Design](./QUIT_SMOKING_DATABASE_API.md)
+- **Tables**:
+  - `users` - Device-based user records
+  - `sessions` - Active lockdown sessions
+  - `check_ins` - Activity logging
+  - `settings` - User preferences
+  - `reflections` - Reflection responses
+  - `security_logs` - Security events
+
+### Shared Packages
+
+#### 1. Utils Package (`@repo/utils`)
+- **Location**: `packages/utils/`
+- **Responsibilities**:
+  - Shared utilities (cn, logger)
+  - Common helper functions
+
+#### 2. TypeScript Config (`@repo/typescript-config`)
+- **Location**: `packages/typescript-config/`
+- **Responsibilities**:
+  - Shared TypeScript configurations
+  - Type definitions
+
+## 🔄 Data Flow
+
+### Request Flow
+
+```
+User Action (Frontend)
+    ↓
+Client Component (React)
+    ↓
+API Client (lib/api/client.ts)
+    ├─ Device ID (localStorage)
+    ├─ Client Time (new Date())
+    ├─ Timezone Offset
+    └─ Timezone Name
+    ↓
+HTTP Request (fetch)
+    ├─ Headers: X-Device-Id, X-Client-Time, X-Timezone-Offset
+    └─ Body: Request payload
+    ↓
+NestJS Middleware
+    ├─ Time Validation
+    ├─ Device Authentication
+    └─ Request Logging
+    ↓
+Controller (Route Handler)
+    ↓
+Service (Business Logic)
+    ├─ Time Validation Service
+    ├─ Session Service
+    └─ Security Service
+    ↓
+Repository/ORM (Database Access)
+    ↓
+PostgreSQL Database
+    ↓
+Response (JSON)
+    ├─ Success: { success: true, data: {...} }
+    └─ Error: { success: false, error: {...} }
+    ↓
+Frontend (Update UI)
+```
+
+### Time Validation Flow
+
+```
+Client Request
+    ↓
+Extract Headers:
+    ├─ X-Client-Time
+    ├─ X-Timezone-Offset
+    └─ X-Timezone-Name
+    ↓
+Time Validation Service
+    ├─ Get Server Time (NTP-synced)
+    ├─ Compare Client vs Server Time
+    ├─ Check Timezone Consistency
+    ├─ Detect Time Manipulation
+    └─ Log Security Events
+    ↓
+Validation Result
+    ├─ Valid: Process Request
+    └─ Invalid: Return 400 Error
+```
+
+### Session Management Flow
+
+```
+App Open
+    ↓
+Auto Check-in (useAutoSave hook)
+    ↓
+POST /api/sessions/check-in
+    ├─ Device ID
+    ├─ Client Time
+    └─ Timezone Info
+    ↓
+Backend: Get or Create User
+    ↓
+Backend: Get Current Session
+    ├─ Check Active Sessions
+    ├─ Calculate Time Remaining
+    └─ Determine Status (locked/active)
+    ↓
+Response: Session Data
+    ↓
+Frontend: Update UI
+    ├─ Show Countdown (if locked)
+    └─ Show Time Ahead (if active)
+```
+
+## 🔒 Security Architecture
+
+### Security Layers
+
+#### 1. Client-Side Security
+- **Device ID**: Generated and stored in localStorage
+- **Time Headers**: Always sent with requests
+- **HTTPS Only**: All API calls over HTTPS
+- **Input Validation**: Client-side validation before submission
+
+#### 2. Network Security
+- **HTTPS/TLS**: Encrypted communication
+- **CORS**: Configured for allowed origins
+- **Rate Limiting**: Prevent abuse on critical endpoints
+- **Request Validation**: All requests validated
+
+#### 3. Server-Side Security
+- **Time Validation**: Every request validated
+- **Device Authentication**: Device ID verified
+- **Input Sanitization**: All inputs sanitized
+- **SQL Injection Prevention**: Parameterized queries
+- **Security Logging**: All security events logged
+
+### Anti-Cheat Mechanisms
+
+```
+┌─────────────────────────────────────────┐
+│      Time Validation Pipeline            │
+├─────────────────────────────────────────┤
+│ 1. Extract Client Time from Headers     │
+│ 2. Get Server Time (NTP-synced)         │
+│ 3. Calculate Time Difference             │
+│ 4. Check Tolerance (5 seconds)            │
+│ 5. Validate Timezone Consistency         │
+│ 6. Detect Backward Time Jumps            │
+│ 7. Detect Forward Time Jumps             │
+│ 8. Log Security Event if Invalid         │
+│ 9. Return Validation Result              │
+└─────────────────────────────────────────┘
+```
+
+### Security Event Types
+
+- `time_manipulation` - Client time doesn't match server time
+- `timezone_change` - Sudden timezone change detected
+- `suspicious_activity` - Pattern of suspicious requests
+- `validation_failure` - Time validation failed
+
+## 🚀 Deployment Architecture
+
+### Development Environment
+
+```
+┌─────────────────────────────────────────┐
+│     Docker Compose (dev)                 │
+├─────────────────────────────────────────┤
+│  - monitabits-app (Next.js)             │
+│    Port: 3002                            │
+│  - monitabits-api (NestJS)              │
+│    Port: 3003                            │
+│  - postgres (PostgreSQL)                │
+│    Port: 5432                            │
+│  - ui-storybook (Storybook)             │
+│    Port: 3004                            │
+└─────────────────────────────────────────┘
+```
+
+### Production Environment
+
+```
+┌─────────────────────────────────────────┐
+│         Nginx (Reverse Proxy)            │
+│         Port: 80/443                     │
+├─────────────────────────────────────────┤
+│  ┌───────────────────────────────────┐  │
+│  │  Next.js App (Container)          │  │
+│  │  Port: 3002 (internal)            │  │
+│  └───────────────────────────────────┘  │
+│  ┌───────────────────────────────────┐  │
+│  │  NestJS API (Container)           │  │
+│  │  Port: 3003 (internal)            │  │
+│  └───────────────────────────────────┘  │
+│  ┌───────────────────────────────────┐  │
+│  │  PostgreSQL (Container)           │  │
+│  │  Port: 5432 (internal)             │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+### Deployment Flow
+
+```
+Code Push (Git)
+    ↓
+GitHub Actions (CI/CD)
+    ├─ Run Tests
+    ├─ Build Applications
+    ├─ Build Docker Images
+    └─ Push to Registry
+    ↓
+Deploy to Production
+    ├─ Pull Latest Images
+    ├─ Run Database Migrations
+    ├─ Restart Containers
+    └─ Health Checks
+```
+
+## 🏢 Infrastructure
+
+### Container Architecture
+
+#### Frontend Container
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install
+COPY . .
+RUN bun run build
+CMD ["bun", "run", "start"]
+```
+
+#### Backend Container
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install
+COPY . .
+RUN bun run build
+CMD ["bun", "run", "start"]
+```
+
+#### Database Container
+```yaml
+postgres:
+  image: postgres:15-alpine
+  environment:
+    POSTGRES_DB: monitabits
+    POSTGRES_USER: monitabits
+    POSTGRES_PASSWORD: ${DB_PASSWORD}
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+```
+
+### Environment Variables
+
+#### Frontend
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3003
+NEXT_PUBLIC_APP_URL=http://localhost:3002
+```
+
+#### Backend
+```env
+PORT=3003
+DATABASE_URL=postgresql://user:pass@postgres:5432/monitabits
+NODE_ENV=production
+HOST=0.0.0.0
+```
+
+## 🔌 Integration Points
+
+### Frontend ↔ Backend
+
+**Communication Protocol**: RESTful HTTP/HTTPS
+
+**Request Format**:
+```typescript
+Headers:
+  X-Device-Id: string
+  X-Client-Time: ISO-8601 timestamp
+  X-Timezone-Offset: number (minutes)
+  X-Timezone-Name: string
+  Content-Type: application/json
+```
+
+**Response Format**:
+```typescript
+Success:
+  { success: true, data: T }
+
+Error:
+  { success: false, error: string, message: string, statusCode: number }
+```
+
+### Backend ↔ Database
+
+**ORM**: Prisma (recommended) or TypeORM
+
+**Connection**: PostgreSQL connection pool
+
+**Migrations**: Version-controlled database migrations
+
+### External Services
+
+**NTP Servers**: For accurate server time synchronization (optional, can use system time)
+
+## 📈 Scalability Considerations
+
+### Current Design (Single User)
+
+- **Stateless API**: Easy to scale horizontally
+- **Device-Based Auth**: No session storage needed
+- **Database**: Single user, minimal load
+
+### Future Scalability (If Multi-User)
+
+1. **Load Balancing**: Multiple API instances behind load balancer
+2. **Database Scaling**: Read replicas for read-heavy operations
+3. **Caching**: Redis for frequently accessed data
+4. **CDN**: Static assets served via CDN
+5. **Database Sharding**: If user base grows significantly
+
+### Performance Optimizations
+
+- **Database Indexing**: Indexed on frequently queried columns
+- **API Response Caching**: Cache session data (with TTL)
+- **Frontend Caching**: Service worker for offline support
+- **Code Splitting**: Next.js automatic code splitting
+- **Image Optimization**: Next.js Image component
+
+## 🔗 Related Documentation
+
+- [Project Proposal](./QUIT_SMOKING_PROPOSAL.md)
+- [UX Guidelines](./QUIT_SMOKING_UX.md)
+- [Database & API Design](./QUIT_SMOKING_DATABASE_API.md)
+- [Frontend Structure](./QUIT_SMOKING_FRONTEND.md)
+
+---
+
+**System Design Principle**: Security-first architecture with server-side time authority. Simple, scalable, and maintainable.
