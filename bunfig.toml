@@ -1,0 +1,105 @@
+[install]
+
+# whether to install optionalDependencies
+optional = true
+
+# whether to install devDependencies
+dev = true
+
+# whether to install peerDependencies
+peer = true
+
+# equivalent to `--production` flag
+production = false
+
+# equivalent to `--save-text-lockfile` flag
+saveTextLockfile = true
+
+# equivalent to `--frozen-lockfile` flag
+frozenLockfile = false
+
+# equivalent to `--dry-run` flag
+dryRun = false
+
+# equivalent to `--concurrent-scripts` flag
+concurrentScripts = 16 # (cpu count or GOMAXPROCS) x2
+
+# Use exact versions for better reproducibility
+exact = true
+
+[install.scopes]
+# Configure scopes if needed
+
+[install.registries]
+# Configure local workspace registry
+"@repo" = { url = "file:./packages" }
+
+[test]
+# Preload centralized test setup from test-preset package
+preload = ["./packages/test-preset/happydom.ts", "./packages/test-preset/testing-library.ts", "./packages/test-preset/test-setup.ts"]
+# Environment variables for tests
+env = { 
+	NODE_ENV = "test", 
+	DOM_ENV = "jsdom",
+	TEST_TIMEOUT = "5000"
+}
+
+# Test timeout in milliseconds
+timeout = 5000
+
+# Enable coverage reporting
+coverage = true
+coverageDir = "./coverage"
+coverageThreshold = { lines = 0.1, functions = 0.1, statements = 0.1 }
+coverageIgnoreSourcemaps = true
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = [
+	"**/packages/test-preset/**",
+	"**/scripts/**",
+	"**/node_modules/**",
+	"**/dist/**",
+	"**/build/**",
+	"**/.turbo/**",
+	"**/coverage/**",
+	"**/packages/intershell/src/**/tag.ts",
+	"**/packages/intershell/src/**/*.shell.ts",
+]
+
+# Watch mode configuration
+[test.watch]
+# Enable watch mode by default for development
+enabled = false
+
+# Watch specific file patterns
+patterns = [
+	"**/*.test.ts",
+	"**/*.test.tsx", 
+	"**/*.spec.ts",
+	"**/*.spec.tsx",
+	"**/*.test.js",
+	"**/*.test.jsx",
+	"**/*.spec.js",
+	"**/*.spec.jsx"
+]
+
+# Ignore patterns for watch mode
+ignore = [
+	"**/node_modules/**",
+	"**/dist/**",
+	"**/build/**",
+	"**/.turbo/**",
+	"**/coverage/**",
+	"**/test-preset/**"
+]
+
+# Debounce time for file changes (in milliseconds)
+debounce = 300
+
+# Show coverage in watch mode
+coverage = false
+
+# Run tests in parallel in watch mode
+parallel = true
+
+# Clear console before each test run in watch mode
+clear = true
