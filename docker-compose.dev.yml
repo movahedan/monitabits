@@ -1,4 +1,4 @@
-name: repo
+name: monitabits
 
 networks:
   dev-network:
@@ -102,6 +102,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+  
   ui:
     extends:
       service: apps

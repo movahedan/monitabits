@@ -34,10 +34,13 @@ Our Docker setup provides a complete development and production environment with
 ├── Dockerfile.dev                  # Development base image
 ├── .devcontainer/
 │   └── devcontainer.json           # VS Code DevContainer config
-└── apps/
-    ├── monitabits-app/Dockerfile   # Multi-stage production build
-    ├── monitabits-api/Dockerfile   # Multi-stage production build
-    └── monitabits-api/Dockerfile   # Multi-stage production build
+├── apps/
+│   ├── monitabits-app/Dockerfile   # Multi-stage production build
+│   └── monitabits-api/Dockerfile   # Multi-stage production build
+└── packages/
+    ├── schema/Dockerfile           # Multi-stage production build with nginx
+    ├── schema/nginx.conf           # Nginx configuration for schema service
+    └── ui/Dockerfile               # Multi-stage production build
 ```
 
 ### Service Architecture
@@ -47,8 +50,8 @@ Our Docker setup provides a complete development and production environment with
 | `vscode` | - | DevContainer | Development | VS Code development environment |
 | `monitabits-app` | 3002 | Next.js 15 | Both | Next.js frontend application |
 | `monitabits-api` | 3003 | Express.js (NestJS pending) | Both | Backend API server |
-| `monitabits-api` | 3003 | Express.js (NestJS pending) | Both | Backend API server |
 | `ui` | 3004 | Storybook + Vite | Development | UI component library with Storybook |
+| `schema` | 3005 (dev) / 5005 (prod) | Nginx + OpenAPI | Both | OpenAPI schema package with Swagger UI served via nginx |
 
 ## 🐳 DevContainer Details
 
@@ -160,8 +163,15 @@ services:
 3. **Socket Forwarding**: Requires careful port management to avoid binding conflicts
 
 **Port Mapping**:
-- **Development**: 3001-3004 (apps) managed by docker-compose.dev.yml
-- **Production**: 5001-5004 (isolated from development) managed by docker-compose.yml
+- **Development**: 3001-3005 (apps) managed by docker-compose.dev.yml
+  - 3002: monitabits-app
+  - 3003: monitabits-api
+  - 3004: ui (Storybook)
+  - 3005: schema
+- **Production**: 5001-5005 (isolated from development) managed by docker-compose.yml
+  - 5001: monitabits-app
+  - 5003: monitabits-api
+  - 5005: schema (nginx)
 - **Health Checks**: All services include curl-based health checks
 
 ### Volume Mounting Strategy
@@ -253,6 +263,7 @@ healthcheck:
 - **Flexible Port Management**: Docker Compose handles all port mapping
 - **Improved Health Checks**: More reliable health check implementations
 - **Better Container Orchestration**: Enhanced compatibility with orchestration tools
+- **Schema Nginx Setup**: Schema package now uses nginx to serve OpenAPI documentation and Swagger UI
 
 ## ⚡ Performance Optimizations
 
@@ -411,6 +422,44 @@ ui:
 - **From Host**: `http://localhost:3004`
 - **From Container**: `http://ui:3004`
 - **Health Check**: `curl -f http://localhost:3004`
+
+### Schema Nginx Configuration
+
+**Production Schema Setup**:
+The schema package uses nginx to serve OpenAPI documentation and Swagger UI in production:
+
+```dockerfile
+# packages/schema/Dockerfile
+FROM nginx:alpine AS runner
+ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
+ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
+COPY --from=build /app/packages/schema/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=build /app/packages/schema/dist/ /usr/share/nginx/html
+```
+
+**Nginx Configuration**:
+```nginx
+# packages/schema/nginx.conf
+server {
+    listen ${PORT};
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+    # ... gzip and error handling configuration
+}
+```
+
+**Schema Service Access**:
+- **Development**: `http://localhost:3005` (bun dev server)
+- **Production**: `http://localhost:5005` (nginx)
+- **Health Check**: `curl -f http://localhost:5005`
+- **From Container**: `http://schema:5005`
+
+**Key Features**:
+- **Environment Variable Resolution**: Uses `envsubst` to resolve `${PORT}` in nginx config
+- **Static File Serving**: Serves built OpenAPI schema and Swagger UI
+- **Gzip Compression**: Enabled for better performance
+- **SPA Support**: Configured for single-page application routing
 
 ## 📚 Implementation Best Practices
 

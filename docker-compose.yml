@@ -1,4 +1,4 @@
-name: repo-prod
+name: monitabits-prod
 
 networks:
   prod-network:

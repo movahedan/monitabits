@@ -1,5 +1,5 @@
-FROM oven/bun:1.3.1-alpine AS base
-RUN bun install -g turbo@2.5.5
+FROM oven/bun:1.3.3-alpine AS base
+RUN bun install -g turbo@2.5.8
 
 FROM base AS turbo
 WORKDIR /app
@@ -9,25 +9,22 @@ FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
-COPY ./scripts ./scripts
 COPY ./package.json ./bun.lock ./
 RUN turbo prune --scope=monitabits-api --docker
 
 FROM turbo AS installer
 WORKDIR /app
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/bun.lock ./bun.lock
 COPY --from=pruner /app/out/full/ .
+COPY --from=pruner /app/out/json/ .
 RUN bun install --ignore-scripts
 
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
-COPY --from=pruner /app/scripts ./scripts
 COPY --from=installer /app/ .
 RUN bun run build --filter=monitabits-api
 
-FROM oven/bun:1.3.1-alpine AS runner
+FROM oven/bun:1.3.3-alpine AS runner
 WORKDIR /app
 RUN addgroup --system --gid 1001 runner-group
 RUN adduser --system --uid 1001 runner-user
