@@ -1,0 +1,28 @@
+{
+	"type": "object",
+	"required": ["hasPending"],
+	"properties": {
+		"hasPending": { "type": "boolean" },
+		"question": {
+			"type": "object",
+			"nullable": true,
+			"properties": {
+				"id": { "type": "string", "format": "uuid" },
+				"text": { "type": "string", "example": "What have you done?" }
+			}
+		},
+		"lastLockdownTimestamp": {
+			"type": "string",
+			"format": "date-time",
+			"nullable": true,
+			"description": "Timestamp of the last lockdown period"
+		},
+		"cyclesMissed": {
+			"type": "integer",
+			"nullable": true,
+			"description": "Number of cycles the user has been gone",
+			"minimum": 0
+		}
+	},
+	"x-readme-ref-name": "PendingFollowUpResponse"
+}

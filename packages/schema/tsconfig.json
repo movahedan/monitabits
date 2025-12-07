@@ -1,0 +1,9 @@
+{
+	"extends": "@repo/typescript-config/react-library.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"types": ["vite/client", "bun-types"]
+	},
+	"include": ["src/**/*", "*.ts", "*.tsx", "*.config.ts"],
+	"exclude": ["node_modules", "dist", "src/api/generated"]
+}

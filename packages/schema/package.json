@@ -1,0 +1,53 @@
+{
+	"private": true,
+	"name": "@repo/schema",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "OpenAPI schema package with Swagger UI",
+	"files": [
+		"src/**",
+		"openapi.yaml"
+	],
+	"exports": {
+		".": "./src/index.ts",
+		"./mutator": "./src/mutator.ts",
+		"./hooks": "./src/api/generated/hooks/index.ts",
+		"./schemas": "./src/api/generated/schemas/index.ts",
+		"./mocks": "./src/api/generated/mocks/handlers/index.ts",
+		"./openapi": "./openapi.yaml"
+	},
+	"scripts": {
+		"check": "biome check .",
+		"check:fix": "biome check . --write",
+		"check:types": "tsc --noEmit",
+		"check:types:api": "tsc --project tsconfig.api.json --noEmit",
+		"dev": "vite",
+		"generate": "kubb && cp src/mutator.ts src/mutator.d.ts ./src/api/generated/ && bun run check:fix && tsc --project tsconfig.api.json",
+		"build": "vite build && bun run generate",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"react": "19.1.1",
+		"react-dom": "19.1.1",
+		"swagger-ui-react": "5.30.3",
+		"swr": "2.3.7"
+	},
+	"devDependencies": {
+		"@kubb/cli": "latest",
+		"@kubb/core": "latest",
+		"@kubb/plugin-faker": "latest",
+		"@kubb/plugin-msw": "latest",
+		"@kubb/plugin-oas": "latest",
+		"@kubb/plugin-swr": "latest",
+		"@kubb/plugin-ts": "latest",
+		"@faker-js/faker": "latest",
+		"msw": "latest",
+		"@repo/test-preset": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"@types/react": "19.1.16",
+		"@types/react-dom": "19.1.9",
+		"@types/swagger-ui-react": "5.18.0",
+		"@vitejs/plugin-react": "5.1.1",
+		"vite": "7.2.6"
+	}
+}

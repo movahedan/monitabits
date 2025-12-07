@@ -1,0 +1,34 @@
+{
+	"type": "object",
+	"required": ["entries", "startDate", "endDate"],
+	"properties": {
+		"entries": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["date", "status", "startTime", "endTime"],
+				"properties": {
+					"date": { "type": "string", "format": "date" },
+					"status": { "type": "string", "enum": ["active", "locked", "completed"] },
+					"startTime": { "type": "string", "format": "date-time" },
+					"endTime": { "type": "string", "format": "date-time", "nullable": true },
+					"lockdownMinutes": { "type": "integer" },
+					"checkIns": {
+						"type": "integer",
+						"description": "Number of check-ins during this period"
+					},
+					"actions": { "type": "integer", "description": "Number of actions during this period" },
+					"timeSpentOnPage": { "type": "integer", "description": "Time spent on page in seconds" }
+				},
+				"x-readme-ref-name": "TimeTableEntry"
+			}
+		},
+		"startDate": { "type": "string", "format": "date" },
+		"endDate": { "type": "string", "format": "date" },
+		"totalEntries": {
+			"type": "integer",
+			"description": "Total number of entries in the date range"
+		}
+	},
+	"x-readme-ref-name": "StatisticsDetailsResponse"
+}

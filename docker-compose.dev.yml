@@ -120,6 +120,22 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://ui:3004"]
 
+  schema:
+    extends:
+      service: apps
+    expose:
+      - "3005"
+    ports:
+      - "3005:3005"
+    command: bun run dev --filter=@repo/schema
+    profiles: ["schema", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://schema:3005"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   vscode-service:
     build:
       context: ./

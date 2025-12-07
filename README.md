@@ -128,6 +128,8 @@ Everything you need to build rock-solid applications is right here! We've kept i
 
 **🎨 UI Package** <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=white" alt="React" style="vertical-align: middle;" /></a> + <a href="https://storybook.js.org/"><img src="https://img.shields.io/badge/Storybook-7.0-FF4785?style=flat&logo=storybook&logoColor=white" alt="Storybook" style="vertical-align: middle;" /></a> - **Port 3004** - Shared components
 
+**📋 Schema Package** <a href="https://swagger.io/"><img src="https://img.shields.io/badge/OpenAPI-3.1-6BA539?style=flat&logo=openapi-initiative&logoColor=white" alt="OpenAPI" style="vertical-align: middle;" /></a> + <a href="https://kubb.dev/"><img src="https://img.shields.io/badge/Kubb-Code%20Generation-000000?style=flat&logo=typescript&logoColor=white" alt="Kubb" style="vertical-align: middle;" /></a> - **Port 3005** - OpenAPI schema with Swagger UI and code generation
+
 **🧪 Test Package** <a href="https://bun.sh/"><img src="https://img.shields.io/badge/Bun-1.0-000000?style=flat&logo=bun&logoColor=white" alt="Bun" style="vertical-align: middle;" /></a> - **Testing utilities** - Development and testing tools
 
 </div>

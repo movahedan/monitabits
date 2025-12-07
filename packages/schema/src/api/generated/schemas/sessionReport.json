@@ -1,0 +1,17 @@
+{
+	"type": "object",
+	"required": ["checkInsDuringLockdown", "timeSpentOnPageDuringLockdown"],
+	"properties": {
+		"checkInsDuringLockdown": {
+			"type": "integer",
+			"description": "Number of times user checked the app during lockdown (fewer is better)",
+			"minimum": 0
+		},
+		"timeSpentOnPageDuringLockdown": {
+			"type": "integer",
+			"description": "Total time spent on page during lockdown in seconds (fewer is better)",
+			"minimum": 0
+		}
+	},
+	"x-readme-ref-name": "SessionReport"
+}

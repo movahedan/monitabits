@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"required": ["lockdownMinutes"],
+	"properties": {
+		"lockdownMinutes": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 10080,
+			"description": "Lockdown period in minutes"
+		}
+	},
+	"x-readme-ref-name": "UpdateSettingsRequest"
+}

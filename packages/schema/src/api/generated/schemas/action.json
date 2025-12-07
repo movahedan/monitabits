@@ -1,0 +1,24 @@
+{
+	"type": "object",
+	"required": ["id", "type", "serverTime"],
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"type": { "type": "string", "enum": ["cheat", "harm"] },
+		"serverTime": { "type": "string", "format": "date-time" },
+		"consequences": {
+			"type": "object",
+			"properties": {
+				"message": { "type": "string" },
+				"additionalLockdown": {
+					"type": "integer",
+					"description": "Additional lockdown minutes added"
+				}
+			}
+		},
+		"lockdownStarted": {
+			"type": "boolean",
+			"description": "Whether a new lockdown period was started"
+		}
+	},
+	"x-readme-ref-name": "Action"
+}
