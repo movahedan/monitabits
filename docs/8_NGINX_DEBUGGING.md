@@ -25,17 +25,20 @@ docker-compose ps
 docker-compose logs admin
 docker-compose logs ui
 docker-compose logs docs-astro
+docker-compose logs schema
 ```
 
 ### **2. Test Container Connectivity**
 ```bash
 # Test if containers are accessible from host
 curl -v http://localhost:5001  # admin
+curl -v http://localhost:5005  # schema (production)
 curl -v http://localhost:5006  # ui
 curl -v http://localhost:5007  # docs-astro
 
 # Test from inside containers
 docker-compose exec admin curl -f http://localhost:5001
+docker-compose exec schema curl -f http://localhost:5005
 docker-compose exec ui curl -f http://localhost:5006
 docker-compose exec docs-astro curl -f http://localhost:5007
 ```
@@ -44,11 +47,13 @@ docker-compose exec docs-astro curl -f http://localhost:5007
 ```bash
 # Check nginx config inside containers
 docker-compose exec admin nginx -t
+docker-compose exec schema nginx -t
 docker-compose exec ui nginx -t
 docker-compose exec docs-astro nginx -t
 
 # Check nginx processes
 docker-compose exec admin ps aux | grep nginx
+docker-compose exec schema ps aux | grep nginx
 docker-compose exec ui ps aux | grep nginx
 docker-compose exec docs-astro ps aux | grep nginx
 ```
@@ -59,6 +64,9 @@ docker-compose exec docs-astro ps aux | grep nginx
 ```bash
 # Access admin container shell
 docker-compose exec admin sh
+
+# Access schema container shell
+docker-compose exec schema sh
 
 # Access ui container shell
 docker-compose exec ui sh
