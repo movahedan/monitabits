@@ -1,0 +1,1138 @@
+openapi: 3.1.0
+info:
+  title: Monitabits Quit Smoking API
+  description: |
+    API for the cigarette quitting accountability application.
+    
+    This API uses device-based authentication where each device has a unique ID.
+    All time-sensitive operations are validated server-side to prevent cheating.
+    
+    **Security**: All requests must include time validation headers to prevent time manipulation.
+    The server handles all timezone calculations internally based on the user's request context.
+  version: 1.0.0
+  contact:
+    name: Monitabits API Support
+    url: https://github.com/movahedan/monitabits
+
+servers:
+  - url: http://localhost:3003
+    description: Development server
+  - url: https://api.monitabits.com
+    description: Production server
+
+tags:
+  - name: Sessions
+    description: Session management and check-ins
+  - name: Actions
+    description: User actions (cheat, harm, follow-up)
+  - name: Settings
+    description: User settings management
+  - name: Statistics
+    description: User statistics and progress
+
+components:
+  securitySchemes:
+    DeviceAuth:
+      type: apiKey
+      in: header
+      name: X-Device-Id
+      description: Device ID for authentication
+    TimeValidation:
+      type: apiKey
+      in: header
+      name: X-Client-Time
+      description: Client-reported timestamp (ISO-8601)
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+        - message
+        - statusCode
+        - timestamp
+        - path
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: TIME_VALIDATION_FAILED
+        message:
+          type: string
+          example: Time validation failed. Please ensure your device time is correct.
+        statusCode:
+          type: integer
+          example: 400
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          example: /api/actions/harm
+
+    Session:
+      type: object
+      required:
+        - id
+        - status
+        - startTime
+        - lockdownMinutes
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, locked, completed]
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        lockdownMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+        timeRemaining:
+          type: integer
+          description: Time remaining in seconds (if locked)
+          nullable: true
+        timeAhead:
+          type: integer
+          description: Time ahead in seconds (if active)
+          nullable: true
+
+    CheckIn:
+      type: object
+      required:
+        - id
+        - type
+        - serverTime
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [check_in, check_out]
+        serverTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    CheckInResponse:
+      type: object
+      required:
+        - checkIn
+        - session
+      properties:
+        checkIn:
+          $ref: '#/components/schemas/CheckIn'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    Action:
+      type: object
+      required:
+        - id
+        - type
+        - serverTime
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [cheat, harm]
+        serverTime:
+          type: string
+          format: date-time
+        consequences:
+          type: object
+          properties:
+            message:
+              type: string
+            additionalLockdown:
+              type: integer
+              description: Additional lockdown minutes added
+        lockdownStarted:
+          type: boolean
+          description: Whether a new lockdown period was started
+
+    ActionResponse:
+      type: object
+      required:
+        - action
+        - session
+      properties:
+        action:
+          $ref: '#/components/schemas/Action'
+        session:
+          $ref: '#/components/schemas/Session'
+
+    PendingFollowUpResponse:
+      type: object
+      required:
+        - hasPending
+      properties:
+        hasPending:
+          type: boolean
+        question:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+            text:
+              type: string
+              example: What have you done?
+        lastLockdownTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of the last lockdown period
+        cyclesMissed:
+          type: integer
+          nullable: true
+          description: Number of cycles the user has been gone
+          minimum: 0
+
+    FollowUpRequest:
+      type: object
+      required:
+        - answer
+      properties:
+        answer:
+          type: string
+          minLength: 1
+          example: I've been doing well, avoided smoking for 3 days
+        harmIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of harm action IDs this follow-up relates to
+
+    FollowUpResponse:
+      type: object
+      required:
+        - id
+        - question
+        - answer
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        question:
+          type: string
+        answer:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Settings:
+      type: object
+      required:
+        - lockdownMinutes
+        - updatedAt
+      properties:
+        lockdownMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+          description: Lockdown period in minutes
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateSettingsRequest:
+      type: object
+      required:
+        - lockdownMinutes
+      properties:
+        lockdownMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+          description: Lockdown period in minutes
+
+    LockdownNowResponse:
+      type: object
+      required:
+        - isLocked
+      properties:
+        isLocked:
+          type: boolean
+          description: Whether the user is currently in a lockdown period
+        timeRemaining:
+          type: integer
+          nullable: true
+          description: Time remaining in seconds (if locked)
+        sessionId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Current session ID (if locked)
+
+    SessionReport:
+      type: object
+      required:
+        - checkInsDuringLockdown
+        - timeSpentOnPageDuringLockdown
+      properties:
+        checkInsDuringLockdown:
+          type: integer
+          description: Number of times user checked the app during lockdown (fewer is better)
+          minimum: 0
+        timeSpentOnPageDuringLockdown:
+          type: integer
+          description: Total time spent on page during lockdown in seconds (fewer is better)
+          minimum: 0
+
+    StatisticsSummary:
+      type: object
+      required:
+        - totalTimeSaved
+        - currentStreak
+        - longestStreak
+        - totalCheckIns
+        - totalActions
+      properties:
+        totalTimeSaved:
+          type: integer
+          description: Total time saved in seconds
+        currentStreak:
+          type: integer
+          description: Current consecutive periods completed
+        longestStreak:
+          type: integer
+          description: Longest consecutive periods completed
+        totalCheckIns:
+          type: integer
+          description: Total number of check-ins
+        totalActions:
+          type: integer
+          description: Total number of actions (cheat + harm)
+        averageTimeBetweenActions:
+          type: integer
+          description: Average time between actions in seconds
+          nullable: true
+        lastRelapse:
+          type: string
+          format: date-time
+          nullable: true
+        sessionReport:
+          $ref: '#/components/schemas/SessionReport'
+          description: Session activity report during lockdown periods
+
+    TimeTableEntry:
+      type: object
+      required:
+        - date
+        - status
+        - startTime
+        - endTime
+      properties:
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [active, locked, completed]
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+          nullable: true
+        lockdownMinutes:
+          type: integer
+        checkIns:
+          type: integer
+          description: Number of check-ins during this period
+        actions:
+          type: integer
+          description: Number of actions during this period
+        timeSpentOnPage:
+          type: integer
+          description: Time spent on page in seconds
+
+    StatisticsDetailsResponse:
+      type: object
+      required:
+        - entries
+        - startDate
+        - endDate
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeTableEntry'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        totalEntries:
+          type: integer
+          description: Total number of entries in the date range
+
+paths:
+  /api/sessions/check-in:
+    post:
+      tags:
+        - Sessions
+      summary: Create a check-in
+      description: |
+        Creates a check-in record when the app is opened or synced.
+        This is used for auto-save functionality and activity tracking.
+        The server handles timezone calculations internally.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '201':
+          description: Check-in created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CheckInResponse'
+              example:
+                success: true
+                data:
+                  checkIn:
+                    id: "770e8400-e29b-41d4-a716-446655440000"
+                    type: "check_in"
+                    serverTime: "2024-01-01T12:00:01Z"
+                    createdAt: "2024-01-01T12:00:01Z"
+                  session:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    status: "locked"
+                    startTime: "2024-01-01T12:00:00Z"
+                    endTime: "2024-01-01T13:00:00Z"
+                    lockdownMinutes: 60
+                    timeRemaining: 3599
+        '400':
+          description: Time validation failed or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sessions/check-out:
+    post:
+      tags:
+        - Sessions
+      summary: Create a check-out
+      description: |
+        Creates a check-out record when the app is closed or backgrounded.
+        This is used for tracking session duration and activity patterns.
+        The server handles timezone calculations internally.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '201':
+          description: Check-out created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CheckInResponse'
+              example:
+                success: true
+                data:
+                  checkIn:
+                    id: "880e8400-e29b-41d4-a716-446655440000"
+                    type: "check_out"
+                    serverTime: "2024-01-01T12:30:00Z"
+                    createdAt: "2024-01-01T12:30:00Z"
+                  session:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    status: "locked"
+                    startTime: "2024-01-01T12:00:00Z"
+                    endTime: "2024-01-01T13:00:00Z"
+                    lockdownMinutes: 60
+                    timeRemaining: 1800
+        '400':
+          description: Time validation failed or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/actions/cheat:
+    post:
+      tags:
+        - Actions
+      summary: Log "I cheated" action
+      description: |
+        Logs when the user clicks "I cheated and dishonored myself" while in a locked state.
+        The action is logged but consequences may be delayed.
+        Note: If the user calls the harm endpoint while cheating, the system detects this automatically.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '201':
+          description: Action logged successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ActionResponse'
+              example:
+                success: true
+                data:
+                  action:
+                    id: "880e8400-e29b-41d4-a716-446655440000"
+                    type: "cheat"
+                    serverTime: "2024-01-01T12:00:01Z"
+                    consequences:
+                      message: "Action logged. Consequences will apply."
+                      additionalLockdown: 0
+                  session:
+                    id: "550e8400-e29b-41d4-a716-446655440000"
+                    status: "locked"
+                    startTime: "2024-01-01T12:00:00Z"
+                    endTime: "2024-01-01T13:00:00Z"
+                    lockdownMinutes: 60
+                    timeRemaining: 3599
+        '400':
+          description: Time validation failed, invalid action, or action not allowed in current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/actions/harm:
+    post:
+      tags:
+        - Actions
+      summary: Log "I'm choosing to harm myself" action
+      description: |
+        Logs when the user clicks "I'm choosing to harm myself" while in an active state.
+        This starts a new lockdown period.
+        Note: This is essentially the same as cheating - if you're cheating and call harm endpoint,
+        the system detects this automatically.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '201':
+          description: Action logged and lockdown started
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ActionResponse'
+              example:
+                success: true
+                data:
+                  action:
+                    id: "990e8400-e29b-41d4-a716-446655440000"
+                    type: "harm"
+                    serverTime: "2024-01-01T12:00:01Z"
+                    lockdownStarted: true
+                  session:
+                    id: "aa0e8400-e29b-41d4-a716-446655440000"
+                    status: "locked"
+                    startTime: "2024-01-01T12:00:01Z"
+                    endTime: "2024-01-01T13:00:01Z"
+                    lockdownMinutes: 60
+                    timeRemaining: 3600
+        '400':
+          description: Time validation failed, invalid action, or action not allowed in current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/actions/follow-up/pending:
+    get:
+      tags:
+        - Actions
+      summary: Get pending follow-up question
+      description: |
+        Returns a pending follow-up question if one is available.
+        The response includes information about the last lockdown timestamp and
+        how many cycles the user has been gone.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '200':
+          description: Follow-up question status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PendingFollowUpResponse'
+              examples:
+                hasPending:
+                  summary: Pending question available
+                  value:
+                    success: true
+                    data:
+                      hasPending: true
+                      question:
+                        id: "bb0e8400-e29b-41d4-a716-446655440000"
+                        text: "What have you done?"
+                      lastLockdownTimestamp: "2024-01-01T10:00:00Z"
+                      cyclesMissed: 2
+                noPending:
+                  summary: No pending questions
+                  value:
+                    success: true
+                    data:
+                      hasPending: false
+                      lastLockdownTimestamp: null
+                      cyclesMissed: null
+        '400':
+          description: Time validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/actions/follow-up:
+    post:
+      tags:
+        - Actions
+      summary: Submit follow-up answer
+      description: |
+        Submits an answer to a follow-up question related to harm actions.
+        The request can include an array of harm action IDs that this follow-up relates to.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FollowUpRequest'
+            example:
+              answer: "I've been doing well, avoided smoking for 3 days"
+              harmIds: ["990e8400-e29b-41d4-a716-446655440000"]
+      responses:
+        '201':
+          description: Follow-up answer submitted successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          followUp:
+                            $ref: '#/components/schemas/FollowUpResponse'
+              example:
+                success: true
+                data:
+                  followUp:
+                    id: "cc0e8400-e29b-41d4-a716-446655440000"
+                    question: "What have you done?"
+                    answer: "I've been doing well, avoided smoking for 3 days"
+                    createdAt: "2024-01-01T12:00:00Z"
+        '400':
+          description: Time validation failed or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/settings:
+    get:
+      tags:
+        - Settings
+      summary: Get user settings
+      description: Returns the current user settings, primarily the lockdown period.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '200':
+          description: Settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Settings'
+              example:
+                success: true
+                data:
+                  lockdownMinutes: 60
+                  updatedAt: "2024-01-01T10:00:00Z"
+        '400':
+          description: Time validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Settings
+      summary: Update user settings
+      description: Updates user settings, primarily the lockdown period in minutes.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+            example:
+              lockdownMinutes: 120
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Settings'
+              example:
+                success: true
+                data:
+                  lockdownMinutes: 120
+                  updatedAt: "2024-01-01T12:00:00Z"
+        '400':
+          description: Time validation failed or invalid settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stats/now:
+    get:
+      tags:
+        - Statistics
+      summary: Get current lockdown status
+      description: |
+        Returns the current lockdown status including whether the user is locked
+        and how much time remains in the lockdown period.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '200':
+          description: Current lockdown status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LockdownNowResponse'
+              example:
+                success: true
+                data:
+                  isLocked: true
+                  timeRemaining: 3600
+                  sessionId: "550e8400-e29b-41d4-a716-446655440000"
+        '400':
+          description: Time validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stats/summary:
+    get:
+      tags:
+        - Statistics
+      summary: Get comprehensive statistics summary
+      description: |
+        Returns comprehensive user statistics including time saved, streaks, activity metrics,
+        and session report data (check-ins during lockdown, time spent on page during lockdown, etc.).
+        Fewer check-ins and less time spent on page during lockdown are better indicators.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+      responses:
+        '200':
+          description: Statistics summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatisticsSummary'
+              example:
+                success: true
+                data:
+                  totalTimeSaved: 86400
+                  currentStreak: 3
+                  longestStreak: 7
+                  totalCheckIns: 45
+                  totalActions: 12
+                  averageTimeBetweenActions: 7200
+                  lastRelapse: "2024-01-01T10:00:00Z"
+                  sessionReport:
+                    checkInsDuringLockdown: 5
+                    timeSpentOnPageDuringLockdown: 300
+        '400':
+          description: Time validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stats/details:
+    get:
+      tags:
+        - Statistics
+      summary: Get detailed time table report
+      description: |
+        Returns a detailed time table report for a specified date range.
+        Each entry includes session status, check-ins, actions, and time spent on page.
+      security:
+        - DeviceAuth: []
+        - TimeValidation: []
+      parameters:
+        - name: X-Device-Id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Device identifier
+        - name: X-Client-Time
+          in: header
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: Client-reported timestamp
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date for the report (inclusive)
+          example: "2024-01-01"
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date for the report (inclusive)
+          example: "2024-01-31"
+      responses:
+        '200':
+          description: Detailed statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/StatisticsDetailsResponse'
+              example:
+                success: true
+                data:
+                  entries:
+                    - date: "2024-01-01"
+                      status: "locked"
+                      startTime: "2024-01-01T12:00:00Z"
+                      endTime: "2024-01-01T13:00:00Z"
+                      lockdownMinutes: 60
+                      checkIns: 3
+                      actions: 1
+                      timeSpentOnPage: 120
+                    - date: "2024-01-02"
+                      status: "completed"
+                      startTime: "2024-01-02T10:00:00Z"
+                      endTime: "2024-01-02T11:00:00Z"
+                      lockdownMinutes: 60
+                      checkIns: 1
+                      actions: 0
+                      timeSpentOnPage: 30
+                  startDate: "2024-01-01"
+                  endDate: "2024-01-31"
+                  totalEntries: 31
+        '400':
+          description: Time validation failed or invalid date range
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -95,6 +95,7 @@
 					"monitabits-app",
 					"@repo/ui",
 					"@repo/utils",
+					"@repo/schema",
 					"@repo/typescript-config",
 					"@repo/test-preset"
 				],

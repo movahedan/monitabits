@@ -1,0 +1,22 @@
+{
+	"type": "object",
+	"required": ["id", "status", "startTime", "lockdownMinutes"],
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"status": { "type": "string", "enum": ["active", "locked", "completed"] },
+		"startTime": { "type": "string", "format": "date-time" },
+		"endTime": { "type": "string", "format": "date-time", "nullable": true },
+		"lockdownMinutes": { "type": "integer", "minimum": 1, "maximum": 10080 },
+		"timeRemaining": {
+			"type": "integer",
+			"description": "Time remaining in seconds (if locked)",
+			"nullable": true
+		},
+		"timeAhead": {
+			"type": "integer",
+			"description": "Time ahead in seconds (if active)",
+			"nullable": true
+		}
+	},
+	"x-readme-ref-name": "Session"
+}
