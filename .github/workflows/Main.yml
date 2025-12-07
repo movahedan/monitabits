@@ -55,10 +55,10 @@ jobs:
           bun run ci:attach:affected --mode docker --output-id affected-services
           echo "::endgroup::"
 
-  build-affected:
-    name: Build Affected
+  build:
+    name: Build
     needs: get-affected
-    if: github.event.workflow_run.conclusion == 'success' && needs.get-affected.outputs.affected-services != ''
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout repository
@@ -86,14 +86,19 @@ jobs:
         if: steps.bun-cache.outputs.cache-hit != 'true'
         run: bun install -E --no-save
 
+      - name: 🔍 Quick check
+        run: bun run check && bun run test
+
       - name: 🏗️ Build Packages
         run: |
           echo "::group::🏗️ Building Packages"
-          bun run prod:build ${{ needs.get-affected.outputs.affected-services }}
+          bun run prod:build
           echo "::endgroup::"
 
-      - name: 📋 - Display deployment info
+      - name: 📋 Display deployment info
         run: |
           echo "::group::📋 Deployment Summary"
-          echo "Packages to deploy: ${{ needs.get-affected.outputs.affected-services }}"
+          echo "All packages built successfully"
+          echo "Note: Deployment will be based on affected services only"
+          echo "Affected services: ${{ needs.get-affected.outputs.affected-services }}"
           echo "::endgroup::"
