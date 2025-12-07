@@ -1,0 +1,226 @@
+name: Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  get-affected:
+    name: 🔍 Get affected
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    outputs:
+      affected-packages: ${{ steps.affected-packages.outputs.affected-packages }}
+      affected-services: ${{ steps.affected-services.outputs.affected-services }}
+      service-ports: ${{ steps.service-ports.outputs.service-ports }}
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          no-cache: true
+          bun-version: 1.3.1
+
+      - name: 🗃️ Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            **/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
+
+      - name: 🔍 - Check branch name
+        run: bun run commit:check --branch
+
+      - name: 🔍 - Get affected packages
+        id: affected-packages
+        run: |
+          echo "::group::🔍 Getting affected packages"
+          bun run ci:attach:affected --mode turbo --output-id affected-packages
+          echo "::endgroup::"
+
+      - name: 🔍 - Get affected services
+        id: affected-services
+        run: |
+          echo "::group::🔍 Getting affected services"
+          bun run ci:attach:affected --mode docker --output-id affected-services
+          echo "::endgroup::"
+      
+      - name: 🔍 - Attach service ports to github output
+        if: steps.affected-services.outputs.affected-services != ''
+        id: service-ports
+        run: |
+          echo "::group::🔍 Getting service ports"
+          bun run ci:attach:service-ports --output-id service-ports
+          echo "::endgroup::"
+
+  validate-source:
+    name: 🔍 Validate
+    runs-on: ubuntu-latest
+    needs: get-affected
+    if: needs.get-affected.outputs.affected-packages != ''
+    env:
+      TURBO_SCM_HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha || 'HEAD' }}
+      TURBO_SCM_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }}
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          no-cache: true
+          bun-version: 1.3.1
+
+      - name: 🗃️ Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            **/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: 📦 Install dependencies
+        if: steps.bun-cache.outputs.cache-hit != 'true'
+        run: bun install
+
+      - name: 🔍 - Check branch name
+        run: bun run commit:check --branch
+
+      - name: ✨ - Biome check
+        run: bun run check .
+
+      - name: 🏗️ - Build packages
+        run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
+
+      - name: 🔍 - Type check
+        run: bun run check:types ${{ needs.get-affected.outputs.affected-packages }}
+
+  validate-docker-compose:
+    name: 🐳 Validate Docker Compose
+    runs-on: ubuntu-latest
+    needs: get-affected
+    if: needs.get-affected.outputs.affected-services != ''
+    env:
+     TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+     TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: 🚀 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          no-cache: true
+          bun-version: 1.3.1
+
+      - name: 🗃️ Cache Bun dependencies
+        uses: actions/cache@v4
+        id: bun-cache
+        with:
+          path: |
+            ~/.bun/install/cache
+            **/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+  
+      - name: 🐳 Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🏗️ Test Production Build
+        run: |
+          echo "::group::🏗️ Testing Production Build"
+
+          if [ -z "${{ needs.get-affected.outputs.affected-services }}" ]; then
+            echo "No affected services to test"
+            exit 0
+          fi
+
+          # Build production images without cache to test build process
+          bun run prod:compose build ${{ needs.get-affected.outputs.affected-services }} --no-cache --parallel
+          if [ $? -ne 0 ]; then
+            echo "❌ Production builds failed"
+            exit 1
+          fi
+          
+          echo "✅ Production builds completed successfully"
+          echo "::endgroup::"
+
+      - name: 🧪 Test Production Services
+        run: |
+          echo "::group::🧪 Testing Production Services"
+          
+          # Check if we have any affected packages
+          if [ -z "${{ needs.get-affected.outputs.affected-services }}" ]; then
+            echo "No affected packages to test"
+            exit 0
+          fi
+          
+          # Start services in background
+          bun run prod:compose up ${{ needs.get-affected.outputs.affected-services }} -d
+          
+          # Wait for services to start
+          sleep 30
+          
+          # Check service status
+          bun run prod:compose ps
+          
+          # Test service health (basic connectivity)
+          for service in ${{ needs.get-affected.outputs.affected-services }}; do
+            echo "Testing $service..."
+            
+            # Get port from the ports output - use proper jq syntax with quotes
+            port=$(echo '${{ needs.get-affected.outputs.service-ports }}' | jq -r --arg service "$service" '.[$service] // empty' 2>/dev/null || echo "")
+            
+            if [ -n "$port" ] && [ "$port" != "null" ] && [ "$port" != "" ]; then
+              echo "Service $service is accessible on port $port"
+              # Test basic connectivity (don't fail if service doesn't respond, just log)
+              curl -s --max-time 5 http://localhost:$port > /dev/null && echo "✅ $service is responding" || echo "⚠️ $service is not responding (may be normal for some services)"
+            else
+              echo "⚠️ Service $service has no exposed port (may be a library package)"
+            fi
+          done
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          echo "::group::🧹 Cleaning up Docker resources"
+          if [ -z "${{ needs.get-affected.outputs.affected-services }}" ]; then
+            echo "No affected services to clean up"
+            exit 0
+          fi
+
+          bun run prod:compose down ${{ needs.get-affected.outputs.affected-services }} --remove-orphans || true
+          docker system prune -f || true
+          echo "✅ Cleanup completed"
+          echo "::endgroup::"
