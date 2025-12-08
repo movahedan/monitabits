@@ -31,6 +31,11 @@ FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
+
+# Build argument for API URL (used by Vite at build time)
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN bun run build --filter=monitabits-swagger
 
 FROM nginx:alpine AS runner

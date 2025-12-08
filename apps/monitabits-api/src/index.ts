@@ -30,13 +30,13 @@ async function bootstrap(): Promise<void> {
 
 	app.setGlobalPrefix("api");
 
-	const isDev = process.env.NODE_ENV === "development";
 	const host = process.env.HOST || "localhost";
 	const port = process.env.PORT ? Number(process.env.PORT) : 3003;
 
-	if (isDev) {
-		await swaggerSetup(app);
-	}
+	// Always set up Swagger (serves /api-docs and /api-docs-json)
+	// File generation and Kubb only run in development (handled in swaggerSetup)
+	await swaggerSetup(app);
+
 	await app.listen(port, host);
 	log(`API running on ${host}:${port}`);
 	console.log(`API running on ${host}:${port}`);
