@@ -37,13 +37,12 @@ ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
-COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
+# Copy entire node_modules from build stage (includes generated .prisma client and all @prisma runtime deps)
+COPY --from=build --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
 COPY --from=build --chown=runner-user:runner-group /app/packages/monitabits-kubb ./packages/monitabits-kubb
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./apps/monitabits-api
-# Copy Prisma schema and generated client (generated client is in node_modules/.prisma)
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
-COPY --from=build --chown=runner-user:runner-group /app/node_modules/.prisma ./node_modules/.prisma
 
 USER runner-user
 CMD ["bun", "run", "./apps/monitabits-api/dist/index.js"]
