@@ -9,12 +9,23 @@ async function bootstrap(): Promise<void> {
 
 	app.enableCors({
 		origin: process.env.ALLOWED_ORIGINS?.split(",") || [
+			"http://localhost:3000",
+			"http://localhost:3001",
 			"http://localhost:3002",
 			"http://localhost:3003",
+			"http://localhost:3004",
+			"http://localhost:3005",
 		],
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization", "X-Device-Id", "X-Client-Time"],
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"X-Device-Id",
+			"X-Client-Time",
+			"X-Timezone-Offset",
+			"X-Timezone-Name",
+		],
 	});
 
 	app.setGlobalPrefix("api");

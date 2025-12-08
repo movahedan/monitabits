@@ -1,11 +1,16 @@
-import { Controller, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { ClientTime } from "../common/decorators/client-time.decorator";
 import { DeviceId } from "../common/decorators/device-id.decorator";
 import { DeviceAuthGuard } from "../common/guards/device-auth.guard";
 import { TimeValidationGuard } from "../common/guards/time-validation.guard";
 import { ErrorResponseDto } from "../common/models";
-import { type CheckInResponse, CheckInResponseDto } from "./session.model";
+import {
+	type CheckInResponse,
+	CheckInResponseDto,
+	type CurrentSessionResponse,
+	CurrentSessionResponseDto,
+} from "./session.model";
 import { SessionsService } from "./sessions.service";
 
 @ApiTags("Sessions")
@@ -15,6 +20,27 @@ import { SessionsService } from "./sessions.service";
 @ApiSecurity("TimeValidation")
 export class SessionsController {
 	constructor(private readonly sessionsService: SessionsService) {}
+
+	@Get("current")
+	@ApiOperation({
+		summary: "Get current session status",
+		description: `Returns the current active or locked session status along with user statistics.
+If no active session exists, the session field will be null.
+Includes user stats like total time saved, current streak, and last relapse.`,
+	})
+	@ApiResponse({
+		status: HttpStatus.OK,
+		description: "Current session status retrieved successfully",
+		type: CurrentSessionResponseDto,
+	})
+	@ApiResponse({
+		status: HttpStatus.BAD_REQUEST,
+		description: "Time validation failed or invalid request",
+		type: ErrorResponseDto,
+	})
+	async getCurrentSession(@DeviceId() deviceId: string): Promise<CurrentSessionResponse> {
+		return this.sessionsService.getCurrentSession(deviceId);
+	}
 
 	@Post("check-in")
 	@HttpCode(HttpStatus.CREATED)

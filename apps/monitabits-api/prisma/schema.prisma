@@ -13,11 +13,12 @@ model Device {
 	createdAt DateTime  @default(now())
 	updatedAt DateTime  @updatedAt
 
-	sessions  Session[]
-	actions   Action[]
-	checkIns  CheckIn[]
-	settings  Settings?
-	followUps FollowUp[]
+	sessions     Session[]
+	actions      Action[]
+	checkIns     CheckIn[]
+	settings     Settings?
+	followUps    FollowUp[]
+	securityLogs SecurityLog[]
 
 	@@map("devices")
 }
@@ -103,4 +104,22 @@ model FollowUp {
 
 	@@index([deviceId])
 	@@map("follow_ups")
+}
+
+model SecurityLog {
+	id             String   @id @default(uuid())
+	deviceId       String
+	eventType      String   // "time_manipulation" | "timezone_change" | "suspicious_activity" | "validation_failure"
+	details        Json     // Additional event details
+	serverTime     DateTime
+	clientTime     DateTime
+	timezoneOffset Int      // Client timezone offset in minutes
+	createdAt      DateTime @default(now())
+
+	device         Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+	@@index([deviceId])
+	@@index([eventType])
+	@@index([createdAt])
+	@@map("security_logs")
 }

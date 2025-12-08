@@ -29,6 +29,21 @@ function getApiBaseUrl(): string {
 }
 
 /**
+ * Generate a UUID v4
+ */
+function generateUUID(): string {
+	if (typeof crypto !== "undefined" && crypto.randomUUID) {
+		return crypto.randomUUID();
+	}
+	// Fallback for older browsers
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+		const r = (Math.random() * 16) | 0;
+		const v = c === "x" ? r : (r & 0x3) | 0x8;
+		return v.toString(16);
+	});
+}
+
+/**
  * Get or create device ID from localStorage
  */
 function getOrCreateDeviceId(): string {
@@ -38,7 +53,7 @@ function getOrCreateDeviceId(): string {
 	let deviceId = localStorage.getItem(storageKey);
 
 	if (!deviceId) {
-		deviceId = `device_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+		deviceId = generateUUID();
 		localStorage.setItem(storageKey, deviceId);
 	}
 

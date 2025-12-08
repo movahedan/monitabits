@@ -57,6 +57,11 @@ const OPENAPI_YAML_PATH = resolve(KUBB_PACKAGE_PATH, "src/openapi.yaml");
 
 const generateSchema = async (document: OpenAPIObject): Promise<void> => {
 	try {
+		const currentContent = await Bun.file(OPENAPI_YAML_PATH).text();
+		if (currentContent.trim() === Bun.YAML.stringify(document, null, 2).trim()) {
+			return;
+		}
+
 		await Bun.write(OPENAPI_YAML_PATH, Bun.YAML.stringify(document, null, 2));
 		console.log("[swagger] ✅ openapi.yaml generated");
 		runKubb();

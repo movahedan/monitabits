@@ -1,5 +1,1 @@
-export {
-	appControllerGetStatus200Schema,
-	appControllerGetStatus500Schema,
-	appControllerGetStatusQueryResponseSchema,
-} from "./appControllerGetStatusSchema";
+export { appControllerGetStatus200Schema, appControllerGetStatus500Schema, appControllerGetStatusQueryResponseSchema } from "./appControllerGetStatusSchema";

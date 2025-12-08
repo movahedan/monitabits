@@ -14,7 +14,7 @@ const config: ReturnType<typeof defineConfig> = defineConfig({
 		clean: true,
 		lint: "biome",
 		format: "biome",
-		barrelType: false,
+		barrelType: "named",
 		extension: {
 			".ts": "",
 		},
