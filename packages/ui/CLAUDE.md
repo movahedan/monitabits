@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Package Overview
 
-**@repo/ui** is a React component library built with modern tools providing tree-shakable, type-safe components. It uses Radix UI primitives, Tailwind CSS, and includes comprehensive Storybook documentation.
+**@repo/ui** is a React component library built with modern tools using **Atomic Design** methodology. It provides tree-shakable, type-safe components organized into atoms, molecules, hooks, and utilities. Built on Radix UI primitives, Tailwind CSS 4, and includes comprehensive Storybook documentation.
 
 ## Essential Commands
 
 ### Development
-- `bun run dev` - Start development server
+- `bun run dev` - Start Storybook development server
 - `bun run check:types` - Run TypeScript type checking
 - `bun test` - Run component tests
 
@@ -18,53 +18,91 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 - `bun run build:storybook` - Build Storybook static site to `dist-storybook/`
 - `bun run start` - Serve built Storybook site
 
-### Package Structure
+## Package Structure
 
 ```
 packages/ui/
 ├── src/
-│   ├── button/           # Button component with variants
-│   ├── card/             # Card component family
-│   ├── counter-button/   # Interactive counter component
-│   ├── input/            # Form input component
-│   ├── label/            # Form label component
-│   ├── link/             # Navigation link component
-│   ├── login-form/       # Complete login form
-│   ├── index.ts          # Barrel exports
-│   └── styles.css        # Global styles
-├── .storybook/           # Storybook configuration
+│   ├── atoms/               # Basic UI building blocks (53 components)
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── input.tsx
+│   │   ├── dialog.tsx
+│   │   ├── select.tsx
+│   │   └── ... (50+ more)
+│   ├── molecules/           # Composed components
+│   │   ├── action-button.tsx
+│   │   ├── confirmation-modal.tsx
+│   │   ├── countdown-timer.tsx
+│   │   ├── counter-button/
+│   │   ├── progress-metrics.tsx
+│   │   └── status-card.tsx
+│   ├── hooks/               # React hooks
+│   │   ├── index.ts
+│   │   └── use-mobile.ts
+│   ├── utils/               # Utility functions
+│   │   └── index.ts
+│   └── styles.css           # Global styles with Tailwind
+├── .storybook/              # Storybook configuration
 ├── package.json
 └── README.md
 ```
 
-## Architecture & Design Patterns
+## Atomic Design Architecture
 
-### Component Organization
-Each component follows a consistent structure:
-- `component-name.tsx` - Main component implementation
-- `component-name.stories.tsx` - Storybook stories
-- `component-name.test.tsx` - Component tests
+### Atoms (53 components)
+Basic UI primitives - buttons, inputs, cards, dialogs, etc.
+- Accordion, Alert, AlertDialog, AspectRatio, Avatar, Badge
+- Breadcrumb, Button, ButtonGroup, Calendar, Card, Carousel
+- Chart, Checkbox, Collapsible, Command, ContextMenu, Dialog
+- Drawer, DropdownMenu, Empty, Field, Form, HoverCard
+- Input, InputGroup, InputOtp, Item, Kbd, Label
+- Menubar, NavigationMenu, Pagination, Popover, Progress
+- RadioGroup, Resizable, ScrollArea, Select, Separator
+- Sheet, Sidebar, Skeleton, Slider, Sonner, Spinner
+- Switch, Table, Tabs, Textarea, Toggle, ToggleGroup, Tooltip
 
-### Import Strategies
+### Molecules (6 components)
+Composed components that combine atoms for specific use cases:
+- **ActionButton** - Button with loading states and action handling
+- **ConfirmationModal** - Modal for confirming destructive actions
+- **CountdownTimer** - Timer display with formatting
+- **CounterButton** - Interactive counter with increment/decrement
+- **ProgressMetrics** - Display for progress statistics
+- **StatusCard** - Card showing status information
 
-**Tree-Shakable Imports (Recommended)**:
+### Hooks
+- **useMobile** - Hook to detect mobile viewport
+
+### Utils
+- Styling utilities (cn helper via @repo/utils)
+
+## Import Strategies
+
+**Category-based Imports (Required)**:
 ```typescript
-import { Button } from '@repo/ui/button';
-import { Card } from '@repo/ui/card';
+// Import atoms
+import { Button, Card, Dialog, Input } from '@repo/ui/atoms';
+
+// Import molecules  
+import { ActionButton, ProgressMetrics, StatusCard } from '@repo/ui/molecules';
+
+// Import hooks
+import { useMobile } from '@repo/ui/hooks';
+
+// Import utils
+import { cn } from '@repo/ui/utils';
 ```
 
-**Barrel Imports (Convenience)**:
-```typescript
-import { Button, Card, Input } from '@repo/ui';
-```
-
-### Technology Stack
+## Technology Stack
 - **React 19** with functional components and hooks
 - **TypeScript** with strict typing
 - **Tailwind CSS 4** for styling
 - **Radix UI** for accessible primitives
 - **Class Variance Authority** for component variants
-- **Storybook** for component documentation and testing
+- **Storybook 9** for component documentation and testing
+- **Lucide React** for iconography
+- **React Hook Form** with Zod resolver for forms
 
 ## Component Guidelines
 
@@ -113,11 +151,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 ```
 
 ### Key Patterns
-1. **Variant-based styling** using Class Variance Authority
-2. **Forward refs** for proper component composition
-3. **Accessible primitives** from Radix UI when needed
-4. **Type-safe props** with proper TypeScript interfaces
-5. **Utility-first styling** with Tailwind CSS
+1. **Atomic Design** - Atoms for primitives, Molecules for composed components
+2. **Variant-based styling** using Class Variance Authority
+3. **Forward refs** for proper component composition
+4. **Accessible primitives** from Radix UI
+5. **Type-safe props** with proper TypeScript interfaces
+6. **Utility-first styling** with Tailwind CSS
 
 ### Testing Patterns
 ```typescript
@@ -140,7 +179,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from './button';
 
 const meta: Meta<typeof Button> = {
-  title: 'Example/Button',
+  title: 'Atoms/Button',
   component: Button,
   parameters: { layout: 'centered' },
   tags: ['autodocs'],
@@ -163,12 +202,12 @@ export const Primary: Story = {
 ## Development Guidelines
 
 ### Adding New Components
-1. Create component directory in `src/`
-2. Implement component with TypeScript
-3. Add Storybook stories
-4. Write component tests  
-5. Export from `src/index.ts`
-6. Update package.json exports if needed
+1. Determine category: **atoms** (primitive) or **molecules** (composed)
+2. Create component in appropriate directory
+3. Implement with TypeScript and proper typing
+4. Add Storybook stories
+5. Write component tests
+6. Export from category's `index.ts`
 
 ### Styling Guidelines
 - Use Tailwind CSS utility classes
@@ -211,4 +250,4 @@ Always export component prop types for external consumption:
 export type { ButtonProps, CardProps } from './component';
 ```
 
-When working with this package, focus on building reusable, accessible components following the established patterns. Always include Storybook stories and tests for new components.
+When working with this package, follow the Atomic Design methodology - atoms for primitives, molecules for composed components. Always include Storybook stories and tests for new components.
