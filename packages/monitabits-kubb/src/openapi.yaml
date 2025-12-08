@@ -1,0 +1,702 @@
+openapi: 3.0.0
+paths: 
+  /api/status: 
+    get: 
+      operationId: AppController_getStatus
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Service is healthy
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/AppResponseDto"
+        "500": 
+          description: Service is unhealthy
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      summary: Health check endpoint
+      tags: 
+        - Health
+  /api/sessions/check-in: 
+    post: 
+      description: "Creates a check-in record when the app is opened or synced.\nThis is used for auto-save functionality and activity tracking.\nThe server handles timezone calculations internally."
+      operationId: SessionsController_checkIn
+      parameters: 
+        []
+      responses: 
+        "201": 
+          description: Check-in created successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/CheckInResponseDto"
+        "400": 
+          description: Time validation failed or invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        &security
+        - TimeValidation: 
+            []
+        - DeviceAuth: 
+            []
+      summary: Create a check-in
+      tags: 
+        &tags
+        - Sessions
+  /api/sessions/check-out: 
+    post: 
+      description: "Creates a check-out record when the app is closed or backgrounded.\nThis is used for tracking session duration and activity patterns.\nThe server handles timezone calculations internally."
+      operationId: SessionsController_checkOut
+      parameters: 
+        []
+      responses: 
+        "201": 
+          description: Check-out created successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/CheckInResponseDto"
+        "400": 
+          description: Time validation failed or invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security
+      summary: Create a check-out
+      tags: 
+        *tags
+  /api/actions/cheat: 
+    post: 
+      description: "Logs when the user clicks \"I cheated and dishonored myself\" while in a locked state.\nThe action is logged but consequences may be delayed.\nNote: If the user calls the harm endpoint while cheating, the system detects this automatically."
+      operationId: ActionsController_cheat
+      parameters: 
+        []
+      responses: 
+        "201": 
+          description: Action logged successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ActionResponseDto"
+        "400": 
+          description: "Time validation failed, invalid action, or action not allowed in current state"
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        &security1
+        - TimeValidation: 
+            []
+        - DeviceAuth: 
+            []
+      summary: "Log \"I cheated\" action"
+      tags: 
+        &tags1
+        - Actions
+  /api/actions/harm: 
+    post: 
+      description: "Logs when the user clicks \"I'm choosing to harm myself\" while in an active state.\nThis starts a new lockdown period.\nNote: This is essentially the same as cheating - if you're cheating and call harm endpoint,\nthe system detects this automatically."
+      operationId: ActionsController_harm
+      parameters: 
+        []
+      responses: 
+        "201": 
+          description: Action logged and lockdown started
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ActionResponseDto"
+        "400": 
+          description: "Time validation failed, invalid action, or action not allowed in current state"
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security1
+      summary: "Log \"I'm choosing to harm myself\" action"
+      tags: 
+        *tags1
+  /api/actions/follow-up/pending: 
+    get: 
+      description: "Returns a pending follow-up question if one is available.\nThe response includes information about the last lockdown timestamp and\nhow many cycles the user has been gone."
+      operationId: ActionsController_getPendingFollowUp
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Follow-up question status
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/PendingFollowUpResponseDto"
+        "400": 
+          description: Time validation failed
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security1
+      summary: Get pending follow-up question
+      tags: 
+        *tags1
+  /api/actions/follow-up: 
+    post: 
+      description: "Submits an answer to a follow-up question related to harm actions.\nThe request can include an array of harm action IDs that this follow-up relates to."
+      operationId: ActionsController_submitFollowUp
+      parameters: 
+        []
+      requestBody: 
+        required: true
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/FollowUpRequestDto"
+      responses: 
+        "201": 
+          description: Follow-up answer submitted successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/FollowUpResponseDto"
+        "400": 
+          description: Time validation failed or invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security1
+      summary: Submit follow-up answer
+      tags: 
+        *tags1
+  /api/settings: 
+    get: 
+      description: "Returns the current user settings, primarily the lockdown period."
+      operationId: SettingsController_getSettings
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Settings retrieved successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/SettingsDto"
+        "400": 
+          description: Time validation failed
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        &security2
+        - TimeValidation: 
+            []
+        - DeviceAuth: 
+            []
+      summary: Get user settings
+      tags: 
+        &tags2
+        - Settings
+    put: 
+      description: "Updates user settings, primarily the lockdown period in minutes."
+      operationId: SettingsController_updateSettings
+      parameters: 
+        []
+      requestBody: 
+        required: true
+        content: 
+          application/json: 
+            schema: 
+              $ref: "#/components/schemas/UpdateSettingsRequestDto"
+      responses: 
+        "200": 
+          description: Settings updated successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/SettingsDto"
+        "400": 
+          description: Time validation failed or invalid settings
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security2
+      summary: Update user settings
+      tags: 
+        *tags2
+  /api/stats/now: 
+    get: 
+      description: "Returns the current lockdown status including whether the user is locked\nand how much time remains in the lockdown period."
+      operationId: StatisticsController_getLockdownNow
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Current lockdown status
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/LockdownNowResponseDto"
+        "400": 
+          description: Time validation failed
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        &security3
+        - TimeValidation: 
+            []
+        - DeviceAuth: 
+            []
+      summary: Get current lockdown status
+      tags: 
+        &tags3
+        - Statistics
+  /api/stats/summary: 
+    get: 
+      description: "Returns comprehensive user statistics including time saved, streaks, activity metrics,\nand session report data (check-ins during lockdown, time spent on page during lockdown, etc.).\nFewer check-ins and less time spent on page during lockdown are better indicators."
+      operationId: StatisticsController_getSummary
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Statistics summary retrieved successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/StatisticsSummaryDto"
+        "400": 
+          description: Time validation failed
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security3
+      summary: Get comprehensive statistics summary
+      tags: 
+        *tags3
+  /api/stats/details: 
+    get: 
+      description: "Returns a detailed time table report for a specified date range.\nEach entry includes session status, check-ins, actions, and time spent on page."
+      operationId: StatisticsController_getDetails
+      parameters: 
+        - name: endDate
+          required: true
+          in: query
+          description: End date for the report (inclusive)
+          schema: 
+            format: date
+            example: 2024-01-31
+            type: string
+        - name: startDate
+          required: true
+          in: query
+          description: Start date for the report (inclusive)
+          schema: 
+            format: date
+            example: 2024-01-01
+            type: string
+      responses: 
+        "200": 
+          description: Detailed statistics retrieved successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/StatisticsDetailsResponseDto"
+        "400": 
+          description: Time validation failed or invalid date range
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        *security3
+      summary: Get detailed time table report
+      tags: 
+        *tags3
+info: 
+  title: Monitabits Quit Smoking API
+  description: "API for the cigarette quitting accountability application.\n\nThis API uses device-based authentication where each device has a unique ID.\nAll time-sensitive operations are validated server-side to prevent cheating.\n\n**Security**: All requests must include time validation headers to prevent time manipulation.\nThe server handles all timezone calculations internally based on the user's request context."
+  version: 1.0.0
+  contact: 
+    {}
+tags: 
+  - name: Sessions
+    description: Session management and check-ins
+  - name: Actions
+    description: "User actions (cheat, harm, follow-up)"
+  - name: Settings
+    description: User settings management
+  - name: Statistics
+    description: User statistics and progress
+servers: 
+  - url: http://localhost:3003
+    description: Development server
+  - url: https://api.monitabits.com
+    description: Production server
+components: 
+  securitySchemes: 
+    DeviceAuth: 
+      type: apiKey
+      in: header
+      name: X-Device-Id
+      description: Device ID for authentication
+    TimeValidation: 
+      type: apiKey
+      in: header
+      name: X-Client-Time
+      description: Client-reported timestamp (ISO-8601)
+  schemas: 
+    AppDto: 
+      type: object
+      properties: 
+        ok: 
+          type: boolean
+      required: 
+        - ok
+    AppResponseDto: 
+      type: object
+      properties: 
+        data: 
+          $ref: "#/components/schemas/AppDto"
+      required: 
+        - data
+    ErrorResponseDto: 
+      type: object
+      properties: 
+        success: 
+          type: boolean
+          default: false
+        error: 
+          type: string
+        message: 
+          type: string
+        statusCode: 
+          type: number
+        timestamp: 
+          type: string
+          format: date-time
+        path: 
+          type: string
+      required: 
+        - success
+        - error
+        - message
+        - statusCode
+        - timestamp
+        - path
+    CheckInDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        type: 
+          type: string
+          enum: 
+            - check_in
+            - check_out
+        serverTime: 
+          type: string
+          format: date-time
+        createdAt: 
+          type: string
+          format: date-time
+      required: 
+        - id
+        - type
+        - serverTime
+        - createdAt
+    SessionDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        status: 
+          type: string
+          enum: 
+            - active
+            - locked
+            - completed
+        startTime: 
+          type: string
+          format: date-time
+        endTime: 
+          type: string
+          format: date-time
+          nullable: true
+        lockdownMinutes: 
+          type: number
+          minimum: 1
+          maximum: 10080
+        timeRemaining: 
+          type: number
+          nullable: true
+        timeAhead: 
+          type: number
+          nullable: true
+      required: 
+        - id
+        - status
+        - startTime
+        - endTime
+        - lockdownMinutes
+    CheckInResponseDto: 
+      type: object
+      properties: 
+        checkIn: 
+          $ref: "#/components/schemas/CheckInDto"
+        session: 
+          $ref: "#/components/schemas/SessionDto"
+      required: 
+        - checkIn
+        - session
+    ActionConsequencesDto: 
+      type: object
+      properties: 
+        message: 
+          type: string
+        additionalLockdown: 
+          type: number
+    ActionDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        type: 
+          type: string
+          enum: 
+            - cheat
+            - harm
+        serverTime: 
+          type: string
+          format: date-time
+        consequences: 
+          $ref: "#/components/schemas/ActionConsequencesDto"
+        lockdownStarted: 
+          type: boolean
+      required: 
+        - id
+        - type
+        - serverTime
+    ActionResponseDto: 
+      type: object
+      properties: 
+        action: 
+          $ref: "#/components/schemas/ActionDto"
+        session: 
+          $ref: "#/components/schemas/SessionDto"
+      required: 
+        - action
+        - session
+    PendingFollowUpQuestionDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        text: 
+          type: string
+      required: 
+        - id
+        - text
+    PendingFollowUpResponseDto: 
+      type: object
+      properties: 
+        hasPending: 
+          type: boolean
+        question: 
+          nullable: true
+          allOf: 
+            - $ref: "#/components/schemas/PendingFollowUpQuestionDto"
+        lastLockdownTimestamp: 
+          type: string
+          format: date-time
+          nullable: true
+        cyclesMissed: 
+          type: number
+          minimum: 0
+          nullable: true
+      required: 
+        - hasPending
+    FollowUpRequestDto: 
+      type: object
+      properties: 
+        answer: 
+          type: string
+          minLength: 1
+        harmIds: 
+          type: array
+          items: 
+            type: string
+      required: 
+        - answer
+    FollowUpResponseDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        question: 
+          type: string
+        answer: 
+          type: string
+        createdAt: 
+          type: string
+          format: date-time
+      required: 
+        - id
+        - question
+        - answer
+        - createdAt
+    SettingsDto: 
+      type: object
+      properties: 
+        lockdownMinutes: 
+          type: number
+          minimum: 1
+          maximum: 10080
+        updatedAt: 
+          type: string
+          format: date-time
+      required: 
+        - lockdownMinutes
+        - updatedAt
+    UpdateSettingsRequestDto: 
+      type: object
+      properties: 
+        lockdownMinutes: 
+          type: number
+          minimum: 1
+          maximum: 10080
+      required: 
+        - lockdownMinutes
+    LockdownNowResponseDto: 
+      type: object
+      properties: 
+        isLocked: 
+          type: boolean
+        timeRemaining: 
+          type: number
+          nullable: true
+        sessionId: 
+          type: string
+          format: uuid
+          nullable: true
+      required: 
+        - isLocked
+    SessionReportDto: 
+      type: object
+      properties: 
+        checkInsDuringLockdown: 
+          type: number
+          minimum: 0
+        timeSpentOnPageDuringLockdown: 
+          type: number
+          minimum: 0
+      required: 
+        - checkInsDuringLockdown
+        - timeSpentOnPageDuringLockdown
+    StatisticsSummaryDto: 
+      type: object
+      properties: 
+        totalTimeSaved: 
+          type: number
+        currentStreak: 
+          type: number
+        longestStreak: 
+          type: number
+        totalCheckIns: 
+          type: number
+        totalActions: 
+          type: number
+        averageTimeBetweenActions: 
+          type: number
+          nullable: true
+        lastRelapse: 
+          type: string
+          format: date-time
+          nullable: true
+        sessionReport: 
+          $ref: "#/components/schemas/SessionReportDto"
+      required: 
+        - totalTimeSaved
+        - currentStreak
+        - longestStreak
+        - totalCheckIns
+        - totalActions
+    TimeTableEntryDto: 
+      type: object
+      properties: 
+        date: 
+          type: string
+          format: date
+        status: 
+          type: string
+          enum: 
+            - active
+            - locked
+            - completed
+        startTime: 
+          type: string
+          format: date-time
+        endTime: 
+          type: string
+          format: date-time
+          nullable: true
+        lockdownMinutes: 
+          type: number
+        checkIns: 
+          type: number
+        actions: 
+          type: number
+        timeSpentOnPage: 
+          type: number
+      required: 
+        - date
+        - status
+        - startTime
+        - endTime
+        - lockdownMinutes
+        - checkIns
+        - actions
+        - timeSpentOnPage
+    StatisticsDetailsResponseDto: 
+      type: object
+      properties: 
+        entries: 
+          type: array
+          items: 
+            $ref: "#/components/schemas/TimeTableEntryDto"
+        startDate: 
+          type: string
+          format: date
+        endDate: 
+          type: string
+          format: date
+        totalEntries: 
+          type: number
+      required: 
+        - entries
+        - startDate
+        - endDate
+        - totalEntries

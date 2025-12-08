@@ -1,0 +1,39 @@
+{
+	"private": true,
+	"name": "@repo/monitabits-kubb",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "Kubb-generated API client (types, hooks, zod schemas)",
+	"files": [
+		"src/**"
+	],
+	"exports": {
+		"./mutator": "./src/mutator.ts",
+		"./gen/hooks": "./src/gen/hooks/index.ts",
+		"./gen/types": "./src/gen/types/index.ts",
+		"./gen/zod": "./src/gen/zod/index.ts"
+	},
+	"scripts": {
+		"check": "biome check .",
+		"check:fix": "biome check . --write",
+		"check:types": "tsc --noEmit",
+		"kubb": "kubb"
+	},
+	"dependencies": {
+		"swr": "2.3.7",
+		"zod": "4.1.13"
+	},
+	"devDependencies": {
+		"@kubb/cli": "4.8.1",
+		"@kubb/core": "4.8.1",
+		"@kubb/plugin-oas": "4.8.1",
+		"@kubb/plugin-swr": "4.8.1",
+		"@kubb/plugin-ts": "4.8.1",
+		"@kubb/plugin-zod": "4.8.1",
+		"@repo/test-preset": "workspace:*",
+		"@repo/typescript-config": "workspace:*"
+	},
+	"peerDependencies": {
+		"zod": "4.1.13"
+	}
+}

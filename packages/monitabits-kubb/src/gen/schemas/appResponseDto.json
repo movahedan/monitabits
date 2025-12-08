@@ -1,0 +1,13 @@
+{
+	"type": "object",
+	"properties": {
+		"data": {
+			"type": "object",
+			"properties": { "ok": { "type": "boolean" } },
+			"required": ["ok"],
+			"x-readme-ref-name": "AppDto"
+		}
+	},
+	"required": ["data"],
+	"x-readme-ref-name": "AppResponseDto"
+}
