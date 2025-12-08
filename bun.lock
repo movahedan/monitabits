@@ -199,6 +199,7 @@
       },
       "devDependencies": {
         "@repo/typescript-config": "workspace:*",
+        "@types/node": "24.10.1",
       },
     },
   },
