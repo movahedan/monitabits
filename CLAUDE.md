@@ -84,22 +84,24 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
 ### Package Structure
 - **`packages/`** - Shared packages and libraries
   - `intershell` - Custom CLI framework with entity-driven architecture for monorepo control
-  - `ui` - Shared React component library with Storybook (port 3004)
-  - `monitabits-kubb` - Kubb-generated API client (types, hooks, zod schemas from OpenAPI)
+  - `ui` - Shared React component library with Atomic Design (atoms, molecules, hooks, utils) and Storybook (port 3004)
+  - `monitabits-kubb` - Kubb-generated API client (types, SWR hooks, server functions, zod schemas from OpenAPI)
   - `utils` - Shared utility functions
   - `typescript-config` - Shared TypeScript configurations
   - `test-preset` - Shared testing configurations and mocks
 
 - **`apps/`** - Applications
-  - `monitabits-app` - Next.js frontend application (port 3002)
+  - `monitabits-app` - Next.js frontend PWA with Server Components (port 3002)
   - `monitabits-api` - NestJS backend API with Prisma, DTOs, and OpenAPI generation (port 3003)
   - `monitabits-swagger` - Swagger UI for API documentation (port 3005)
 
 ### Key Technologies
 - **Build System**: Turborepo with Bun package manager
-- **Frontend**: React 19, Next.js 15, Astro, Svelte
-- **Backend**: NestJS (currently Express.js, migration pending)
-- **Styling**: Tailwind CSS, CSS modules
+- **Frontend**: React 19, Next.js 15 (App Router, Server Components)
+- **Backend**: NestJS with Prisma ORM
+- **Styling**: Tailwind CSS 4
+- **Components**: Radix UI primitives, Class Variance Authority
+- **API Client**: Kubb-generated (SWR hooks, server functions, Zod schemas)
 - **Testing**: Bun test runner with custom test presets
 - **Code Quality**: Biome for linting/formatting
 - **Containers**: Docker with DevContainer support
@@ -159,14 +161,14 @@ For detailed information about working with specific packages and applications, 
 - Document breaking changes
 
 ### Packages
-- **[packages/ui/CLAUDE.md](packages/ui/CLAUDE.md)** - React component library with Storybook
-- **[packages/monitabits-kubb/CLAUDE.md](packages/monitabits-kubb/CLAUDE.md)** - Kubb-generated API client (types, hooks, zod)
+- **[packages/ui/CLAUDE.md](packages/ui/CLAUDE.md)** - React component library with Atomic Design (atoms, molecules, hooks, utils)
+- **[packages/monitabits-kubb/CLAUDE.md](packages/monitabits-kubb/CLAUDE.md)** - Kubb-generated API client (types, SWR hooks, server functions, zod)
 - **[packages/utils/CLAUDE.md](packages/utils/CLAUDE.md)** - Shared utility functions (cn, logger)
 - **[packages/typescript-config/CLAUDE.md](packages/typescript-config/CLAUDE.md)** - TypeScript configuration presets
 - **[packages/test-preset/CLAUDE.md](packages/test-preset/CLAUDE.md)** - Testing configuration and utilities
 
 ### Applications  
-- **[apps/monitabits-app/CLAUDE.md](apps/monitabits-app/CLAUDE.md)** - Next.js frontend application (port 3002)
+- **[apps/monitabits-app/CLAUDE.md](apps/monitabits-app/CLAUDE.md)** - Next.js frontend PWA with Server Components (port 3002)
 - **[apps/monitabits-api/CLAUDE.md](apps/monitabits-api/CLAUDE.md)** - NestJS backend API with Prisma (port 3003)
 
 **When working on a specific package or application, always read its CLAUDE.md file first for detailed guidance, architecture patterns, and development practices specific to that component.**
