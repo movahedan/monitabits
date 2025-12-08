@@ -16,12 +16,16 @@ FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
-RUN bun install --ignore-scripts
+# Don't ignore scripts - Prisma needs postinstall to set up runtime
+RUN bun install
 
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
+
+# Install Prisma runtime utils explicitly (required for Prisma 7.x with Bun)
+RUN cd /app/apps/monitabits-api && bun add @prisma/client-runtime-utils
 
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
