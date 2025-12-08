@@ -36,33 +36,53 @@ bun run db:reset          # Reset database (deletes data!)
 ```
 apps/monitabits-api/
 ├── prisma/
-│   └── schema.prisma       # Database schema
-├── prisma.config.ts        # Prisma configuration
+│   └── schema.prisma         # Database schema
+├── prisma.config.ts          # Prisma configuration
 ├── src/
 │   ├── common/
-│   │   ├── models/         # DTOs with @ApiProperty decorators
-│   │   │   ├── action.model.ts
-│   │   │   ├── response.model.ts
-│   │   │   ├── session.model.ts
-│   │   │   ├── settings.model.ts
-│   │   │   └── statistics.model.ts
-│   │   ├── validators/     # Header validation
-│   │   │   └── headers.ts  # validateDeviceId, validateClientTime
-│   │   ├── guards/         # Authentication guards
+│   │   ├── decorators/       # Custom decorators
+│   │   │   ├── client-time.decorator.ts
+│   │   │   └── device-id.decorator.ts
+│   │   ├── filters/          # Exception filters
+│   │   │   ├── all-exceptions.filter.ts
+│   │   │   └── http-exception.filter.ts
+│   │   ├── guards/           # Authentication guards
 │   │   │   ├── device-auth.guard.ts
 │   │   │   └── time-validation.guard.ts
-│   │   ├── pipes/          # Validation pipes
+│   │   ├── interceptors/     # Response transformation
+│   │   │   └── transform.interceptor.ts
+│   │   ├── models/           # Shared response DTOs
+│   │   │   └── response.model.ts
+│   │   ├── pipes/            # Validation pipes
 │   │   │   └── zod-validation.pipe.ts
-│   │   ├── filters/        # Exception filters
-│   │   ├── interceptors/   # Response transformation
-│   │   └── services/       # Prisma service
-│   ├── actions/            # Actions module
-│   ├── sessions/           # Sessions module
-│   ├── settings/           # Settings module
-│   ├── statistics/         # Statistics module
-│   ├── swagger.setup.ts    # OpenAPI generation
-│   ├── app.module.ts       # Root module
-│   └── main.ts             # Entry point
+│   │   ├── services/         # Prisma service
+│   │   │   ├── prisma.module.ts
+│   │   │   └── prisma.service.ts
+│   │   └── validators/       # Header validation
+│   │       └── headers.ts
+│   ├── actions/              # Actions module (cheat, harm, follow-up)
+│   │   ├── action.model.ts
+│   │   ├── actions.controller.ts
+│   │   ├── actions.module.ts
+│   │   └── actions.service.ts
+│   ├── sessions/             # Sessions module (check-in/out, current)
+│   │   ├── session.model.ts  # Session, CheckIn, UserStats, CurrentSessionResponse
+│   │   ├── sessions.controller.ts
+│   │   ├── sessions.module.ts
+│   │   └── sessions.service.ts
+│   ├── settings/             # Settings module
+│   │   ├── settings.model.ts
+│   │   ├── settings.controller.ts
+│   │   ├── settings.module.ts
+│   │   └── settings.service.ts
+│   ├── statistics/           # Statistics module
+│   │   ├── statistics.model.ts
+│   │   ├── statistics.controller.ts
+│   │   ├── statistics.module.ts
+│   │   └── statistics.service.ts
+│   ├── swagger.setup.ts      # OpenAPI generation
+│   ├── app.module.ts         # Root module
+│   └── index.ts              # Entry point
 ├── tsconfig.json
 └── package.json
 ```
@@ -71,30 +91,40 @@ apps/monitabits-api/
 
 ### DTOs as OpenAPI Source of Truth
 
-DTOs in `src/common/models/` define both TypeScript types and OpenAPI schema:
+Each module has its own model file defining DTOs with `@ApiProperty` decorators:
 
 ```typescript
-// src/common/models/settings.model.ts
-import { ApiProperty } from "@nestjs/swagger";
+// src/sessions/session.model.ts
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { z } from "zod";
 
-export class SettingsDto {
-  @ApiProperty({ type: Number, minimum: 1, maximum: 10080 })
-  readonly lockdownMinutes!: number;
+export class SessionDto {
+  @ApiProperty({ type: String, format: "uuid" })
+  readonly id!: string;
 
-  @ApiProperty({ type: String, format: "date-time" })
-  readonly updatedAt!: string;
+  @ApiProperty({ enum: ["active", "locked", "completed"] })
+  readonly status!: SessionStatus;
+
+  @ApiPropertyOptional({ type: Number, nullable: true })
+  readonly timeRemaining?: number | null;
 }
 
 // Zod schema for runtime validation
-export const SettingsSchema = z.object({
-  lockdownMinutes: z.number().int().min(1).max(10080),
-  updatedAt: z.string().datetime(),
+export const SessionSchema = z.object({
+  id: z.string().uuid(),
+  status: z.enum(["active", "locked", "completed"]),
+  timeRemaining: z.number().int().nullable().optional(),
 });
 
 // TypeScript type
-export type Settings = z.infer<typeof SettingsSchema>;
+export type Session = z.infer<typeof SessionSchema>;
 ```
+
+### Key Session Types
+
+- **Session**: Current lockdown session state (id, status, timeRemaining, timeAhead)
+- **UserStats**: User progress stats (totalTimeSaved, currentStreak, lastRelapse)
+- **CurrentSessionResponse**: Combined session + user stats for `/sessions/current`
 
 ### OpenAPI Generation Flow
 
@@ -113,27 +143,29 @@ When the API starts in dev mode:
 ### Controller Pattern
 
 ```typescript
-@Controller("settings")
-@ApiTags("Settings")
+@Controller("sessions")
+@ApiTags("Sessions")
 @UseGuards(DeviceAuthGuard, TimeValidationGuard)
-export class SettingsController {
-  constructor(private readonly settingsService: SettingsService) {}
+export class SessionsController {
+  constructor(private readonly sessionsService: SessionsService) {}
 
-  @Get()
-  @ApiOperation({ summary: "Get user settings" })
-  @ApiResponse({ status: 200, type: SettingsDto })
-  async getSettings(@DeviceId() deviceId: string): Promise<Settings> {
-    return this.settingsService.getSettings(deviceId);
+  @Get("current")
+  @ApiOperation({ summary: "Get current session and user stats" })
+  @ApiResponse({ status: 200, type: CurrentSessionResponseDto })
+  async getCurrentSession(
+    @DeviceId() deviceId: string,
+  ): Promise<CurrentSessionResponse> {
+    return this.sessionsService.getCurrentSession(deviceId);
   }
 
-  @Put()
-  @ApiOperation({ summary: "Update settings" })
-  @UsePipes(new ZodValidationPipe(UpdateSettingsRequestSchema))
-  async updateSettings(
+  @Post("check-in")
+  @ApiOperation({ summary: "Create check-in" })
+  @ApiResponse({ status: 201, type: CheckInResponseDto })
+  async checkIn(
     @DeviceId() deviceId: string,
-    @Body() data: UpdateSettingsRequest,
-  ): Promise<Settings> {
-    return this.settingsService.updateSettings(deviceId, data);
+    @ClientTime() clientTime: Date,
+  ): Promise<CheckInResponse> {
+    return this.sessionsService.createCheckIn(deviceId, clientTime, "check_in");
   }
 }
 ```
