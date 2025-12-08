@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Application Overview
 
-**monitabits-app** is a Next.js frontend application. It runs on **port 3002** in the monorepo setup and uses the latest Next.js App Router architecture.
+**monitabits-app** is a Next.js frontend application for tracking quit smoking progress. It runs on **port 3002** in the monorepo setup and uses the Next.js App Router architecture with Server Components and Server Actions.
 
 ## Essential Commands
 
@@ -17,393 +17,247 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 ## Technology Stack
 
 ### Core Framework
-- **Next.js 15.4.7** - React framework with App Router
-- **React 19.1.1** - Modern React with latest features
+- **Next.js 15** - React framework with App Router
+- **React 19** - Modern React with Server Components
 - **TypeScript** - Type-safe development
 
 ### UI & Styling
-- **@repo/ui** - Shared component library
-- **@repo/utils** - Shared utilities (cn helper, logger)
-- Server Components and Client Components patterns
+- **@repo/ui** - Shared component library (Atomic Design)
+  - `@repo/ui/atoms` - Basic UI components (Button, Card, Input, etc.)
+  - `@repo/ui/molecules` - Composed components (ActionButton, StatusCard, etc.)
+- **Tailwind CSS** - Utility-first styling
 
-### Build & Development
-- **@repo/typescript-config** - Shared TypeScript configuration extending Next.js preset
+### API Integration
+- **@repo/monitabits-kubb** - Generated API client
+  - `/server` - Server functions for Server Components
+  - `/hooks` - SWR hooks for Client Components
+  - `/types` - TypeScript types
+  - `/zod` - Validation schemas
 
 ## Architecture
 
-### Project Structure (App Router)
+### Project Structure
 ```
 apps/monitabits-app/
 ├── src/
-│   ├── app/                    # App Router directory
-│   │   ├── (shop)/            # Route groups
-│   │   │   ├── products/      # Product pages
-│   │   │   ├── cart/          # Shopping cart
-│   │   │   └── checkout/      # Checkout flow
-│   │   ├── api/               # API routes
-│   │   ├── globals.css        # Global styles
-│   │   ├── layout.tsx         # Root layout
-│   │   ├── page.tsx           # Home page
-│   │   └── loading.tsx        # Loading UI
-│   ├── components/            # Reusable components
-│   │   ├── ui/                # App-specific UI components
-│   │   ├── forms/             # Form components
-│   │   └── layout/            # Layout components
-│   ├── lib/                   # Utilities and configurations
-│   │   ├── api.ts             # API client
-│   │   ├── auth.ts            # Authentication logic
-│   │   └── utils.ts           # App-specific utilities
-│   └── types/                 # TypeScript definitions
-├── public/                    # Static assets
-├── next.config.js             # Next.js configuration
-├── tsconfig.json              # TypeScript configuration
-└── package.json               # Dependencies and scripts
+│   ├── app/                        # App Router directory
+│   │   ├── _components/           # Shared app components
+│   │   │   └── providers.tsx      # React providers (SWR, themes)
+│   │   ├── (dashboard)/           # Dashboard route group
+│   │   │   ├── _components/       # Dashboard-specific components
+│   │   │   │   ├── dashboard-client.tsx  # Client component with real-time updates
+│   │   │   │   └── reflection-modal.tsx  # Follow-up questions modal
+│   │   │   ├── actions.ts         # Server Actions for dashboard
+│   │   │   ├── page.tsx           # Dashboard page (Server Component)
+│   │   │   ├── loading.tsx        # Loading UI
+│   │   │   └── error.tsx          # Error boundary
+│   │   ├── settings/              # Settings pages
+│   │   │   ├── _components/
+│   │   │   │   └── settings-form.tsx  # Client form component
+│   │   │   ├── actions.ts         # Server Actions for settings
+│   │   │   ├── page.tsx           # Settings page (Server Component)
+│   │   │   ├── loading.tsx        # Loading UI
+│   │   │   └── error.tsx          # Error boundary
+│   │   ├── layout.tsx             # Root layout with providers
+│   │   ├── styles.css             # Global styles (Tailwind)
+│   │   ├── error.tsx              # Global error boundary
+│   │   ├── global-error.tsx       # Root error boundary
+│   │   └── not-found.tsx          # 404 page
+│   ├── middleware.ts              # Device ID cookie middleware
+│   └── utils/
+│       ├── api-headers.ts         # Server-side API headers helper
+│       └── register-sw.ts         # Service worker registration
+├── public/
+│   ├── manifest.json              # PWA manifest
+│   └── sw.js                      # Service worker
+├── next.config.ts                 # Next.js configuration
+└── tsconfig.json                  # TypeScript configuration
 ```
 
-### Development Patterns
+### Server Components vs Client Components
 
 #### Server Components (Default)
+Use for initial data fetching and static content:
+
 ```typescript
-// app/products/page.tsx
-import { Card } from '@repo/ui/card';
-import { Button } from '@repo/ui/button';
-import { getProducts } from '@/lib/api';
+// app/(dashboard)/page.tsx - Server Component
+import { sessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/server';
+import { getApiHeaders } from '../../utils/api-headers';
+import { DashboardClient } from './_components/dashboard-client';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-}
-
-// Server Component - runs on server
-export default async function ProductsPage() {
-  // Direct data fetching in Server Components
-  const products = await getProducts();
-
+export default async function DashboardPage() {
+  // Fetch data on the server
+  const headers = await getApiHeaders();
+  const data = await sessionsControllerGetCurrentSession({ headers });
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
-  );
-}
-
-// Server Component with proper typing
-async function ProductCard({ product }: { product: Product }) {
-  return (
-    <Card className="overflow-hidden">
-      <img 
-        src={product.image} 
-        alt={product.name}
-        className="w-full h-48 object-cover"
-      />
-      <div className="p-4">
-        <h3 className="font-semibold text-lg">{product.name}</h3>
-        <p className="text-2xl font-bold text-green-600">
-          ${product.price.toFixed(2)}
-        </p>
-        <AddToCartButton productId={product.id} />
-      </div>
-    </Card>
+    <main>
+      {/* Pass server data to client component */}
+      <DashboardClient initialSession={data?.session ?? null} />
+    </main>
   );
 }
 ```
 
 #### Client Components
+Use for interactivity and real-time updates:
+
 ```typescript
-'use client'; // Client Component directive
+'use client';
 
-import { useState } from 'react';
-import { Button } from '@repo/ui/button';
-import { cn } from '@repo/utils/cn';
-import { logger } from '@repo/utils/logger';
+import { useSessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/hooks';
+import { ActionButton, StatusCard } from '@repo/ui/molecules';
 
-interface AddToCartButtonProps {
-  productId: string;
-  className?: string;
+export function DashboardClient({ initialSession }) {
+  // Real-time updates with SWR
+  const { data, mutate } = useSessionsControllerGetCurrentSession({
+    query: { refreshInterval: 30000 },
+  });
+  
+  // Use server data as fallback
+  const session = data?.session ?? initialSession;
+  
+  return (
+    <StatusCard status={session?.status}>
+      {/* Interactive content */}
+    </StatusCard>
+  );
+}
+```
+
+#### Server Actions
+Use for mutations triggered from client components:
+
+```typescript
+// app/(dashboard)/actions.ts
+'use server';
+
+import { sessionsControllerCheckIn } from '@repo/monitabits-kubb/server';
+import { revalidatePath } from 'next/cache';
+import { getApiHeaders } from '../../utils/api-headers';
+
+export async function performCheckIn() {
+  const headers = await getApiHeaders();
+  await sessionsControllerCheckIn({}, { headers });
+  revalidatePath('/');
+}
+```
+
+### API Headers Helper
+
+Get device ID from cookies for server-side API calls:
+
+```typescript
+// utils/api-headers.ts
+import { cookies } from 'next/headers';
+
+export async function getApiHeaders(): Promise<{ 'X-Device-Id': string }> {
+  const cookieStore = await cookies();
+  const deviceId = cookieStore.get('monitabits_device_id')?.value ?? '';
+  return { 'X-Device-Id': deviceId };
+}
+```
+
+## Development Patterns
+
+### Component Import Patterns
+
+```typescript
+// Server Components - use server functions
+import { sessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/server';
+import { Card, CardContent, CardHeader } from '@repo/ui/atoms';
+
+// Client Components - use hooks
+'use client';
+import { useSessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/hooks';
+import { ActionButton, StatusCard } from '@repo/ui/molecules';
+```
+
+### Data Fetching Strategy
+
+1. **Server Components** - Initial data fetch with server functions
+2. **Client Components** - Real-time updates with SWR hooks
+3. **Hydration** - Pass server data as initial props to client components
+4. **Server Actions** - Mutations with `revalidatePath` for cache invalidation
+
+### Loading and Error States
+
+```typescript
+// loading.tsx - Shown during server component loading
+export default function Loading() {
+  return <div className="animate-pulse">Loading...</div>;
 }
 
-// Client Component for interactivity
-export function AddToCartButton({ productId, className }: AddToCartButtonProps) {
-  const [isAdding, setIsAdding] = useState(false);
+// error.tsx - Error boundary for route segment
+'use client';
+export default function Error({ error, reset }) {
+  return (
+    <div>
+      <h2>Something went wrong!</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+```
 
-  const handleAddToCart = async () => {
-    try {
-      setIsAdding(true);
-      logger.info('Adding product to cart', { productId });
+### Streaming with Suspense
+
+```typescript
+import { Suspense } from 'react';
+
+export default async function Page() {
+  return (
+    <main>
+      {/* Fast initial content */}
+      <Header />
       
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity: 1 })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add to cart');
-      }
-
-      logger.info('Product added to cart successfully', { productId });
-      // Handle success (toast notification, etc.)
-    } catch (error) {
-      logger.error('Failed to add product to cart', { productId, error });
-      // Handle error
-    } finally {
-      setIsAdding(false);
-    }
-  };
-
-  return (
-    <Button 
-      onClick={handleAddToCart}
-      disabled={isAdding}
-      className={cn('w-full mt-4', className)}
-    >
-      {isAdding ? 'Adding...' : 'Add to Cart'}
-    </Button>
-  );
-}
-```
-
-#### API Routes
-```typescript
-// app/api/products/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { logger } from '@repo/utils/logger';
-
-export async function GET(request: NextRequest) {
-  try {
-    logger.info('Fetching products');
-    
-    // Simulate database call
-    const products = await getProductsFromDatabase();
-    
-    logger.info('Products fetched successfully', { count: products.length });
-    
-    return NextResponse.json(products);
-  } catch (error) {
-    logger.error('Failed to fetch products', { error });
-    
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    logger.info('Creating new product', { body });
-    
-    // Validate input
-    if (!body.name || !body.price) {
-      return NextResponse.json(
-        { error: 'Name and price are required' },
-        { status: 400 }
-      );
-    }
-    
-    const product = await createProduct(body);
-    logger.info('Product created successfully', { id: product.id });
-    
-    return NextResponse.json(product, { status: 201 });
-  } catch (error) {
-    logger.error('Failed to create product', { error });
-    
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
-  }
-}
-```
-
-#### Layout Components
-```typescript
-// app/layout.tsx
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import '@/app/globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: 'Storefront - E-commerce Solution',
-  description: 'Modern e-commerce storefront built with Next.js',
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Header />
-        <main className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
-      </body>
-    </html>
-  );
-}
-```
-
-## Development Guidelines
-
-### Server vs Client Components
-- **Default to Server Components** for better performance
-- **Use Client Components** only when you need:
-  - Event handlers (onClick, onChange, etc.)
-  - Browser-only APIs
-  - React hooks (useState, useEffect, etc.)
-- **Mark Client Components** explicitly with `'use client'`
-
-### Data Fetching Patterns
-```typescript
-// Server Component - direct data fetching
-async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await fetch(`/api/products/${params.id}`);
-  return <ProductDetail product={product} />;
-}
-
-// Client Component - use SWR or React Query for client-side fetching
-'use client';
-import useSWR from 'swr';
-
-function ClientProductList() {
-  const { data: products, error, isLoading } = useSWR('/api/products');
-  
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage />;
-  
-  return <ProductGrid products={products} />;
-}
-```
-
-### State Management
-- **Server State**: Use Server Components and API routes
-- **Client State**: React hooks for component-level state
-- **Global State**: Context API or state management library
-- **URL State**: Next.js searchParams and routing
-
-### Performance Optimization
-- Leverage Next.js automatic optimizations
-- Use Image component for optimized images
-- Implement proper loading states
-- Use Suspense boundaries for progressive loading
-- Optimize bundle size with dynamic imports
-
-## E-commerce Specific Patterns
-
-### Shopping Cart Implementation
-```typescript
-// lib/cart-context.tsx
-'use client';
-
-import { createContext, useContext, useReducer } from 'react';
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface CartState {
-  items: CartItem[];
-  total: number;
-}
-
-type CartAction = 
-  | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: string }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } };
-
-const CartContext = createContext<{
-  state: CartState;
-  dispatch: React.Dispatch<CartAction>;
-} | null>(null);
-
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
-  
-  return (
-    <CartContext.Provider value={{ state, dispatch }}>
-      {children}
-    </CartContext.Provider>
+      {/* Streamed content */}
+      <Suspense fallback={<StatsSkeleton />}>
+        <StatsLoader />
+      </Suspense>
+    </main>
   );
 }
 
-export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within CartProvider');
-  }
-  return context;
+async function StatsLoader() {
+  const stats = await fetchStats();
+  return <Stats data={stats} />;
 }
 ```
 
-### SEO and Metadata
-```typescript
-// app/products/[id]/page.tsx
-import type { Metadata } from 'next';
+## PWA Support
 
-export async function generateMetadata(
-  { params }: { params: { id: string } }
-): Promise<Metadata> {
-  const product = await getProduct(params.id);
-  
-  return {
-    title: `${product.name} | Storefront`,
-    description: product.description,
-    openGraph: {
-      title: product.name,
-      description: product.description,
-      images: [product.image],
-    },
-  };
-}
-```
+The app is configured as a Progressive Web App:
+- `manifest.json` - App metadata and icons
+- `sw.js` - Service worker for offline support
+- `appleWebApp` metadata in layout
 
 ## Integration with Monorepo
 
 ### Shared Dependencies
-- **@repo/ui**: Use for consistent UI components
-- **@repo/utils**: cn() for styling, logger for monitoring
+- **@repo/ui/atoms** - Basic UI components
+- **@repo/ui/molecules** - Composed components
+- **@repo/monitabits-kubb** - API client (server + hooks)
+- **@repo/utils** - Shared utilities
 
-### API Integration
-- Communicates with the API app (port 3003) for backend functionality
-- Use proper error handling and logging
-- Implement proper loading and error states
+### API Communication
+- **Server-side**: Uses `@repo/monitabits-kubb/server` functions
+- **Client-side**: Uses `@repo/monitabits-kubb/hooks` SWR hooks
+- **API base URL**: Configured via `NEXT_PUBLIC_API_URL` environment variable
 
 ## Testing Patterns
 
 ```typescript
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'bun:test';
-import ProductCard from './product-card';
+import { StatusCard } from '@repo/ui/molecules';
 
-describe('ProductCard', () => {
-  const mockProduct = {
-    id: '1',
-    name: 'Test Product',
-    price: 29.99,
-    image: '/test-image.jpg'
-  };
-
-  it('renders product information correctly', () => {
-    render(<ProductCard product={mockProduct} />);
-    
-    expect(screen.getByText('Test Product')).toBeInTheDocument();
-    expect(screen.getByText('$29.99')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /add to cart/i })).toBeInTheDocument();
+describe('StatusCard', () => {
+  it('renders locked state correctly', () => {
+    render(<StatusCard status="locked">Locked content</StatusCard>);
+    expect(screen.getByText('Locked content')).toBeInTheDocument();
   });
 });
 ```
 
-When working with this application, leverage Next.js App Router features, maintain proper separation between Server and Client Components, and focus on e-commerce functionality while using shared monorepo resources.
+When working with this application, follow the Server Components first approach - fetch data on the server, pass to client components for interactivity. Use the generated API client appropriately: server functions for Server Components, SWR hooks for Client Components.

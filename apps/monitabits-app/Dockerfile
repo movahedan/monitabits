@@ -38,6 +38,7 @@ COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages
 COPY --from=build --chown=runner-user:runner-group --chmod=${OWNER_MODE} /app/apps/monitabits-app/.next ./apps/monitabits-app/.next
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/monitabits-app/public ./apps/monitabits-app/public
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/monitabits-app/next.config.ts ./apps/monitabits-app/next.config.ts
+COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages/monitabits-kubb ./packages/monitabits-kubb
 
 USER runner-user
 CMD ["bun", "run", "start", "--filter=monitabits-app"]
