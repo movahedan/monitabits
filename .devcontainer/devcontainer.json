@@ -92,11 +92,12 @@
 				"conventionalCommits.scopes": [
 					"root",
 					"monitabits-api",
+					"monitabits-swagger",
 					"monitabits-app",
 					"@repo/ui",
 					"@repo/utils",
-					"@repo/schema",
 					"@repo/typescript-config",
+					"@repo/monitabits-kubb",
 					"@repo/test-preset"
 				],
 				"typescript.preferences.useAliasesForRenames": false,

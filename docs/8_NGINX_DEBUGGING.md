@@ -523,7 +523,6 @@ docker-compose exec admin nginx -g "daemon off;" &
 - [Docker Guide](./5_DOCKER.md) - Docker setup and configuration
 - [Development Workflow](./3_DEV_FLOWS.md) - Development commands and processes
 - [Setup Flows](./2_SETUP_FLOWS.md) - Environment setup and configuration
-- [Testing Guide](./TESTING.md) - Testing procedures and best practices
 
 ---
 

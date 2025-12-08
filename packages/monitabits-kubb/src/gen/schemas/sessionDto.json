@@ -1,0 +1,14 @@
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"status": { "type": "string", "enum": ["active", "locked", "completed"] },
+		"startTime": { "type": "string", "format": "date-time" },
+		"endTime": { "type": "string", "format": "date-time", "nullable": true },
+		"lockdownMinutes": { "type": "number", "minimum": 1, "maximum": 10080 },
+		"timeRemaining": { "type": "number", "nullable": true },
+		"timeAhead": { "type": "number", "nullable": true }
+	},
+	"required": ["id", "status", "startTime", "endTime", "lockdownMinutes"],
+	"x-readme-ref-name": "SessionDto"
+}

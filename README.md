@@ -149,7 +149,7 @@ curl -fsSL https://bun.com/install | bash
 # powershell -c "irm bun.sh/install.ps1|iex"
 
 # Clone and go! 🏃‍♂️
-git clone https://github.com/movahedan/monobun.git && cd monobun
+git clone https://github.com/movahedan/monitabits.git && cd monitabits
 
 # Open in Dev Container (VS Code)
 # Ctrl+Shift+P → Dev Containers: Reopen in Container
@@ -163,8 +163,8 @@ bun run dev:cleanup && bun run local:cleanup
 bun run local:setup && bun run check:quick && bun run dev
 ```
 
-[![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monobun)
-[![Fork](https://img.shields.io/badge/🍴%20Fork%20%26%20Customize-Make%20It%20Yours-646CFF?style=for-the-badge)](https://github.com/movahedan/monobun/fork)
+[![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monitabits)
+[![Fork](https://img.shields.io/badge/🍴%20Fork%20%26%20Customize-Make%20It%20Yours-646CFF?style=for-the-badge)](https://github.com/movahedan/monitabits/fork)
 
 </div>
 

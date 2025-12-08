@@ -1,11 +1,24 @@
 {
-	"extends": "@repo/typescript-config/base.json",
 	"compilerOptions": {
-		"lib": ["ES2015"],
+		"module": "preserve",
+		"moduleResolution": "bundler",
+		"target": "ES2023",
+		"lib": ["ES2023"],
 		"outDir": "./dist",
-		"baseUrl": ".",
 		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
+		"emitDecoratorMetadata": true,
+		"noEmit": false,
+		"declaration": false,
+		"sourceMap": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"types": ["node", "bun-types"]
 	},
-	"include": [".", "../../packages/logger/src/**/*"]
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

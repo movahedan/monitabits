@@ -16,9 +16,9 @@
 
 ### Technology Stack
 - **Database**: PostgreSQL 15+
-- **ORM**: TypeORM or Prisma (recommended: Prisma for type safety)
-- **Migrations**: Database version control
-- **Backups**: Automated daily backups
+- **ORM**: Prisma (type-safe database access)
+- **Location**: `apps/monitabits-api/prisma/`
+- **Migrations**: `apps/monitabits-api/prisma/migrations/`
 
 ### Entity Relationship Diagram
 

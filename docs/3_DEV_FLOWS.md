@@ -1,6 +1,6 @@
 # 🔧 Development Flows
 
-> **Daily development commands and processes for the Monobun monorepo**
+> **Daily development commands and processes for the Monitabits monorepo**
 
 ## 📋 Table of Contents
 
@@ -15,7 +15,7 @@
 
 ## 🎯 Overview
 
-The Monobun monorepo provides sophisticated development workflows built on:
+The Monitabits monorepo provides sophisticated development workflows built on:
 
 - **🎮 Interactive CLI**: Step-by-step wizards with navigation and validation
 - **🏗️ Entity Architecture**: Modular, reusable components for common operations
@@ -266,7 +266,7 @@ bun test packages/utils/src/
 
 ### **Test Isolation & Mocking**
 
-> **Important**: This project uses function-level mocking to prevent cross-test interference. See [Bun Test Isolation Bug Solution](../planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md) for detailed information about test isolation patterns and best practices.
+> **Important**: This project uses function-level mocking to prevent cross-test interference. See the test isolation patterns in `packages/test-preset` for detailed information about test isolation patterns and best practices.
 
 ```bash
 # Run tests by folder (debugging tool for isolation issues)
@@ -453,7 +453,7 @@ bun test src/entities/packages/packages.test.ts
 bun test src/entities/affected/ src/entities/packages/
 
 # See detailed solution documentation
-# Reference: docs/planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md
+# Reference: See test isolation patterns in packages/test-preset
 ```
 
 #### **Build Failures**
@@ -530,4 +530,4 @@ bun run dev:compose restart service-name
 
 *This enhanced development system provides a robust, automated approach to development workflows with sophisticated CLI interaction and comprehensive CI/CD integration.* 
 
-**Ready to start developing?** Follow this workflow for efficient, quality-focused development in the Monobun monorepo! 🚀 
+**Ready to start developing?** Follow this workflow for efficient, quality-focused development in the Monitabits monorepo! 🚀 

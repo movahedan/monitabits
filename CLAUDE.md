@@ -85,14 +85,15 @@ This is a **Turborepo monorepo** using **Bun** as the package manager and runtim
 - **`packages/`** - Shared packages and libraries
   - `intershell` - Custom CLI framework with entity-driven architecture for monorepo control
   - `ui` - Shared React component library with Storybook (port 3004)
-  - `schema` - OpenAPI schema package with Swagger UI and Kubb code generation (port 3005)
+  - `monitabits-kubb` - Kubb-generated API client (types, hooks, zod schemas from OpenAPI)
   - `utils` - Shared utility functions
   - `typescript-config` - Shared TypeScript configurations
   - `test-preset` - Shared testing configurations and mocks
 
 - **`apps/`** - Applications
   - `monitabits-app` - Next.js frontend application (port 3002)
-  - `monitabits-api` - NestJS backend API (port 3003, currently Express.js, migration pending)
+  - `monitabits-api` - NestJS backend API with Prisma, DTOs, and OpenAPI generation (port 3003)
+  - `monitabits-swagger` - Swagger UI for API documentation (port 3005)
 
 ### Key Technologies
 - **Build System**: Turborepo with Bun package manager
@@ -159,14 +160,14 @@ For detailed information about working with specific packages and applications, 
 
 ### Packages
 - **[packages/ui/CLAUDE.md](packages/ui/CLAUDE.md)** - React component library with Storybook
-- **[packages/schema/CLAUDE.md](packages/schema/CLAUDE.md)** - OpenAPI schema with Swagger UI and Kubb code generation
+- **[packages/monitabits-kubb/CLAUDE.md](packages/monitabits-kubb/CLAUDE.md)** - Kubb-generated API client (types, hooks, zod)
 - **[packages/utils/CLAUDE.md](packages/utils/CLAUDE.md)** - Shared utility functions (cn, logger)
 - **[packages/typescript-config/CLAUDE.md](packages/typescript-config/CLAUDE.md)** - TypeScript configuration presets
 - **[packages/test-preset/CLAUDE.md](packages/test-preset/CLAUDE.md)** - Testing configuration and utilities
 
 ### Applications  
 - **[apps/monitabits-app/CLAUDE.md](apps/monitabits-app/CLAUDE.md)** - Next.js frontend application (port 3002)
-- **[apps/monitabits-api/CLAUDE.md](apps/monitabits-api/CLAUDE.md)** - NestJS backend API (port 3003, currently Express.js)
+- **[apps/monitabits-api/CLAUDE.md](apps/monitabits-api/CLAUDE.md)** - NestJS backend API with Prisma (port 3003)
 
 **When working on a specific package or application, always read its CLAUDE.md file first for detailed guidance, architecture patterns, and development practices specific to that component.**
 

@@ -429,17 +429,17 @@ ui:
 The schema package uses nginx to serve OpenAPI documentation and Swagger UI in production:
 
 ```dockerfile
-# packages/schema/Dockerfile
+# packages/monitabits-schema/Dockerfile
 FROM nginx:alpine AS runner
 ENV NGINX_ENVSUBST_TEMPLATE_DIR=/etc/nginx/templates
 ENV NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx/conf.d
-COPY --from=build /app/packages/schema/nginx.conf /etc/nginx/templates/default.conf.template
-COPY --from=build /app/packages/schema/dist/ /usr/share/nginx/html
+COPY --from=build /app/packages/monitabits-schema/nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=build /app/packages/monitabits-schema/dist/ /usr/share/nginx/html
 ```
 
 **Nginx Configuration**:
 ```nginx
-# packages/schema/nginx.conf
+# packages/monitabits-schema/nginx.conf
 server {
     listen ${PORT};
     server_name _;

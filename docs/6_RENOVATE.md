@@ -319,7 +319,6 @@ renovate validate-config renovate.json
 - **[Configuration Options](https://docs.renovatebot.com/configuration-options/)** - All available settings
 - **[Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/)** - Dashboard management
 - **[Development Workflow](./3_DEV_FLOWS.md)** - Daily development practices
-- **[Quality Checklist](./0_QUALITY_CHECKLIST.md)** - Testing before deployment
 
 ---
 

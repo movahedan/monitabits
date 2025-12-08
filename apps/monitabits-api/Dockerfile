@@ -33,7 +33,13 @@ RUN chown -R runner-user:runner-group /app
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
+COPY --from=build --chown=runner-user:runner-group /app/packages/monitabits-kubb ./packages/monitabits-kubb
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./apps/monitabits-api
+
+COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
+COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma.config.ts ./apps/monitabits-api/prisma.config.ts
+COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/.env ./apps/monitabits-api/.env
+RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
 
 USER runner-user
 CMD ["bun", "run", "./apps/monitabits-api/dist/index.js"]

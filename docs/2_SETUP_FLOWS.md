@@ -1,6 +1,6 @@
 # ⚡ Setup Flows
 
-> **Comprehensive setup workflows for the Monobun monorepo with enhanced automation and interactive CLI**
+> **Comprehensive setup workflows for the Monitabits monorepo with enhanced automation and interactive CLI**
 
 ## 📋 Table of Contents
 
@@ -15,7 +15,7 @@
 
 ## 🎯 Overview
 
-The Monobun monorepo provides sophisticated setup workflows built on:
+The Monitabits monorepo provides sophisticated setup workflows built on:
 
 - **🎮 Interactive CLI**: Step-by-step setup wizards with validation
 - **🏗️ Entity Architecture**: Modular, reusable components for environment setup
@@ -29,8 +29,8 @@ The Monobun monorepo provides sophisticated setup workflows built on:
 
 ```bash
 # Clone repository
-git clone https://github.com/movahedan/monobun.git
-cd monobun
+git clone https://github.com/movahedan/monitabits.git
+cd monitabits
 
 # Open in VS Code DevContainer
 # Ctrl+Shift+P → Dev Containers: Reopen in Container
@@ -49,8 +49,8 @@ bun run dev:check
 
 ```bash
 # Clone repository
-git clone https://github.com/movahedan/monobun.git
-cd monobun
+git clone https://github.com/movahedan/monitabits.git
+cd monitabits
 
 # Setup local environment
 bun run local:setup
@@ -110,8 +110,8 @@ bun --version
 
 ```bash
 # Clone repository
-git clone https://github.com/movahedan/monobun.git
-cd monobun
+git clone https://github.com/movahedan/monitabits.git
+cd monitabits
 
 # Setup local environment
 bun run local:setup
@@ -159,8 +159,8 @@ bun test
 
 ```bash
 # Clone repository
-git clone https://github.com/movahedan/monobun.git
-cd monobun
+git clone https://github.com/movahedan/monitabits.git
+cd monitabits
 
 # Open in VS Code
 code .

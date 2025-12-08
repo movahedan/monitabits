@@ -1,0 +1,6 @@
+{
+	"type": "object",
+	"properties": { "id": { "type": "string", "format": "uuid" }, "text": { "type": "string" } },
+	"required": ["id", "text"],
+	"x-readme-ref-name": "PendingFollowUpQuestionDto"
+}

@@ -5,7 +5,8 @@
 		"./base.json": "./base.json",
 		"./vite.json": "./vite.json",
 		"./nextjs.json": "./nextjs.json",
-		"./react-library.json": "./react-library.json"
+		"./react-library.json": "./react-library.json",
+		"./react-app.json": "./react-app.json"
 	},
 	"peerDependencies": {
 		"typescript": "5.9.3",

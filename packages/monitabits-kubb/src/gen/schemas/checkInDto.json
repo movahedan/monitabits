@@ -1,0 +1,11 @@
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"type": { "type": "string", "enum": ["check_in", "check_out"] },
+		"serverTime": { "type": "string", "format": "date-time" },
+		"createdAt": { "type": "string", "format": "date-time" }
+	},
+	"required": ["id", "type", "serverTime", "createdAt"],
+	"x-readme-ref-name": "CheckInDto"
+}
