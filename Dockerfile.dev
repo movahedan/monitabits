@@ -11,13 +11,40 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 RUN addgroup --system --gid 1001 runner-group && adduser --system --uid 1001 runner-user
+
+# ============================================================
+# LAYER 1: Copy only dependency manifests (rarely change)
+# This layer is cached unless package.json files change
+# ============================================================
+COPY package.json bun.lock turbo.json ./
+
+# Apps package.json files
+COPY apps/monitabits-api/package.json apps/monitabits-api/
+COPY apps/monitabits-app/package.json apps/monitabits-app/
+COPY apps/monitabits-swagger/package.json apps/monitabits-swagger/
+
+# Packages package.json files
+COPY packages/ui/package.json packages/ui/
+COPY packages/utils/package.json packages/utils/
+COPY packages/monitabits-kubb/package.json packages/monitabits-kubb/
+COPY packages/typescript-config/package.json packages/typescript-config/
+COPY packages/test-preset/package.json packages/test-preset/
+
+# ============================================================
+# LAYER 2: Install dependencies (cached if manifests unchanged)
+# ============================================================
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+    bun install --ignore-scripts
+
+# ============================================================
+# LAYER 3: Setup turbo cache directory
+# ============================================================
+RUN mkdir -p .turbo/cache && chmod -R 777 .turbo
+
+# ============================================================
+# LAYER 4: Copy source code (this rebuilds on code changes,
+# but dependency installation above remains cached!)
+# ============================================================
 COPY --chown=runner-user:runner-group . .
 
-RUN --mount=type=cache,target=/root/.bun/install/cache \
-    --mount=type=cache,target=/app/node_modules/.cache \
-    bun install
-RUN --mount=type=cache,target=/app/.turbo \
-    mkdir -p .turbo/cache && \
-    chmod -R 777 .turbo
-    
-CMD ["sleep", "infinity"] 
+CMD ["sleep", "infinity"]

@@ -13,6 +13,8 @@ volumes:
     driver: local
   vscode_cache:
     driver: local
+  postgres_data:
+    driver: local
 
 services:
   # Apps runtime environment - shared container for all applications
@@ -58,7 +60,70 @@ services:
       retries: 3
       start_period: 10s
 
-  # Lightweight app containers that inherit from apps runtime
+  postgres:
+    image: postgres:16-alpine
+    container_name: monitabits-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monitabits}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monitabits}
+      POSTGRES_DB: ${POSTGRES_DB:-monitabits}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - dev-network
+    profiles: ["postgres", "monitabits-api", "all"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-monitabits}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  monitabits-api:
+    extends:
+      service: apps
+    expose:
+      - "3003"
+    ports:
+      - "3003:3003"
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      PORT: "3003"
+      HOST: "0.0.0.0"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-monitabits}:${POSTGRES_PASSWORD:-monitabits}@postgres:5432/${POSTGRES_DB:-monitabits}?schema=public"
+    command: sh -c "cd /app/apps/monitabits-api && bunx --bun prisma generate && cd /app && bun run dev --filter=monitabits-api"
+    profiles: ["monitabits-api", "all"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://monitabits-api:3003/status | grep -q '\"ok\":true'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  monitabits-swagger:
+    extends:
+      service: apps
+    expose:
+      - "3005"
+    ports:
+      - "3005:3005"
+    command: bun run dev --filter=monitabits-swagger
+    profiles: ["monitabits-api", "all"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://monitabits-swagger:3005"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
   monitabits-app:
     extends:
       service: apps
@@ -81,28 +146,6 @@ services:
       retries: 3
       start_period: 30s
 
-  monitabits-api:
-    extends:
-      service: apps
-    expose:
-      - "3003"
-    ports:
-      - "3003:3003"
-    env_file:
-      - path: ./.env
-        required: true
-    environment:
-      PORT: "3003"
-      HOST: "0.0.0.0"
-    command: bun run dev --filter=monitabits-api
-    profiles: ["monitabits-api", "all"]
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://monitabits-api:3003/status | grep -q '\"ok\":true'"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-  
   ui:
     extends:
       service: apps
@@ -120,22 +163,6 @@ services:
     profiles: ["ui", "all"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://ui:3004"]
-
-  schema:
-    extends:
-      service: apps
-    expose:
-      - "3005"
-    ports:
-      - "3005:3005"
-    command: bun run dev --filter=@repo/schema
-    profiles: ["schema", "all"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://schema:3005"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   vscode-service:
     build:

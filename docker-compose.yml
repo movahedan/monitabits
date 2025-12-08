@@ -4,22 +4,42 @@ networks:
   prod-network:
     driver: bridge
 
+volumes:
+  postgres_data:
+    driver: local
+
 services:
-  monitabits-app:
+  postgres:
+    image: postgres:16-alpine
+    container_name: monitabits-postgres-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monitabits}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-monitabits}
+      POSTGRES_DB: ${POSTGRES_DB:-monitabits}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-monitabits}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  monitabits-swagger:
     build:
       context: .
-      dockerfile: apps/monitabits-app/Dockerfile
+      dockerfile: apps/monitabits-swagger/Dockerfile
     ports:
-      - "5002:5002"
+      - "5005:5005"
     networks:
       - prod-network
     environment:
-      - PORT=5002
+      - PORT=5005
       - HOST=0.0.0.0
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://monitabits-api:5003
-    depends_on:
-      - monitabits-api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 30s
@@ -39,6 +59,10 @@ services:
       - PORT=5003
       - HOST=0.0.0.0
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-monitabits}:${POSTGRES_PASSWORD:-monitabits}@postgres:5432/${POSTGRES_DB:-monitabits}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 30s
@@ -46,18 +70,21 @@ services:
       retries: 3
       start_period: 30s
   
-  schema:
+  monitabits-app:
     build:
       context: .
-      dockerfile: packages/schema/Dockerfile
+      dockerfile: apps/monitabits-app/Dockerfile
     ports:
-      - "5005:5005"
+      - "5002:5002"
     networks:
       - prod-network
     environment:
-      - PORT=5005
+      - PORT=5002
       - HOST=0.0.0.0
       - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://monitabits-api:5003
+    depends_on:
+      - monitabits-api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 30s
