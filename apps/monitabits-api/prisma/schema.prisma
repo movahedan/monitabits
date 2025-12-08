@@ -1,0 +1,106 @@
+generator client {
+	provider   = "prisma-client-js"
+	output     = "../../../node_modules/.prisma/client"
+	engineType = "library"
+}
+
+datasource db {
+	provider = "postgresql"
+}
+
+model Device {
+	id        String    @id @default(uuid())
+	createdAt DateTime  @default(now())
+	updatedAt DateTime  @updatedAt
+
+	sessions  Session[]
+	actions   Action[]
+	checkIns  CheckIn[]
+	settings  Settings?
+	followUps FollowUp[]
+
+	@@map("devices")
+}
+
+model Session {
+	id              String   @id @default(uuid())
+	deviceId        String
+	status          String   // "active" | "locked" | "completed"
+	startTime       DateTime
+	endTime         DateTime?
+	lockdownMinutes Int      @default(60)
+	timeRemaining   Int?     // in seconds
+	timeAhead       Int?     // in seconds
+	createdAt       DateTime @default(now())
+	updatedAt       DateTime @updatedAt
+
+	device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+	actions         Action[]
+	checkIns        CheckIn[]
+
+	@@index([deviceId])
+	@@index([deviceId, status])
+	@@map("sessions")
+}
+
+model Action {
+	id                String   @id @default(uuid())
+	deviceId          String
+	sessionId         String?
+	type              String   // "cheat" | "harm"
+	serverTime        DateTime
+	lockdownStarted   Boolean  @default(false)
+	consequences      Json?    // { message?: string, additionalLockdown?: number }
+	createdAt         DateTime @default(now())
+
+	device            Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+	session           Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+	followUps         FollowUp[]
+
+	@@index([deviceId])
+	@@index([sessionId])
+	@@map("actions")
+}
+
+model CheckIn {
+	id         String   @id @default(uuid())
+	deviceId   String
+	sessionId  String?
+	type       String   // "check_in" | "check_out"
+	serverTime DateTime
+	createdAt  DateTime @default(now())
+
+	device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+	session    Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+	@@index([deviceId])
+	@@index([sessionId])
+	@@map("check_ins")
+}
+
+model Settings {
+	id              String   @id @default(uuid())
+	deviceId        String   @unique
+	lockdownMinutes Int      @default(60)
+	updatedAt       DateTime @updatedAt
+
+	device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+	@@map("settings")
+}
+
+model FollowUp {
+	id        String   @id @default(uuid())
+	deviceId  String
+	actionId  String?
+	question  String
+	answer    String
+	harmIds   String[] // Array of action IDs
+	createdAt DateTime @default(now())
+
+	device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+	action    Action?  @relation(fields: [actionId], references: [id], onDelete: SetNull)
+
+	@@index([deviceId])
+	@@map("follow_ups")
+}
