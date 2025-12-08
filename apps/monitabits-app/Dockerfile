@@ -24,9 +24,8 @@ COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
 RUN bun run build --filter=monitabits-app
 
-FROM turbo AS runner
+FROM oven/bun:1.3.3-alpine AS runner
 WORKDIR /app
-RUN mkdir -p .turbo/cache && chmod -R 777 .turbo
 RUN addgroup --system --gid 1001 runner-group && adduser --system --uid 1001 runner-user
 
 ARG MODE=755
@@ -41,4 +40,5 @@ COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/mon
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages/monitabits-kubb ./packages/monitabits-kubb
 
 USER runner-user
-CMD ["bun", "run", "start", "--filter=monitabits-app"]
+WORKDIR /app/apps/monitabits-app
+CMD ["bun", "run", "../../node_modules/.bin/next", "start"]

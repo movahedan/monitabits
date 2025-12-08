@@ -22,6 +22,8 @@ FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
+
+RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
 RUN bun run build --filter=monitabits-api
 
 FROM oven/bun:1.3.3-alpine AS runner
@@ -38,10 +40,10 @@ COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
 COPY --from=build --chown=runner-user:runner-group /app/packages/monitabits-kubb ./packages/monitabits-kubb
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./apps/monitabits-api
-
+# Copy Prisma schema and generated client
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
-COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma.config.ts ./apps/monitabits-api/prisma.config.ts
-RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
+COPY --from=build --chown=runner-user:runner-group /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build --chown=runner-user:runner-group /app/node_modules/@prisma ./node_modules/@prisma
 
 USER runner-user
 CMD ["bun", "run", "./apps/monitabits-api/dist/index.js"]
