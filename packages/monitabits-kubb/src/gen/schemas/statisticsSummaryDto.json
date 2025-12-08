@@ -1,1 +1,23 @@
-{"type":"object","properties":{"totalTimeSaved":{"type":"number"},"currentStreak":{"type":"number"},"longestStreak":{"type":"number"},"totalCheckIns":{"type":"number"},"totalActions":{"type":"number"},"averageTimeBetweenActions":{"type":"number","nullable":true},"lastRelapse":{"type":"string","format":"date-time","nullable":true},"sessionReport":{"type":"object","properties":{"checkInsDuringLockdown":{"type":"number","minimum":0},"timeSpentOnPageDuringLockdown":{"type":"number","minimum":0}},"required":["checkInsDuringLockdown","timeSpentOnPageDuringLockdown"],"x-readme-ref-name":"SessionReportDto"}},"required":["totalTimeSaved","currentStreak","longestStreak","totalCheckIns","totalActions"],"x-readme-ref-name":"StatisticsSummaryDto"}
+{
+	"type": "object",
+	"properties": {
+		"totalTimeSaved": { "type": "number" },
+		"currentStreak": { "type": "number" },
+		"longestStreak": { "type": "number" },
+		"totalCheckIns": { "type": "number" },
+		"totalActions": { "type": "number" },
+		"averageTimeBetweenActions": { "type": "number", "nullable": true },
+		"lastRelapse": { "type": "string", "format": "date-time", "nullable": true },
+		"sessionReport": {
+			"type": "object",
+			"properties": {
+				"checkInsDuringLockdown": { "type": "number", "minimum": 0 },
+				"timeSpentOnPageDuringLockdown": { "type": "number", "minimum": 0 }
+			},
+			"required": ["checkInsDuringLockdown", "timeSpentOnPageDuringLockdown"],
+			"x-readme-ref-name": "SessionReportDto"
+		}
+	},
+	"required": ["totalTimeSaved", "currentStreak", "longestStreak", "totalCheckIns", "totalActions"],
+	"x-readme-ref-name": "StatisticsSummaryDto"
+}

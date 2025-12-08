@@ -1,2 +1,11 @@
-export { settingsControllerGetSettings200Schema, settingsControllerGetSettings400Schema, settingsControllerGetSettingsQueryResponseSchema } from "./settingsControllerGetSettingsSchema";
-export { settingsControllerUpdateSettings200Schema, settingsControllerUpdateSettings400Schema, settingsControllerUpdateSettingsMutationRequestSchema, settingsControllerUpdateSettingsMutationResponseSchema } from "./settingsControllerUpdateSettingsSchema";
+export {
+	settingsControllerGetSettings200Schema,
+	settingsControllerGetSettings400Schema,
+	settingsControllerGetSettingsQueryResponseSchema,
+} from "./settingsControllerGetSettingsSchema";
+export {
+	settingsControllerUpdateSettings200Schema,
+	settingsControllerUpdateSettings400Schema,
+	settingsControllerUpdateSettingsMutationRequestSchema,
+	settingsControllerUpdateSettingsMutationResponseSchema,
+} from "./settingsControllerUpdateSettingsSchema";

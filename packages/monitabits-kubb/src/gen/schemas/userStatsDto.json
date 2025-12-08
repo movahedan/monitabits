@@ -1,1 +1,14 @@
-{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"totalTimeSaved":{"type":"number","description":"Total time saved in seconds"},"currentStreak":{"type":"number","description":"Current consecutive lockdown periods completed"},"lastRelapse":{"type":"string","format":"date-time","nullable":true}},"required":["id","totalTimeSaved","currentStreak","lastRelapse"],"x-readme-ref-name":"UserStatsDto"}
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"totalTimeSaved": { "type": "number", "description": "Total time saved in seconds" },
+		"currentStreak": {
+			"type": "number",
+			"description": "Current consecutive lockdown periods completed"
+		},
+		"lastRelapse": { "type": "string", "format": "date-time", "nullable": true }
+	},
+	"required": ["id", "totalTimeSaved", "currentStreak", "lastRelapse"],
+	"x-readme-ref-name": "UserStatsDto"
+}

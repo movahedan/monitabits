@@ -1,5 +1,3 @@
-import useSWR, { type SWRConfiguration } from "swr";
-
 /**
  * Request configuration type expected by Kubb-generated hooks
  */
@@ -29,38 +27,6 @@ function getApiBaseUrl(): string {
 }
 
 /**
- * Generate a UUID v4
- */
-function generateUUID(): string {
-	if (typeof crypto !== "undefined" && crypto.randomUUID) {
-		return crypto.randomUUID();
-	}
-	// Fallback for older browsers
-	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-		const r = (Math.random() * 16) | 0;
-		const v = c === "x" ? r : (r & 0x3) | 0x8;
-		return v.toString(16);
-	});
-}
-
-/**
- * Get or create device ID from localStorage
- */
-function getOrCreateDeviceId(): string {
-	if (typeof window === "undefined") return "";
-
-	const storageKey = "monitabits_device_id";
-	let deviceId = localStorage.getItem(storageKey);
-
-	if (!deviceId) {
-		deviceId = generateUUID();
-		localStorage.setItem(storageKey, deviceId);
-	}
-
-	return deviceId;
-}
-
-/**
  * Get client time information for headers
  */
 function getClientTimeInfo(): {
@@ -77,23 +43,44 @@ function getClientTimeInfo(): {
 }
 
 /**
- * Custom fetch function with automatic headers
+ * Get device ID from cookie (client-side only).
+ * On server-side, returns empty string - headers must be passed explicitly.
  */
-async function customFetch<TData = unknown>(url: string, options?: RequestInit): Promise<TData> {
+function getDeviceIdFromCookie(): string {
+	if (typeof document === "undefined") return "";
+	const match = document.cookie.match(/monitabits_device_id=([^;]+)/);
+	return match?.[1] ?? "";
+}
+
+/**
+ * Custom fetch function with automatic headers.
+ * - On client-side: Auto-injects device ID from cookies
+ * - On server-side: Device ID must be passed via options.headers
+ */
+export async function customFetch<TData = unknown>(
+	url: string,
+	options?: RequestInit,
+): Promise<TData> {
 	const apiBaseUrl = getApiBaseUrl();
 	const fullUrl = url.startsWith("http") ? url : `${apiBaseUrl}${url}`;
 
-	// Get device ID and time info
-	const deviceId = getOrCreateDeviceId();
+	// Get time info
 	const timeInfo = getClientTimeInfo();
 
 	// Merge headers
 	const headers = new Headers(options?.headers);
 	headers.set("Content-Type", "application/json");
-	headers.set("X-Device-Id", deviceId);
 	headers.set("X-Client-Time", timeInfo.clientTime);
 	headers.set("X-Timezone-Offset", String(timeInfo.timezoneOffset));
 	headers.set("X-Timezone-Name", timeInfo.timezoneName);
+
+	// Auto-inject device ID from cookie on client-side (if not already set)
+	if (!headers.has("X-Device-Id")) {
+		const deviceId = getDeviceIdFromCookie();
+		if (deviceId) {
+			headers.set("X-Device-Id", deviceId);
+		}
+	}
 
 	// Make request
 	const response = await fetch(fullUrl, {
@@ -127,21 +114,6 @@ async function customFetch<TData = unknown>(url: string, options?: RequestInit):
 	return data.data as TData;
 }
 
-/**
- * SWR fetcher using custom fetch
- */
-export const swrFetcher = <TData = unknown>(url: string): Promise<TData> => {
-	return customFetch<TData>(url);
-};
-
-/**
- * HTTP client for Kubb-generated SWR hooks
- * This is the mutator that Kubb's SWR plugin expects
- *
- * The client function signature matches what @kubb/plugin-swr expects:
- * - Accepts a config object with method, url, params, headers, data
- * - Returns a Promise with an object containing the response data
- */
 export const client = async <TData = unknown, _TError = unknown, TRequest = unknown>(config: {
 	method: string;
 	url: string;
@@ -155,11 +127,11 @@ export const client = async <TData = unknown, _TError = unknown, TRequest = unkn
 	let fullUrl = url;
 	if (params) {
 		const searchParams = new URLSearchParams();
-		Object.entries(params).forEach(([key, value]) => {
+		for (const [key, value] of Object.entries(params)) {
 			if (value !== undefined && value !== null) {
 				searchParams.append(key, String(value));
 			}
-		});
+		}
 		const queryString = searchParams.toString();
 		if (queryString) {
 			fullUrl += `?${queryString}`;
@@ -180,28 +152,6 @@ export const client = async <TData = unknown, _TError = unknown, TRequest = unkn
 	const responseData = await customFetch<TData>(fullUrl, options);
 	return { data: responseData };
 };
-
-/**
- * SWR configuration with default options
- */
-export const swrConfig: SWRConfiguration = {
-	fetcher: swrFetcher,
-	revalidateOnFocus: true,
-	revalidateOnReconnect: true,
-	shouldRetryOnError: true,
-	errorRetryCount: 3,
-	errorRetryInterval: 1000,
-};
-
-/**
- * Hook to use SWR with default configuration
- */
-export function useSWRWithConfig<TData = unknown>(key: string | null, config?: SWRConfiguration) {
-	return useSWR<TData>(key, {
-		...swrConfig,
-		...config,
-	});
-}
 
 /**
  * Export default client as fetch for Kubb-generated hooks

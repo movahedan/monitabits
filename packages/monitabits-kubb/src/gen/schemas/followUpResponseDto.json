@@ -1,1 +1,11 @@
-{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"question":{"type":"string"},"answer":{"type":"string"},"createdAt":{"type":"string","format":"date-time"}},"required":["id","question","answer","createdAt"],"x-readme-ref-name":"FollowUpResponseDto"}
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"question": { "type": "string" },
+		"answer": { "type": "string" },
+		"createdAt": { "type": "string", "format": "date-time" }
+	},
+	"required": ["id", "question", "answer", "createdAt"],
+	"x-readme-ref-name": "FollowUpResponseDto"
+}

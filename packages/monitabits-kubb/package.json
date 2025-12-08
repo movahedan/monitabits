@@ -10,16 +10,18 @@
 	"main": "./src/index.ts",
 	"exports": {
 		".": "./src/index.ts",
-		"./mutator": "./src/mutator.ts",
-		"./gen/hooks": "./src/gen/hooks/index.ts",
-		"./gen/types": "./src/gen/types/index.ts",
-		"./gen/zod": "./src/gen/zod/index.ts"
+		"./mutator.client": "./src/mutator.client.ts",
+		"./mutator.server": "./src/mutator.server.ts",
+		"./hooks": "./src/gen/hooks/index.ts",
+		"./server": "./src/gen/server/index.ts",
+		"./types": "./src/gen/types/index.ts",
+		"./zod": "./src/gen/zod/index.ts"
 	},
 	"scripts": {
 		"check": "biome check .",
 		"check:fix": "biome check . --write",
 		"check:types": "tsc --noEmit",
-		"kubb": "kubb"
+		"kubb": "kubb && bun run check:fix"
 	},
 	"dependencies": {
 		"swr": "2.3.7",

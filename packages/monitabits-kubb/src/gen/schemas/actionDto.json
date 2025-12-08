@@ -1,1 +1,16 @@
-{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"type":{"type":"string","enum":["cheat","harm"]},"serverTime":{"type":"string","format":"date-time"},"consequences":{"type":"object","properties":{"message":{"type":"string"},"additionalLockdown":{"type":"number"}},"x-readme-ref-name":"ActionConsequencesDto"},"lockdownStarted":{"type":"boolean"}},"required":["id","type","serverTime"],"x-readme-ref-name":"ActionDto"}
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string", "format": "uuid" },
+		"type": { "type": "string", "enum": ["cheat", "harm"] },
+		"serverTime": { "type": "string", "format": "date-time" },
+		"consequences": {
+			"type": "object",
+			"properties": { "message": { "type": "string" }, "additionalLockdown": { "type": "number" } },
+			"x-readme-ref-name": "ActionConsequencesDto"
+		},
+		"lockdownStarted": { "type": "boolean" }
+	},
+	"required": ["id", "type", "serverTime"],
+	"x-readme-ref-name": "ActionDto"
+}

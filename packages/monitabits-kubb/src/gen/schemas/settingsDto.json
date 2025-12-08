@@ -1,1 +1,9 @@
-{"type":"object","properties":{"lockdownMinutes":{"type":"number","minimum":1,"maximum":10080},"updatedAt":{"type":"string","format":"date-time"}},"required":["lockdownMinutes","updatedAt"],"x-readme-ref-name":"SettingsDto"}
+{
+	"type": "object",
+	"properties": {
+		"lockdownMinutes": { "type": "number", "minimum": 1, "maximum": 10080 },
+		"updatedAt": { "type": "string", "format": "date-time" }
+	},
+	"required": ["lockdownMinutes", "updatedAt"],
+	"x-readme-ref-name": "SettingsDto"
+}

@@ -1,1 +1,5 @@
-{"type":"object","properties":{"message":{"type":"string"},"additionalLockdown":{"type":"number"}},"x-readme-ref-name":"ActionConsequencesDto"}
+{
+	"type": "object",
+	"properties": { "message": { "type": "string" }, "additionalLockdown": { "type": "number" } },
+	"x-readme-ref-name": "ActionConsequencesDto"
+}
