@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { statisticsDetailsResponseDtoSchema } from "../statisticsDetailsResponseDtoSchema";
-import { z } from "zod/v4";
 
 export const statisticsControllerGetDetailsQueryParamsSchema = z.object({
 	endDate: z.iso.date().describe("End date for the report (inclusive)"),

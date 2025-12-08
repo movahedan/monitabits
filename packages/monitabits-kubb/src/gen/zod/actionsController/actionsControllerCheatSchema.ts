@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { actionResponseDtoSchema } from "../actionResponseDtoSchema";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Action logged successfully

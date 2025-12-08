@@ -32,7 +32,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 	async onModuleDestroy(): Promise<void> {
 		try {
 			await this.$disconnect();
-		} catch (error) {
+		} catch (_error) {
 			// Ignore disconnection errors
 		}
 	}

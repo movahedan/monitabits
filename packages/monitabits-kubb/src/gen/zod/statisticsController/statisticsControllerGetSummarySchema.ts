@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { statisticsSummaryDtoSchema } from "../statisticsSummaryDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Statistics summary retrieved successfully

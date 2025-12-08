@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import { timeTableEntryDtoSchema } from "./timeTableEntryDtoSchema";
 import { z } from "zod/v4";
+import { timeTableEntryDtoSchema } from "./timeTableEntryDtoSchema";
 
 export const statisticsDetailsResponseDtoSchema = z.object({
 	get entries() {

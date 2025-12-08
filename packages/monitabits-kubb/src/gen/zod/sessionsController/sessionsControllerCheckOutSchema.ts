@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { checkInResponseDtoSchema } from "../checkInResponseDtoSchema";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Check-out created successfully

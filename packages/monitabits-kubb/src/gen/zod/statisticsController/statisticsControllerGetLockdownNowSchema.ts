@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { lockdownNowResponseDtoSchema } from "../lockdownNowResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Current lockdown status

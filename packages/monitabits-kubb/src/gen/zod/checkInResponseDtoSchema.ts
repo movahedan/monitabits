@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { checkInDtoSchema } from "./checkInDtoSchema";
 import { sessionDtoSchema } from "./sessionDtoSchema";
-import { z } from "zod/v4";
 
 export const checkInResponseDtoSchema = z.object({
 	get checkIn() {

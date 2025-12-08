@@ -1,7 +1,7 @@
 export {
-	statisticsControllerGetDetailsQueryParamsSchema,
 	statisticsControllerGetDetails200Schema,
 	statisticsControllerGetDetails400Schema,
+	statisticsControllerGetDetailsQueryParamsSchema,
 	statisticsControllerGetDetailsQueryResponseSchema,
 } from "./statisticsControllerGetDetailsSchema";
 export {

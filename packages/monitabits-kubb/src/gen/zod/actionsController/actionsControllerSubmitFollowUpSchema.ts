@@ -3,10 +3,10 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { followUpRequestDtoSchema } from "../followUpRequestDtoSchema";
 import { followUpResponseDtoSchema } from "../followUpResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Follow-up answer submitted successfully

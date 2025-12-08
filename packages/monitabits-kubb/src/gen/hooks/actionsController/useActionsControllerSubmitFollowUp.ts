@@ -3,15 +3,15 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
+import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
+	ActionsControllerSubmitFollowUp400,
 	ActionsControllerSubmitFollowUpMutationRequest,
 	ActionsControllerSubmitFollowUpMutationResponse,
-	ActionsControllerSubmitFollowUp400,
 } from "../../types/ActionsControllerSubmitFollowUp";
-import type { SWRMutationConfiguration } from "swr/mutation";
 
 export const actionsControllerSubmitFollowUpMutationKey = () =>
 	[{ url: "/api/actions/follow-up" }] as const;

@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { appResponseDtoSchema } from "../appResponseDtoSchema";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Service is healthy

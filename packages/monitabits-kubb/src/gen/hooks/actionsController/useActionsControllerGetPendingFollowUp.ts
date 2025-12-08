@@ -3,12 +3,12 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
 import useSWR from "swr";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
-	ActionsControllerGetPendingFollowUpQueryResponse,
 	ActionsControllerGetPendingFollowUp400,
+	ActionsControllerGetPendingFollowUpQueryResponse,
 } from "../../types/ActionsControllerGetPendingFollowUp";
 
 export const actionsControllerGetPendingFollowUpQueryKey = () =>

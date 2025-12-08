@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import { appDtoSchema } from "./appDtoSchema";
 import { z } from "zod/v4";
+import { appDtoSchema } from "./appDtoSchema";
 
 export const appResponseDtoSchema = z.object({
 	get data() {

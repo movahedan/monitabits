@@ -3,10 +3,10 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { settingsDtoSchema } from "../settingsDtoSchema";
 import { updateSettingsRequestDtoSchema } from "../updateSettingsRequestDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Settings updated successfully

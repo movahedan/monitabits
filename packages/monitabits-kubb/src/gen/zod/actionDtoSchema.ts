@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import { actionConsequencesDtoSchema } from "./actionConsequencesDtoSchema";
 import { z } from "zod/v4";
+import { actionConsequencesDtoSchema } from "./actionConsequencesDtoSchema";
 
 export const actionDtoSchema = z.object({
 	id: z.uuid(),

@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { errorResponseDtoSchema } from "../errorResponseDtoSchema";
 import { pendingFollowUpResponseDtoSchema } from "../pendingFollowUpResponseDtoSchema";
-import { z } from "zod/v4";
 
 /**
  * @description Follow-up question status

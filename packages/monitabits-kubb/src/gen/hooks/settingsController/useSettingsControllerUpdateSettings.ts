@@ -3,15 +3,15 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
+import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
+	SettingsControllerUpdateSettings400,
 	SettingsControllerUpdateSettingsMutationRequest,
 	SettingsControllerUpdateSettingsMutationResponse,
-	SettingsControllerUpdateSettings400,
 } from "../../types/SettingsControllerUpdateSettings";
-import type { SWRMutationConfiguration } from "swr/mutation";
 
 export const settingsControllerUpdateSettingsMutationKey = () =>
 	[{ url: "/api/settings" }] as const;

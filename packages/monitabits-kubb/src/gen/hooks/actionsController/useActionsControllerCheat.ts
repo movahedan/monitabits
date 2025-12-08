@@ -3,14 +3,14 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
+import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
-	ActionsControllerCheatMutationResponse,
 	ActionsControllerCheat400,
+	ActionsControllerCheatMutationResponse,
 } from "../../types/ActionsControllerCheat";
-import type { SWRMutationConfiguration } from "swr/mutation";
 
 export const actionsControllerCheatMutationKey = () => [{ url: "/api/actions/cheat" }] as const;
 

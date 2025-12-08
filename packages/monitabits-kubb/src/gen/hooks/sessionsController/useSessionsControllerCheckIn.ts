@@ -3,14 +3,14 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
+import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
-	SessionsControllerCheckInMutationResponse,
 	SessionsControllerCheckIn400,
+	SessionsControllerCheckInMutationResponse,
 } from "../../types/SessionsControllerCheckIn";
-import type { SWRMutationConfiguration } from "swr/mutation";
 
 export const sessionsControllerCheckInMutationKey = () =>
 	[{ url: "/api/sessions/check-in" }] as const;

@@ -62,9 +62,9 @@ export {
 } from "./settingsController/settingsControllerUpdateSettingsSchema";
 export { settingsDtoSchema } from "./settingsDtoSchema";
 export {
-	statisticsControllerGetDetailsQueryParamsSchema,
 	statisticsControllerGetDetails200Schema,
 	statisticsControllerGetDetails400Schema,
+	statisticsControllerGetDetailsQueryParamsSchema,
 	statisticsControllerGetDetailsQueryResponseSchema,
 } from "./statisticsController/statisticsControllerGetDetailsSchema";
 export {

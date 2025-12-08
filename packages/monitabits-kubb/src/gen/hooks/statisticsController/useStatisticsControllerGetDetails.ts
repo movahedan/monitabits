@@ -3,13 +3,13 @@
  * Do not edit manually.
  */
 
-import fetch from "../../../mutator";
 import useSWR from "swr";
 import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
+import fetch from "../../../mutator";
 import type {
-	StatisticsControllerGetDetailsQueryResponse,
-	StatisticsControllerGetDetailsQueryParams,
 	StatisticsControllerGetDetails400,
+	StatisticsControllerGetDetailsQueryParams,
+	StatisticsControllerGetDetailsQueryResponse,
 } from "../../types/StatisticsControllerGetDetails";
 
 export const statisticsControllerGetDetailsQueryKey = (

@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import { sessionReportDtoSchema } from "./sessionReportDtoSchema";
 import { z } from "zod/v4";
+import { sessionReportDtoSchema } from "./sessionReportDtoSchema";
 
 export const statisticsSummaryDtoSchema = z.object({
 	totalTimeSaved: z.number(),

@@ -3,9 +3,9 @@
  * Do not edit manually.
  */
 
+import { z } from "zod/v4";
 import { actionDtoSchema } from "./actionDtoSchema";
 import { sessionDtoSchema } from "./sessionDtoSchema";
-import { z } from "zod/v4";
 
 export const actionResponseDtoSchema = z.object({
 	get action() {

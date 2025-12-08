@@ -3,8 +3,8 @@
  * Do not edit manually.
  */
 
-import { pendingFollowUpQuestionDtoSchema } from "./pendingFollowUpQuestionDtoSchema";
 import { z } from "zod/v4";
+import { pendingFollowUpQuestionDtoSchema } from "./pendingFollowUpQuestionDtoSchema";
 
 export const pendingFollowUpResponseDtoSchema = z.object({
 	hasPending: z.boolean(),
