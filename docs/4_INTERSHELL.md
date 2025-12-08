@@ -16,7 +16,7 @@
 
 ## 🎯 Overview
 
-InterShell is a modern, type-safe CLI framework that provides a clean separation between I/O handling and application logic. It's built from the ground up for Bun with no external dependencies. While the interactive framework is in development, the current entity system provides a robust foundation that powers several key features in the Monobun monorepo including staged file checking, branch linting, version bump automation, and changelog generation.
+InterShell is a modern, type-safe CLI framework that provides a clean separation between I/O handling and application logic. It's built from the ground up for Bun with no external dependencies. While the interactive framework is in development, the current entity system provides a robust foundation that powers several key features in the Monitabits monorepo including staged file checking, branch linting, version bump automation, and changelog generation.
 
 ### ✨ Key Features
 
@@ -415,7 +415,7 @@ class HTMLRenderer implements Renderer {
 
 ### **What's Already Working**
 
-The InterShell package currently provides a robust foundation that powers several key features in the Monobun monorepo:
+The InterShell package currently provides a robust foundation that powers several key features in the Monitabits monorepo:
 
 #### **1. Staged File Checking**
 The entity system enables intelligent staged file validation:
@@ -597,7 +597,7 @@ describe('WrapShell', () => {
 
 ### **Test Isolation & Mocking**
 
-> **Important**: This package uses function-level mocking to prevent cross-test interference. See [Bun Test Isolation Bug Solution](../planning/24_BUN_TEST_ISOLATION_BUG_SOLUTION.md) for detailed information about the test isolation patterns and the complex bug we solved.
+> **Important**: This package uses function-level mocking to prevent cross-test interference. See the test isolation patterns in `packages/test-preset` for detailed information about the test isolation patterns and best practices.
 
 **Key Testing Principles:**
 - ✅ **Function-level mocking** instead of global mock setup
@@ -730,4 +730,4 @@ InterShell is inspired by modern web frameworks and CLI tools, bringing the best
 
 ---
 
-**Built with ❤️ by the Monobun team**
+**Built with ❤️ by the Monitabits team**

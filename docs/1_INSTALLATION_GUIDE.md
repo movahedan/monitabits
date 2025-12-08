@@ -1,6 +1,6 @@
 # 🚀 Installation Guide
 
-> **Complete step-by-step installation guide for Monobun monorepo**
+> **Complete step-by-step installation guide for Monitabits monorepo**
 
 This guide walks you through the complete installation process, from initial setup to development environment configuration and cleanup.
 
@@ -85,10 +85,10 @@ bun --version
 
 ```bash
 # Clone the repository
-git clone https://github.com/movahedan/monobun.git
+git clone https://github.com/movahedan/monitabits.git
 
 # Navigate to the project directory
-cd monobun
+cd monitabits
 
 # Verify the clone was successful
 ls -la
@@ -118,7 +118,7 @@ code .
 **Alternative Method:**
 - Open VS Code manually
 - Go to `File` → `Open Folder`
-- Select the `monobun` directory
+- Select the `monitabits` directory
 
 ### **1.3 Verify Bun Installation**
 
@@ -393,7 +393,7 @@ bun run dev:health
 Name                  Command               State           Ports
 monitabits-app      bun run dev          Up              0.0.0.0:3002->3002/tcp
 monitabits-api      bun run dev          Up              0.0.0.0:3003->3003/tcp
-monobun-api-1       bun run dev          Up              0.0.0.0:3003->3003/tcp
+monitabits-api-1       bun run dev          Up              0.0.0.0:3003->3003/tcp
 ```
 
 ### **5.3 Test Applications**
@@ -591,4 +591,4 @@ After successful installation:
 
 ---
 
-**🎉 Congratulations! You've successfully installed and configured the Monobun monorepo development environment.** 
+**🎉 Congratulations! You've successfully installed and configured the Monitabits monorepo development environment.** 
