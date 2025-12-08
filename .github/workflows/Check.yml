@@ -116,6 +116,12 @@ jobs:
       - name: ✨ - Biome check
         run: bun run check .
 
+      - name: 🗃️ - Generate Prisma client
+        run: |
+          echo "::group::🗃️ Generating Prisma client"
+          bunx prisma generate --schema=apps/monitabits-api/prisma/schema.prisma
+          echo "::endgroup::"
+
       - name: 🏗️ - Build packages
         run: bun run build ${{ needs.get-affected.outputs.affected-packages }}
 
