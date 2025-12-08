@@ -30,6 +30,9 @@ RUN addgroup --system --gid 1001 runner-group
 RUN adduser --system --uid 1001 runner-user
 RUN chown -R runner-user:runner-group /app
 
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils

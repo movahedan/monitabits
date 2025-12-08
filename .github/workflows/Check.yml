@@ -119,7 +119,7 @@ jobs:
       - name: 🗃️ - Generate Prisma client
         run: |
           echo "::group::🗃️ Generating Prisma client"
-          process.env.DATABASE_URL=${{ secrets.DATABASE_URL }} bunx prisma generate --schema=apps/monitabits-api/prisma/schema.prisma
+          bunx prisma generate --schema=apps/monitabits-api/prisma/schema.prisma
           echo "::endgroup::"
 
       - name: 🏗️ - Build packages
@@ -136,6 +136,7 @@ jobs:
     env:
      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+     DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
       - name: 📥 Checkout repository
