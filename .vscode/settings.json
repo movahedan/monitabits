@@ -1,0 +1,79 @@
+{
+	"editor.formatOnSave": true,
+	"biome.lsp.trace.server": "verbose",
+	"biome.requireConfigFile": true,
+	"biome.enabled": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+	"editor.defaultFormatter": "biomejs.biome",
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[jsonc]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[html]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[css]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
+	},
+	"conventionalCommits.scopes": [
+		"root",
+		"monitabits-api",
+		"monitabits-swagger",
+		"monitabits-app",
+		"@repo/ui",
+		"@repo/utils",
+		"@repo/typescript-config",
+		"@repo/monitabits-kubb",
+		"@repo/test-preset"
+	],
+	"typescript.preferences.useAliasesForRenames": false,
+	"typescript.preferences.includePackageJsonAutoImports": "on",
+	"typescript.workspaceSymbols.scope": "allOpenProjects",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"files.watcherExclude": {
+		"**/node_modules.turbo.nextdist.gitnode_modules": true,
+		"**/.turbo": true,
+		"**/.next": true,
+		"**/dist": true
+	},
+	"workbench.colorCustomizations": {
+		"activityBar.activeBackground": "#93e6fc",
+		"activityBar.activeBorder": "#fa45d4",
+		"activityBar.background": "#93e6fc",
+		"activityBar.foreground": "#15202b",
+		"activityBar.inactiveForeground": "#15202b99",
+		"activityBarBadge.background": "#fa45d4",
+		"activityBarBadge.foreground": "#15202b",
+		"statusBar.background": "#61dafb",
+		"statusBar.foreground": "#15202b",
+		"statusBarItem.hoverBackground": "#2fcefa",
+		"titleBar.activeBackground": "#61dafb",
+		"titleBar.activeForeground": "#15202b",
+		"titleBar.inactiveBackground": "#61dafb99",
+		"titleBar.inactiveForeground": "#15202b99",
+		"sash.hoverBorder": "#93e6fc",
+		"statusBarItem.remoteBackground": "#61dafb",
+		"statusBarItem.remoteForeground": "#15202b",
+		"commandCenter.border": "#15202b99"
+	}
+}
