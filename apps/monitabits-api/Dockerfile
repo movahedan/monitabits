@@ -38,7 +38,6 @@ COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./ap
 
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma.config.ts ./apps/monitabits-api/prisma.config.ts
-COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/.env ./apps/monitabits-api/.env
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
 
 USER runner-user
