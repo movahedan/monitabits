@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { actionsControllerCheat } from "../../server/actionsControllerCheat";
 import type {
 	ActionsControllerCheat400,
 	ActionsControllerCheatMutationResponse,
@@ -17,24 +18,6 @@ export const actionsControllerCheatMutationKey = () => [{ url: "/api/actions/che
 export type ActionsControllerCheatMutationKey = ReturnType<
 	typeof actionsControllerCheatMutationKey
 >;
-
-/**
- * @description Logs when the user clicks "I cheated and dishonored myself" while in a locked state.The action is logged but consequences may be delayed.Note: If the user calls the harm endpoint while cheating, the system detects this automatically.
- * @summary Log "I cheated" action
- * {@link /api/actions/cheat}
- */
-export async function actionsControllerCheat(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		ActionsControllerCheatMutationResponse,
-		ResponseErrorConfig<ActionsControllerCheat400>,
-		unknown
-	>({ method: "POST", url: "/api/actions/cheat", ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Logs when the user clicks "I cheated and dishonored myself" while in a locked state.The action is logged but consequences may be delayed.Note: If the user calls the harm endpoint while cheating, the system detects this automatically.

@@ -8,3 +8,8 @@ export {
 	sessionsControllerCheckOut400Schema,
 	sessionsControllerCheckOutMutationResponseSchema,
 } from "./sessionsControllerCheckOutSchema";
+export {
+	sessionsControllerGetCurrentSession200Schema,
+	sessionsControllerGetCurrentSession400Schema,
+	sessionsControllerGetCurrentSessionQueryResponseSchema,
+} from "./sessionsControllerGetCurrentSessionSchema";

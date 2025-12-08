@@ -10,14 +10,21 @@
 		"start": "next start"
 	},
 	"dependencies": {
-		"@repo/utils": "workspace:*",
+		"@repo/monitabits-kubb": "workspace:*",
 		"@repo/ui": "workspace:*",
-		"next": "15.4.7",
+		"@repo/utils": "workspace:*",
+		"@tailwindcss/postcss": "4.1.17",
+		"autoprefixer": "10.4.22",
+		"next": "16.0.7",
+		"postcss": "8.5.6",
 		"react": "19.1.1",
-		"react-dom": "19.1.1"
+		"react-dom": "19.1.1",
+		"swr": "2.3.7",
+		"tailwindcss": "4.1.17"
 	},
 	"devDependencies": {
 		"@repo/typescript-config": "workspace:*",
+		"@types/node": "24.10.1",
 		"@types/react": "19.1.17",
 		"@types/react-dom": "19.1.11"
 	}

@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { actionsControllerSubmitFollowUp } from "../../server/actionsControllerSubmitFollowUp";
 import type {
 	ActionsControllerSubmitFollowUp400,
 	ActionsControllerSubmitFollowUpMutationRequest,
@@ -19,29 +20,6 @@ export const actionsControllerSubmitFollowUpMutationKey = () =>
 export type ActionsControllerSubmitFollowUpMutationKey = ReturnType<
 	typeof actionsControllerSubmitFollowUpMutationKey
 >;
-
-/**
- * @description Submits an answer to a follow-up question related to harm actions.The request can include an array of harm action IDs that this follow-up relates to.
- * @summary Submit follow-up answer
- * {@link /api/actions/follow-up}
- */
-export async function actionsControllerSubmitFollowUp(
-	data: ActionsControllerSubmitFollowUpMutationRequest,
-	config: Partial<RequestConfig<ActionsControllerSubmitFollowUpMutationRequest>> & {
-		client?: typeof fetch;
-	} = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const requestData = data;
-
-	const res = await request<
-		ActionsControllerSubmitFollowUpMutationResponse,
-		ResponseErrorConfig<ActionsControllerSubmitFollowUp400>,
-		ActionsControllerSubmitFollowUpMutationRequest
-	>({ method: "POST", url: "/api/actions/follow-up", data: requestData, ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Submits an answer to a follow-up question related to harm actions.The request can include an array of harm action IDs that this follow-up relates to.

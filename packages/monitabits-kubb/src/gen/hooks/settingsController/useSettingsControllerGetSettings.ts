@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { settingsControllerGetSettings } from "../../server/settingsControllerGetSettings";
 import type {
 	SettingsControllerGetSettings400,
 	SettingsControllerGetSettingsQueryResponse,
@@ -16,24 +17,6 @@ export const settingsControllerGetSettingsQueryKey = () => [{ url: "/api/setting
 export type SettingsControllerGetSettingsQueryKey = ReturnType<
 	typeof settingsControllerGetSettingsQueryKey
 >;
-
-/**
- * @description Returns the current user settings, primarily the lockdown period.
- * @summary Get user settings
- * {@link /api/settings}
- */
-export async function settingsControllerGetSettings(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		SettingsControllerGetSettingsQueryResponse,
-		ResponseErrorConfig<SettingsControllerGetSettings400>,
-		unknown
-	>({ method: "GET", url: "/api/settings", ...requestConfig });
-	return res.data;
-}
 
 export function settingsControllerGetSettingsQueryOptions(
 	config: Partial<RequestConfig> & { client?: typeof fetch } = {},

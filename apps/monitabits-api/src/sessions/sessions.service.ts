@@ -3,13 +3,85 @@ import { PrismaService } from "../common/services/prisma.service";
 import {
 	type CheckIn,
 	type CheckInResponse,
+	type CurrentSessionResponse,
 	type Session,
 	sessionStatusEnum,
+	type UserStats,
 } from "./session.model";
 
 @Injectable()
 export class SessionsService {
 	constructor(private readonly prisma: PrismaService) {}
+
+	async getCurrentSession(deviceId: string): Promise<CurrentSessionResponse> {
+		const now = new Date();
+
+		// Ensure device exists
+		await this.prisma.device.upsert({
+			where: { id: deviceId },
+			update: {},
+			create: { id: deviceId },
+		});
+
+		// Get current active or locked session
+		const currentSession = await this.prisma.session.findFirst({
+			where: {
+				deviceId,
+				status: { in: [sessionStatusEnum.active, sessionStatusEnum.locked] },
+			},
+			orderBy: { startTime: "desc" },
+		});
+
+		let session: Session | null = null;
+		if (currentSession) {
+			const updatedSession = await this.updateSessionStatus(currentSession, now);
+			session = this.mapSessionToResponse(updatedSession);
+		}
+
+		// Get user stats
+		const user = await this.getUserStats(deviceId);
+
+		return { session, user };
+	}
+
+	private async getUserStats(deviceId: string): Promise<UserStats> {
+		const now = new Date();
+
+		// Get completed sessions for stats
+		const completedSessions = await this.prisma.session.findMany({
+			where: { deviceId, status: sessionStatusEnum.completed },
+			orderBy: { startTime: "desc" },
+		});
+
+		// Calculate total time saved
+		const totalTimeSaved = completedSessions.reduce(
+			(sum, session) => sum + session.lockdownMinutes * 60,
+			0,
+		);
+
+		// Calculate current streak
+		let currentStreak = 0;
+		for (const session of completedSessions) {
+			if (session.endTime && session.endTime <= now) {
+				currentStreak++;
+			} else {
+				break;
+			}
+		}
+
+		// Get last relapse (last harm action)
+		const lastHarmAction = await this.prisma.action.findFirst({
+			where: { deviceId, type: "harm" },
+			orderBy: { serverTime: "desc" },
+		});
+
+		return {
+			id: deviceId,
+			totalTimeSaved,
+			currentStreak,
+			lastRelapse: lastHarmAction?.serverTime.toISOString() ?? null,
+		};
+	}
 
 	async createCheckIn(
 		deviceId: string,

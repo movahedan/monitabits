@@ -30,6 +30,9 @@ RUN addgroup --system --gid 1001 runner-group
 RUN adduser --system --uid 1001 runner-user
 RUN chown -R runner-user:runner-group /app
 
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
 COPY --from=installer --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
@@ -38,7 +41,6 @@ COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./ap
 
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma.config.ts ./apps/monitabits-api/prisma.config.ts
-COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/.env ./apps/monitabits-api/.env
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
 
 USER runner-user

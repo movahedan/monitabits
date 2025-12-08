@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { statisticsControllerGetSummary } from "../../server/statisticsControllerGetSummary";
 import type {
 	StatisticsControllerGetSummary400,
 	StatisticsControllerGetSummaryQueryResponse,
@@ -17,24 +18,6 @@ export const statisticsControllerGetSummaryQueryKey = () =>
 export type StatisticsControllerGetSummaryQueryKey = ReturnType<
 	typeof statisticsControllerGetSummaryQueryKey
 >;
-
-/**
- * @description Returns comprehensive user statistics including time saved, streaks, activity metrics,and session report data (check-ins during lockdown, time spent on page during lockdown, etc.).Fewer check-ins and less time spent on page during lockdown are better indicators.
- * @summary Get comprehensive statistics summary
- * {@link /api/stats/summary}
- */
-export async function statisticsControllerGetSummary(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		StatisticsControllerGetSummaryQueryResponse,
-		ResponseErrorConfig<StatisticsControllerGetSummary400>,
-		unknown
-	>({ method: "GET", url: "/api/stats/summary", ...requestConfig });
-	return res.data;
-}
 
 export function statisticsControllerGetSummaryQueryOptions(
 	config: Partial<RequestConfig> & { client?: typeof fetch } = {},

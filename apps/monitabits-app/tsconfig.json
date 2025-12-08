@@ -4,8 +4,8 @@
 		"outDir": "./dist",
 		"baseUrl": ".",
 		"paths": {
-			"@repo/ui": ["../../packages/ui/dist"],
-			"@repo/ui/*": ["../../packages/ui/dist/*"]
+			"@repo/ui": ["../../packages/ui/src"],
+			"@repo/ui/*": ["../../packages/ui/src/*"]
 		}
 	},
 	"include": [
@@ -15,7 +15,8 @@
 		"./.next/types/**/*.ts",
 		".next/types/**/*.ts",
 		"../../packages/logger/src/**/*",
-		"../../packages/ui/src/**/*"
+		"../../packages/ui/src/**/*",
+		"../../packages/monitabits-kubb/src/**/*"
 	],
 	"exclude": [
 		"../../packages/ui/src/**/*.test.ts",

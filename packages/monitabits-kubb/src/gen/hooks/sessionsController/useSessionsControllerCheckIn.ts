@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { sessionsControllerCheckIn } from "../../server/sessionsControllerCheckIn";
 import type {
 	SessionsControllerCheckIn400,
 	SessionsControllerCheckInMutationResponse,
@@ -18,24 +19,6 @@ export const sessionsControllerCheckInMutationKey = () =>
 export type SessionsControllerCheckInMutationKey = ReturnType<
 	typeof sessionsControllerCheckInMutationKey
 >;
-
-/**
- * @description Creates a check-in record when the app is opened or synced.This is used for auto-save functionality and activity tracking.The server handles timezone calculations internally.
- * @summary Create a check-in
- * {@link /api/sessions/check-in}
- */
-export async function sessionsControllerCheckIn(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		SessionsControllerCheckInMutationResponse,
-		ResponseErrorConfig<SessionsControllerCheckIn400>,
-		unknown
-	>({ method: "POST", url: "/api/sessions/check-in", ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Creates a check-in record when the app is opened or synced.This is used for auto-save functionality and activity tracking.The server handles timezone calculations internally.

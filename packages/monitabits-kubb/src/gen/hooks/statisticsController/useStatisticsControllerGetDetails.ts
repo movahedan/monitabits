@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { statisticsControllerGetDetails } from "../../server/statisticsControllerGetDetails";
 import type {
 	StatisticsControllerGetDetails400,
 	StatisticsControllerGetDetailsQueryParams,
@@ -19,25 +20,6 @@ export const statisticsControllerGetDetailsQueryKey = (
 export type StatisticsControllerGetDetailsQueryKey = ReturnType<
 	typeof statisticsControllerGetDetailsQueryKey
 >;
-
-/**
- * @description Returns a detailed time table report for a specified date range.Each entry includes session status, check-ins, actions, and time spent on page.
- * @summary Get detailed time table report
- * {@link /api/stats/details}
- */
-export async function statisticsControllerGetDetails(
-	params: StatisticsControllerGetDetailsQueryParams,
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		StatisticsControllerGetDetailsQueryResponse,
-		ResponseErrorConfig<StatisticsControllerGetDetails400>,
-		unknown
-	>({ method: "GET", url: "/api/stats/details", params, ...requestConfig });
-	return res.data;
-}
 
 export function statisticsControllerGetDetailsQueryOptions(
 	params: StatisticsControllerGetDetailsQueryParams,

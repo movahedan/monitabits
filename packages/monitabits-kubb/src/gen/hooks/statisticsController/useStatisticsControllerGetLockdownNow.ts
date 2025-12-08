@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { statisticsControllerGetLockdownNow } from "../../server/statisticsControllerGetLockdownNow";
 import type {
 	StatisticsControllerGetLockdownNow400,
 	StatisticsControllerGetLockdownNowQueryResponse,
@@ -17,24 +18,6 @@ export const statisticsControllerGetLockdownNowQueryKey = () =>
 export type StatisticsControllerGetLockdownNowQueryKey = ReturnType<
 	typeof statisticsControllerGetLockdownNowQueryKey
 >;
-
-/**
- * @description Returns the current lockdown status including whether the user is lockedand how much time remains in the lockdown period.
- * @summary Get current lockdown status
- * {@link /api/stats/now}
- */
-export async function statisticsControllerGetLockdownNow(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		StatisticsControllerGetLockdownNowQueryResponse,
-		ResponseErrorConfig<StatisticsControllerGetLockdownNow400>,
-		unknown
-	>({ method: "GET", url: "/api/stats/now", ...requestConfig });
-	return res.data;
-}
 
 export function statisticsControllerGetLockdownNowQueryOptions(
 	config: Partial<RequestConfig> & { client?: typeof fetch } = {},

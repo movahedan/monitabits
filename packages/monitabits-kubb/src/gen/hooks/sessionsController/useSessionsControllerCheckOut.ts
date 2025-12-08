@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { sessionsControllerCheckOut } from "../../server/sessionsControllerCheckOut";
 import type {
 	SessionsControllerCheckOut400,
 	SessionsControllerCheckOutMutationResponse,
@@ -18,24 +19,6 @@ export const sessionsControllerCheckOutMutationKey = () =>
 export type SessionsControllerCheckOutMutationKey = ReturnType<
 	typeof sessionsControllerCheckOutMutationKey
 >;
-
-/**
- * @description Creates a check-out record when the app is closed or backgrounded.This is used for tracking session duration and activity patterns.The server handles timezone calculations internally.
- * @summary Create a check-out
- * {@link /api/sessions/check-out}
- */
-export async function sessionsControllerCheckOut(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		SessionsControllerCheckOutMutationResponse,
-		ResponseErrorConfig<SessionsControllerCheckOut400>,
-		unknown
-	>({ method: "POST", url: "/api/sessions/check-out", ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Creates a check-out record when the app is closed or backgrounded.This is used for tracking session duration and activity patterns.The server handles timezone calculations internally.

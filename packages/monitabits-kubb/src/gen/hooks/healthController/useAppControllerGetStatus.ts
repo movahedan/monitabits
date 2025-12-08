@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { appControllerGetStatus } from "../../server/appControllerGetStatus";
 import type {
 	AppControllerGetStatus500,
 	AppControllerGetStatusQueryResponse,
@@ -14,23 +15,6 @@ import type {
 export const appControllerGetStatusQueryKey = () => [{ url: "/api/status" }] as const;
 
 export type AppControllerGetStatusQueryKey = ReturnType<typeof appControllerGetStatusQueryKey>;
-
-/**
- * @summary Health check endpoint
- * {@link /api/status}
- */
-export async function appControllerGetStatus(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		AppControllerGetStatusQueryResponse,
-		ResponseErrorConfig<AppControllerGetStatus500>,
-		unknown
-	>({ method: "GET", url: "/api/status", ...requestConfig });
-	return res.data;
-}
 
 export function appControllerGetStatusQueryOptions(
 	config: Partial<RequestConfig> & { client?: typeof fetch } = {},

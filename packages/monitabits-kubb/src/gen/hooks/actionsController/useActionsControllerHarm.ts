@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { actionsControllerHarm } from "../../server/actionsControllerHarm";
 import type {
 	ActionsControllerHarm400,
 	ActionsControllerHarmMutationResponse,
@@ -15,24 +16,6 @@ import type {
 export const actionsControllerHarmMutationKey = () => [{ url: "/api/actions/harm" }] as const;
 
 export type ActionsControllerHarmMutationKey = ReturnType<typeof actionsControllerHarmMutationKey>;
-
-/**
- * @description Logs when the user clicks "I'm choosing to harm myself" while in an active state.This starts a new lockdown period.Note: This is essentially the same as cheating - if you're cheating and call harm endpoint,the system detects this automatically.
- * @summary Log "I'm choosing to harm myself" action
- * {@link /api/actions/harm}
- */
-export async function actionsControllerHarm(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		ActionsControllerHarmMutationResponse,
-		ResponseErrorConfig<ActionsControllerHarm400>,
-		unknown
-	>({ method: "POST", url: "/api/actions/harm", ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Logs when the user clicks "I'm choosing to harm myself" while in an active state.This starts a new lockdown period.Note: This is essentially the same as cheating - if you're cheating and call harm endpoint,the system detects this automatically.

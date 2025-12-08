@@ -26,6 +26,7 @@ export { appDtoSchema } from "./appDtoSchema";
 export { appResponseDtoSchema } from "./appResponseDtoSchema";
 export { checkInDtoSchema } from "./checkInDtoSchema";
 export { checkInResponseDtoSchema } from "./checkInResponseDtoSchema";
+export { currentSessionResponseDtoSchema } from "./currentSessionResponseDtoSchema";
 export { errorResponseDtoSchema } from "./errorResponseDtoSchema";
 export { followUpRequestDtoSchema } from "./followUpRequestDtoSchema";
 export { followUpResponseDtoSchema } from "./followUpResponseDtoSchema";
@@ -49,6 +50,11 @@ export {
 	sessionsControllerCheckOut400Schema,
 	sessionsControllerCheckOutMutationResponseSchema,
 } from "./sessionsController/sessionsControllerCheckOutSchema";
+export {
+	sessionsControllerGetCurrentSession200Schema,
+	sessionsControllerGetCurrentSession400Schema,
+	sessionsControllerGetCurrentSessionQueryResponseSchema,
+} from "./sessionsController/sessionsControllerGetCurrentSessionSchema";
 export {
 	settingsControllerGetSettings200Schema,
 	settingsControllerGetSettings400Schema,
@@ -81,3 +87,4 @@ export { statisticsDetailsResponseDtoSchema } from "./statisticsDetailsResponseD
 export { statisticsSummaryDtoSchema } from "./statisticsSummaryDtoSchema";
 export { timeTableEntryDtoSchema } from "./timeTableEntryDtoSchema";
 export { updateSettingsRequestDtoSchema } from "./updateSettingsRequestDtoSchema";
+export { userStatsDtoSchema } from "./userStatsDtoSchema";

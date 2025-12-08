@@ -4,8 +4,9 @@
  */
 
 import useSWR from "swr";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { actionsControllerGetPendingFollowUp } from "../../server/actionsControllerGetPendingFollowUp";
 import type {
 	ActionsControllerGetPendingFollowUp400,
 	ActionsControllerGetPendingFollowUpQueryResponse,
@@ -17,24 +18,6 @@ export const actionsControllerGetPendingFollowUpQueryKey = () =>
 export type ActionsControllerGetPendingFollowUpQueryKey = ReturnType<
 	typeof actionsControllerGetPendingFollowUpQueryKey
 >;
-
-/**
- * @description Returns a pending follow-up question if one is available.The response includes information about the last lockdown timestamp andhow many cycles the user has been gone.
- * @summary Get pending follow-up question
- * {@link /api/actions/follow-up/pending}
- */
-export async function actionsControllerGetPendingFollowUp(
-	config: Partial<RequestConfig> & { client?: typeof fetch } = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const res = await request<
-		ActionsControllerGetPendingFollowUpQueryResponse,
-		ResponseErrorConfig<ActionsControllerGetPendingFollowUp400>,
-		unknown
-	>({ method: "GET", url: "/api/actions/follow-up/pending", ...requestConfig });
-	return res.data;
-}
 
 export function actionsControllerGetPendingFollowUpQueryOptions(
 	config: Partial<RequestConfig> & { client?: typeof fetch } = {},

@@ -21,6 +21,35 @@ paths:
       summary: Health check endpoint
       tags: 
         - Health
+  /api/sessions/current: 
+    get: 
+      description: "Returns the current active or locked session status along with user statistics.\nIf no active session exists, the session field will be null.\nIncludes user stats like total time saved, current streak, and last relapse."
+      operationId: SessionsController_getCurrentSession
+      parameters: 
+        []
+      responses: 
+        "200": 
+          description: Current session status retrieved successfully
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/CurrentSessionResponseDto"
+        "400": 
+          description: Time validation failed or invalid request
+          content: 
+            application/json: 
+              schema: 
+                $ref: "#/components/schemas/ErrorResponseDto"
+      security: 
+        &security
+        - TimeValidation: 
+            []
+        - DeviceAuth: 
+            []
+      summary: Get current session status
+      tags: 
+        &tags
+        - Sessions
   /api/sessions/check-in: 
     post: 
       description: "Creates a check-in record when the app is opened or synced.\nThis is used for auto-save functionality and activity tracking.\nThe server handles timezone calculations internally."
@@ -41,15 +70,10 @@ paths:
               schema: 
                 $ref: "#/components/schemas/ErrorResponseDto"
       security: 
-        &security
-        - TimeValidation: 
-            []
-        - DeviceAuth: 
-            []
+        *security
       summary: Create a check-in
       tags: 
-        &tags
-        - Sessions
+        *tags
   /api/sessions/check-out: 
     post: 
       description: "Creates a check-out record when the app is closed or backgrounded.\nThis is used for tracking session duration and activity patterns.\nThe server handles timezone calculations internally."
@@ -402,28 +426,6 @@ components:
         - statusCode
         - timestamp
         - path
-    CheckInDto: 
-      type: object
-      properties: 
-        id: 
-          type: string
-          format: uuid
-        type: 
-          type: string
-          enum: 
-            - check_in
-            - check_out
-        serverTime: 
-          type: string
-          format: date-time
-        createdAt: 
-          type: string
-          format: date-time
-      required: 
-        - id
-        - type
-        - serverTime
-        - createdAt
     SessionDto: 
       type: object
       properties: 
@@ -459,6 +461,61 @@ components:
         - startTime
         - endTime
         - lockdownMinutes
+    UserStatsDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        totalTimeSaved: 
+          type: number
+          description: Total time saved in seconds
+        currentStreak: 
+          type: number
+          description: Current consecutive lockdown periods completed
+        lastRelapse: 
+          type: string
+          format: date-time
+          nullable: true
+      required: 
+        - id
+        - totalTimeSaved
+        - currentStreak
+        - lastRelapse
+    CurrentSessionResponseDto: 
+      type: object
+      properties: 
+        session: 
+          nullable: true
+          allOf: 
+            - $ref: "#/components/schemas/SessionDto"
+        user: 
+          $ref: "#/components/schemas/UserStatsDto"
+      required: 
+        - session
+        - user
+    CheckInDto: 
+      type: object
+      properties: 
+        id: 
+          type: string
+          format: uuid
+        type: 
+          type: string
+          enum: 
+            - check_in
+            - check_out
+        serverTime: 
+          type: string
+          format: date-time
+        createdAt: 
+          type: string
+          format: date-time
+      required: 
+        - id
+        - type
+        - serverTime
+        - createdAt
     CheckInResponseDto: 
       type: object
       properties: 

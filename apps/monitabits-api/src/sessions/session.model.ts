@@ -106,3 +106,51 @@ export const CheckInResponseSchema = z.object({
 	checkIn: CheckInSchema,
 	session: SessionSchema,
 });
+
+// User stats for current session response
+export class UserStatsDto {
+	@ApiProperty({ type: String, format: "uuid" })
+	readonly id!: string;
+
+	@ApiProperty({ type: Number, description: "Total time saved in seconds" })
+	readonly totalTimeSaved!: number;
+
+	@ApiProperty({ type: Number, description: "Current consecutive lockdown periods completed" })
+	readonly currentStreak!: number;
+
+	@ApiProperty({ type: String, format: "date-time", nullable: true })
+	readonly lastRelapse!: string | null;
+}
+
+export type UserStats = {
+	readonly id: string;
+	readonly totalTimeSaved: number;
+	readonly currentStreak: number;
+	readonly lastRelapse: string | null;
+};
+
+export const UserStatsSchema = z.object({
+	id: z.string().uuid(),
+	totalTimeSaved: z.number().int().min(0),
+	currentStreak: z.number().int().min(0),
+	lastRelapse: z.string().datetime().nullable(),
+});
+
+// Current session response
+export class CurrentSessionResponseDto {
+	@ApiProperty({ type: () => SessionDto, nullable: true })
+	readonly session!: Session | null;
+
+	@ApiProperty({ type: () => UserStatsDto })
+	readonly user!: UserStats;
+}
+
+export type CurrentSessionResponse = {
+	readonly session: Session | null;
+	readonly user: UserStats;
+};
+
+export const CurrentSessionResponseSchema = z.object({
+	session: SessionSchema.nullable(),
+	user: UserStatsSchema,
+});

@@ -4,11 +4,11 @@ const nextConfig: NextConfig = {
 	typescript: {
 		ignoreBuildErrors: true,
 	},
-	eslint: {
-		ignoreDuringBuilds: true,
-	},
 
-	// Enable hot reload in Docker containers
+	// Turbopack is the default bundler in Next.js 16
+	turbopack: {},
+
+	// Webpack config for Docker development with polling (use with `next dev --webpack`)
 	webpack: (
 		config: { watchOptions: { poll: number; aggregateTimeout: number } },
 		{ dev }: { dev: boolean },

@@ -5,8 +5,9 @@
 
 import type { SWRMutationConfiguration } from "swr/mutation";
 import useSWRMutation from "swr/mutation";
-import type { RequestConfig, ResponseErrorConfig } from "../../../mutator";
-import fetch from "../../../mutator";
+import type fetch from "../../../mutator.client";
+import type { RequestConfig, ResponseErrorConfig } from "../../../mutator.client";
+import { settingsControllerUpdateSettings } from "../../server/settingsControllerUpdateSettings";
 import type {
 	SettingsControllerUpdateSettings400,
 	SettingsControllerUpdateSettingsMutationRequest,
@@ -19,29 +20,6 @@ export const settingsControllerUpdateSettingsMutationKey = () =>
 export type SettingsControllerUpdateSettingsMutationKey = ReturnType<
 	typeof settingsControllerUpdateSettingsMutationKey
 >;
-
-/**
- * @description Updates user settings, primarily the lockdown period in minutes.
- * @summary Update user settings
- * {@link /api/settings}
- */
-export async function settingsControllerUpdateSettings(
-	data: SettingsControllerUpdateSettingsMutationRequest,
-	config: Partial<RequestConfig<SettingsControllerUpdateSettingsMutationRequest>> & {
-		client?: typeof fetch;
-	} = {},
-) {
-	const { client: request = fetch, ...requestConfig } = config;
-
-	const requestData = data;
-
-	const res = await request<
-		SettingsControllerUpdateSettingsMutationResponse,
-		ResponseErrorConfig<SettingsControllerUpdateSettings400>,
-		SettingsControllerUpdateSettingsMutationRequest
-	>({ method: "PUT", url: "/api/settings", data: requestData, ...requestConfig });
-	return res.data;
-}
 
 /**
  * @description Updates user settings, primarily the lockdown period in minutes.

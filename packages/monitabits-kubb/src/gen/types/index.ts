@@ -38,6 +38,7 @@ export type { AppResponseDto } from "./AppResponseDto";
 export type { CheckInDto, CheckInDtoTypeEnumKey } from "./CheckInDto";
 export { checkInDtoTypeEnum } from "./CheckInDto";
 export type { CheckInResponseDto } from "./CheckInResponseDto";
+export type { CurrentSessionResponseDto } from "./CurrentSessionResponseDto";
 export type { ErrorResponseDto } from "./ErrorResponseDto";
 export type { FollowUpRequestDto } from "./FollowUpRequestDto";
 export type { FollowUpResponseDto } from "./FollowUpResponseDto";
@@ -59,6 +60,12 @@ export type {
 	SessionsControllerCheckOutMutation,
 	SessionsControllerCheckOutMutationResponse,
 } from "./SessionsControllerCheckOut";
+export type {
+	SessionsControllerGetCurrentSession200,
+	SessionsControllerGetCurrentSession400,
+	SessionsControllerGetCurrentSessionQuery,
+	SessionsControllerGetCurrentSessionQueryResponse,
+} from "./SessionsControllerGetCurrentSession";
 export type {
 	SettingsControllerGetSettings200,
 	SettingsControllerGetSettings400,
@@ -97,3 +104,4 @@ export type { StatisticsSummaryDto } from "./StatisticsSummaryDto";
 export type { TimeTableEntryDto, TimeTableEntryDtoStatusEnumKey } from "./TimeTableEntryDto";
 export { timeTableEntryDtoStatusEnum } from "./TimeTableEntryDto";
 export type { UpdateSettingsRequestDto } from "./UpdateSettingsRequestDto";
+export type { UserStatsDto } from "./UserStatsDto";
