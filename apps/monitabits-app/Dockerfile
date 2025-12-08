@@ -39,6 +39,8 @@ COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/mon
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/apps/monitabits-app/next.config.ts ./apps/monitabits-app/next.config.ts
 COPY --from=build --chown=runner-user:runner-group --chmod=${MODE} /app/packages/monitabits-kubb ./packages/monitabits-kubb
 
+ENV PATH="/app/node_modules/.bin:$PATH"
+
 USER runner-user
 WORKDIR /app/apps/monitabits-app
-CMD ["bun", "run", "../../node_modules/.bin/next", "start"]
+CMD ["next", "start"]

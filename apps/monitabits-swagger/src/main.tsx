@@ -13,8 +13,8 @@ import localOpenApiSpec from "../../../packages/monitabits-kubb/src/openapi.yaml
 const getOpenApiSpecUrl = (): string => {
 	const apiUrl = import.meta.env.VITE_API_URL;
 	if (apiUrl) {
-		// Production: fetch from API server (NestJS serves JSON at /api-docs-json)
-		return `${apiUrl}/api-docs-json`;
+		// Production: fetch from API server (NestJS serves JSON at /api/docs-json)
+		return `${apiUrl}/docs-json`;
 	}
 	// Development: use local YAML file
 	return localOpenApiSpec;

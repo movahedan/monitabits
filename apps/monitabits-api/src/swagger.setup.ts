@@ -41,7 +41,9 @@ export async function swaggerSetup(app: NestApplication): Promise<OpenAPIObject>
 		extraModels,
 	});
 
-	SwaggerModule.setup("api-docs", app, document, {
+	// Setup at /api/docs so it's under the global /api prefix
+	// JSON will be available at /api/docs-json
+	SwaggerModule.setup("api/docs", app, document, {
 		customSiteTitle: "Monitabits API Documentation",
 	});
 
