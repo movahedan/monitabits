@@ -17,15 +17,13 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
 # Don't ignore scripts - Prisma needs postinstall to set up runtime
-RUN bun install
+# Use --backend=copyfile to copy actual files instead of symlinks (for multi-stage builds)
+RUN bun install --backend=copyfile
 
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
-
-# Install Prisma runtime utils at root level (required for Prisma 7.x with Bun)
-RUN bun add @prisma/client-runtime-utils
 
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
