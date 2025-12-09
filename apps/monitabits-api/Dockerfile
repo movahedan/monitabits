@@ -24,8 +24,8 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
 
-# Install Prisma runtime utils explicitly (required for Prisma 7.x with Bun)
-RUN cd /app/apps/monitabits-api && bun add @prisma/client-runtime-utils
+# Install Prisma runtime utils at root level (required for Prisma 7.x with Bun)
+RUN bun add @prisma/client-runtime-utils
 
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
