@@ -17,8 +17,8 @@ WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
 # Don't ignore scripts - Prisma needs postinstall to set up runtime
-# Use --backend=copyfile to copy actual files instead of symlinks (for multi-stage builds)
-RUN bun install --backend=copyfile
+# Use --linker=isolated for proper dependency isolation in multi-stage Docker builds
+RUN bun install --linker=isolated
 
 FROM turbo AS build
 WORKDIR /app
