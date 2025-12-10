@@ -16,14 +16,17 @@ export type ResponseErrorConfig<TError = unknown> = TError;
 
 /**
  * Get API base URL from environment variables
+ * Ensures the URL always has a protocol (http:// or https://)
  */
 function getApiBaseUrl(): string {
-	if (typeof window === "undefined") {
-		// Server-side: use environment variable or default
-		return process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
-	}
-	// Client-side: use public environment variable
-	return process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+	let baseUrl: string =
+		process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
+	baseUrl = baseUrl.replace(/^https?:\/\//, "");
+
+	const protocol =
+		baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1") ? "http://" : "https://";
+
+	return `${protocol}${baseUrl}`.replace(/\/$/, "");
 }
 
 /**
