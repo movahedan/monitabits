@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from "@nestjs/common";
+import { Controller, Get, HttpCode, HttpStatus, Inject, Post, UseGuards } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiSecurity, ApiTags } from "@nestjs/swagger";
 import { ClientTime } from "../common/decorators/client-time.decorator";
 import { DeviceId } from "../common/decorators/device-id.decorator";
@@ -19,7 +19,14 @@ import { SessionsService } from "./sessions.service";
 @ApiSecurity("DeviceAuth")
 @ApiSecurity("TimeValidation")
 export class SessionsController {
-	constructor(private readonly sessionsService: SessionsService) {}
+	constructor(@Inject(SessionsService) private readonly sessionsService: SessionsService) {
+		// Defensive check: ensure service is injected
+		if (!this.sessionsService) {
+			throw new Error(
+				"SessionsService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	@Get("current")
 	@ApiOperation({
@@ -39,6 +46,9 @@ Includes user stats like total time saved, current streak, and last relapse.`,
 		type: ErrorResponseDto,
 	})
 	async getCurrentSession(@DeviceId() deviceId: string): Promise<CurrentSessionResponse> {
+		if (!this.sessionsService) {
+			throw new Error("SessionsService is undefined at runtime");
+		}
 		return this.sessionsService.getCurrentSession(deviceId);
 	}
 

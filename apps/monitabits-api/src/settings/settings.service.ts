@@ -4,7 +4,13 @@ import type { Settings } from "./settings.model";
 
 @Injectable()
 export class SettingsService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {
+		if (!this.prisma) {
+			throw new Error(
+				"PrismaService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	/**
 	 * Ensure device exists, creating it if necessary

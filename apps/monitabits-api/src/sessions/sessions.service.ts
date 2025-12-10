@@ -11,7 +11,13 @@ import {
 
 @Injectable()
 export class SessionsService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {
+		if (!this.prisma) {
+			throw new Error(
+				"PrismaService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	async getCurrentSession(deviceId: string): Promise<CurrentSessionResponse> {
 		const now = new Date();

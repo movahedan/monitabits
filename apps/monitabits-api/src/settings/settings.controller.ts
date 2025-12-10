@@ -20,7 +20,13 @@ import { SettingsService } from "./settings.service";
 @ApiSecurity("DeviceAuth")
 @ApiSecurity("TimeValidation")
 export class SettingsController {
-	constructor(private readonly settingsService: SettingsService) {}
+	constructor(private readonly settingsService: SettingsService) {
+		if (!this.settingsService) {
+			throw new Error(
+				"SettingsService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	@Get()
 	@ApiOperation({

@@ -23,7 +23,13 @@ import { StatisticsService } from "./statistics.service";
 @ApiSecurity("DeviceAuth")
 @ApiSecurity("TimeValidation")
 export class StatisticsController {
-	constructor(private readonly statisticsService: StatisticsService) {}
+	constructor(private readonly statisticsService: StatisticsService) {
+		if (!this.statisticsService) {
+			throw new Error(
+				"StatisticsService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	@Get("now")
 	@ApiOperation({

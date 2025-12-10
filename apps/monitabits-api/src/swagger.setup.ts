@@ -47,8 +47,15 @@ export async function swaggerSetup(app: NestApplication): Promise<OpenAPIObject>
 		customSiteTitle: "Monitabits API Documentation",
 	});
 
+	// Only generate schema in development mode
+	// Skip in production to avoid file system errors
 	if (process.env.NODE_ENV === "development") {
-		await generateSchema(document);
+		try {
+			await generateSchema(document);
+		} catch (error) {
+			// Log but don't fail startup if schema generation fails
+			console.warn("[swagger] ⚠️ Schema generation skipped:", error);
+		}
 	}
 
 	return document;

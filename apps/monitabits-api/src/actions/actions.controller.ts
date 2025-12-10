@@ -25,7 +25,13 @@ import { ActionsService } from "./actions.service";
 @ApiSecurity("DeviceAuth")
 @ApiSecurity("TimeValidation")
 export class ActionsController {
-	constructor(private readonly actionsService: ActionsService) {}
+	constructor(private readonly actionsService: ActionsService) {
+		if (!this.actionsService) {
+			throw new Error(
+				"ActionsService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	@Post("cheat")
 	@HttpCode(HttpStatus.CREATED)

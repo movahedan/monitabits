@@ -1,3 +1,4 @@
+import { esbuildDecorators } from "@anatine/esbuild-decorators";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
 	platform: "node",
 	// Bundle all workspace packages to include their code and environment variable access
 	noExternal: [/^@repo\//],
+	esbuildPlugins: [esbuildDecorators({ tsconfig: "./tsconfig.json" })],
 	esbuildOptions(options) {
 		options.keepNames = true;
 		options.platform = "node";

@@ -12,7 +12,13 @@ import {
 
 @Injectable()
 export class ActionsService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(private readonly prisma: PrismaService) {
+		if (!this.prisma) {
+			throw new Error(
+				"PrismaService not injected. Check module configuration and bundling settings.",
+			);
+		}
+	}
 
 	async logCheat(deviceId: string, _clientTime: Date): Promise<ActionResponse> {
 		const session = await this.getCurrentSession(deviceId);
