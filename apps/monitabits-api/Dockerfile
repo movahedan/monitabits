@@ -16,17 +16,17 @@ COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/bunfig.toml ./bunfig.toml
 
-ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
-
-RUN DATABASE_URL=${DATABASE_URL} bun install
+RUN bun install
 
 FROM turbo AS build
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=installer /app/ .
 
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 RUN cd /app/apps/monitabits-api && bunx --bun prisma generate
 RUN bun run build --filter=monitabits-api
 
