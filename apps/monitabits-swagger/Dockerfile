@@ -25,7 +25,7 @@ FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
-RUN bun install --ignore-scripts
+RUN bun install
 
 FROM turbo AS build
 WORKDIR /app

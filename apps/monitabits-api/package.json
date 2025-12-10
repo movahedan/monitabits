@@ -5,6 +5,7 @@
 	"description": "Monitabits NestJS API server",
 	"type": "module",
 	"scripts": {
+		"postinstall": "bun run db:generate",
 		"check": "biome check .",
 		"check:fix": "biome check --write .",
 		"check:types": "tsc --noEmit",

@@ -1,5 +1,9 @@
 [install]
 
+# Use hoisted linker for easier dependency management in monorepo
+# Allows leveraging bun's managed dependencies to pin versions easily
+linker = "hoisted"
+
 # whether to install optionalDependencies
 optional = true
 

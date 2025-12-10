@@ -10,13 +10,15 @@ WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./package.json ./bun.lock ./
+COPY ./bunfig.toml ./bunfig.toml
 RUN turbo prune --scope=monitabits-app --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
-RUN bun install --frozen-lockfile --linker=isolated
+COPY --from=pruner /app/bunfig.toml ./bunfig.toml
+RUN bun install
 
 FROM turbo AS build
 WORKDIR /app
@@ -29,7 +31,6 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 runner-group && adduser --system --uid 1001 runner-user
 
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
-# Copy node_modules from build stage (has all dependencies including next)
 COPY --from=build --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/ui ./packages/ui
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils

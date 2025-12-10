@@ -1,24 +1,25 @@
-FROM oven/bun:1.3.3-alpine AS base
+FROM oven/bun:1.3.3-alpine AS turbo
 RUN bun install -g turbo@2.5.8
-
-FROM base AS turbo
-WORKDIR /app
-COPY ./turbo.json ./turbo.json
 
 FROM turbo AS pruner
 WORKDIR /app
 COPY ./apps ./apps
 COPY ./packages ./packages
 COPY ./package.json ./bun.lock ./
+COPY ./bunfig.toml ./bunfig.toml
+COPY ./turbo.json ./turbo.json
 RUN turbo prune --scope=monitabits-api --docker
 
 FROM turbo AS installer
 WORKDIR /app
 COPY --from=pruner /app/out/full/ .
 COPY --from=pruner /app/out/json/ .
-# Don't ignore scripts - Prisma needs postinstall to set up runtime
-# Use --linker=isolated for proper dependency isolation in multi-stage Docker builds
-RUN bun install --linker=isolated
+COPY --from=pruner /app/bunfig.toml ./bunfig.toml
+
+ARG DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV DATABASE_URL=${DATABASE_URL}
+
+RUN DATABASE_URL=${DATABASE_URL} bun install
 
 FROM turbo AS build
 WORKDIR /app
@@ -39,9 +40,9 @@ ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
 COPY --from=pruner --chown=runner-user:runner-group /app/out/json/ .
-# Copy entire node_modules from build stage (includes generated .prisma client and all @prisma runtime deps)
 COPY --from=build --chown=runner-user:runner-group /app/node_modules ./node_modules
 COPY --from=build --chown=runner-user:runner-group /app/packages/utils ./packages/utils
+COPY --from=build --chown=runner-user:runner-group /app/packages/typescript-config ./packages/typescript-config
 COPY --from=build --chown=runner-user:runner-group /app/packages/monitabits-kubb ./packages/monitabits-kubb
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./apps/monitabits-api
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
