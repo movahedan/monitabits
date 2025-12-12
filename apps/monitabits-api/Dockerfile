@@ -47,5 +47,8 @@ COPY --from=build --chown=runner-user:runner-group /app/packages/monitabits-kubb
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api ./apps/monitabits-api
 COPY --from=build --chown=runner-user:runner-group /app/apps/monitabits-api/prisma ./apps/monitabits-api/prisma
 
+COPY --from=pruner --chown=runner-user:runner-group /app/apps/monitabits-api/scripts/docker-entrypoint.ts /app/docker-entrypoint.ts
+RUN chmod +x /app/docker-entrypoint.ts
+
 USER runner-user
-CMD ["bun", "run", "./apps/monitabits-api/dist/index.js"]
+CMD ["bun", "/app/docker-entrypoint.ts"]

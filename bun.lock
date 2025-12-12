@@ -5,7 +5,6 @@
     "": {
       "name": "root",
       "devDependencies": {
-        "@anatine/esbuild-decorators": "0.2.19",
         "@biomejs/biome": "2.2.7",
         "bun-types": "1.3.1",
         "intershell": "0.3.8",
@@ -18,6 +17,7 @@
       "name": "monitabits-api",
       "version": "0.1.0",
       "dependencies": {
+        "@anatine/esbuild-decorators": "0.2.19",
         "@nestjs/common": "11.1.9",
         "@nestjs/core": "11.1.9",
         "@nestjs/platform-express": "11.1.9",

@@ -47,7 +47,7 @@ services:
       - turbo_cache:/app/.turbo:delegated
       - bun_cache:/root/.bun:delegated
       - vscode_cache:/app/.vscode:delegated
-    command: sleep infinity
+    command: bun install && sleep infinity
     # Use init for better signal handling
     init: true
     profiles: ["apps"]
