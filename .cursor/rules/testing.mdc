@@ -1,0 +1,362 @@
+---
+description: Testing Prompt & Bun test standards for writing tests in this monorepo (readable, searchable, modular, minimal LoC)
+alwaysApply: false
+---
+# 🧪 Testing Prompt & Standards
+
+## 📋 Table of Contents
+
+- [🎯 Overview](#-overview)
+- [🧰 Testing Stack in This Repo](#-testing-stack-in-this-repo)
+- [📁 Test File Placement & Naming](#-test-file-placement--naming)
+- [✅ Quality Bar (Non-Negotiables)](#-quality-bar-non-negotiables)
+- [🧱 Test Design Patterns](#-test-design-patterns)
+  - [AAA + early returns](#aaa--early-returns)
+  - [Table-driven tests (map through cases)](#table-driven-tests-map-through-cases)
+  - [Shared test utilities vs inline helpers](#shared-test-utilities-vs-inline-helpers)
+- [🎭 Mocking Strategy](#-mocking-strategy)
+  - [What to mock (and what not to)](#what-to-mock-and-what-not-to)
+  - [Reset/restore rules (test isolation)](#resetrestore-rules-test-isolation)
+- [🧪 Unit vs Integration: Selection Guide](#-unit-vs-integration-selection-guide)
+- [🧪 Copy/Paste: “AI Test Writer” Prompt](#-copypaste-ai-test-writer-prompt)
+- [🧩 Templates](#-templates)
+  - [Unit test template (table-driven)](#unit-test-template-table-driven)
+  - [Mock factory template](#mock-factory-template)
+  - [Integration test template (NestJS module)](#integration-test-template-nestjs-module)
+- [🔍 Test Review Checklist](#-test-review-checklist)
+- [🔗 Related Documentation](#-related-documentation)
+
+## 🎯 Overview
+
+This repo is a **Bun + Turborepo** monorepo with a shared **test preset**. The goal isn’t “more tests” — it’s **tests that protect behavior while staying cheap to read and maintain**.
+
+Your tests must be:
+
+- **Readable**: clear intent, minimal ceremony, stable assertions.
+- **Searchable**: consistent naming so you can grep by module/behavior.
+- **Modular**: helpers and factories live in predictable places.
+- **Extendable**: adding cases shouldn’t require copy/paste.
+- **Minimal LoC**: achieved via **table-driven cases** + **shared utilities**, not by compressing logic into unreadable one-liners.
+
+## 🧰 Testing Stack in This Repo
+
+- **Test runner**: `bun:test` (use `describe`, `it`, `expect`, `mock`, `spyOn`).
+- **Global preset**: preloaded via `bunfig.toml` (`packages/test-preset/...`).
+  - Provides **HappyDOM**, **Testing Library matchers**, and automatic **cleanup + mock reset**.
+- **React tests**: `@testing-library/react` + `@testing-library/jest-dom` matchers.
+- **Backend integration tests**: NestJS supports `@nestjs/testing`.
+
+### Official bun documents for testing:
+
+- https://bun.com/docs/test/configuration
+- https://bun.com/docs/test/runtime-behavior
+- https://bun.com/docs/test/mocks
+- https://bun.com/docs/test/dates-times
+- https://bun.com/docs/test/lifecycle
+- https://bun.com/docs/test/snapshots
+- https://bun.com/docs/test/dom
+
+### Bun API notes (accuracy)
+
+- **Parameterized tests**: Bun supports `test.each(...)` and `describe.each(...)` (not `it.each`). If you prefer `it`, use `cases.forEach(...)` (see template below). See Bun docs: `https://bun.com/docs/test/writing-tests`.
+- **Timeouts**: default timeout is **5000ms** unless overridden; you can pass a per-test timeout as the 3rd argument to `test(...)` or configure via `bunfig.toml`. See Bun docs: `https://bun.com/docs/test/writing-tests`.
+- **Coverage**: this repo enables coverage via `bunfig.toml`. Coverage only reports on files that are actually loaded by tests, and you can also run `bun test --coverage` / `bun test --coverage --coverage-reporter=lcov`. See Bun docs: `https://bun.com/docs/test/code-coverage`.
+- **DOM typing**: if TypeScript complains about `document` in a test file, add `/// <reference lib="dom" />` at the top (or ensure the package tsconfig includes DOM libs). See Bun docs: `https://bun.com/docs/test/dom`.
+
+## 📁 Test File Placement & Naming
+
+Be consistent so tests are easy to find.
+
+- **Unit tests (preferred default)**
+  - Co-locate when it improves discoverability: `src/<area>/<thing>.test.ts`.
+  - Or group for a module: `src/__tests__/<thing>.test.ts`.
+
+- **Integration tests**
+  - Put under `src/__tests__/` and name for the integration boundary:
+    - `server.test.ts`, `sessions.integration.test.ts`, `settings.controller.test.ts`, etc.
+
+- **Naming conventions**
+  - `describe('<package or module> - <unit under test>', ...)`
+  - `it('<observable outcome> when <condition>', ...)`
+  - Prefer **behavioral names**, not implementation names.
+
+## ✅ Quality Bar (Non-Negotiables)
+
+- **Assert observable behavior** (returned values, thrown errors, side effects), not internal details.
+- **One reason to fail per test** (avoid “kitchen sink” tests).
+- **No flaky tests**:
+  - avoid real time, randomness, network, filesystem unless explicitly integration.
+  - if time is involved, inject a clock or mock it.
+- **No cross-test interference**:
+  - tests must pass in isolation and when run as a full suite.
+- **Minimal mocking**:
+  - mock boundaries, not pure logic.
+  - don’t mock what you own unless you’re isolating a hard boundary.
+- **Fast by default**:
+  - heavy integration only where it buys confidence.
+
+## 🧱 Test Design Patterns
+
+### AAA + early returns
+
+Structure each test:
+
+- **Arrange**: inputs, mocks, factories
+- **Act**: call the unit
+- **Assert**: the *one* thing that matters
+
+Use early returns for state-based tests (loading/error states) to keep them short.
+
+### Table-driven tests (map through cases)
+
+If you’re testing several similar scenarios, write **cases** and iterate.
+
+Rules:
+
+- Each case has:
+  - `name`
+  - inputs
+  - expected output OR expected error
+  - optional `setup()` (mock customization)
+- Prefer `test.each(...)` / `describe.each(...)` when it improves readability. Otherwise use `cases.forEach(...)`.
+- Keep case data close to tests unless reused.
+
+### Shared test utilities vs inline helpers
+
+Inline helpers are fine **once**. The moment a helper repeats across files, extract it.
+
+Use this decision tree:
+
+- **Used across many packages/apps** → add to `packages/test-preset`.
+- **Used across one package** → add to that package under:
+  - `src/__tests__/test-utils.ts` or `src/__tests__/__utils__/...`
+- **Only used in a single test file** → keep it in the file.
+
+**Example**: environment-variable helpers, date/time helpers, request builders, and common factories are usually reusable.
+
+## 🎭 Mocking Strategy
+
+### What to mock (and what not to)
+
+Mock **boundaries**:
+
+- network calls
+- database clients
+- filesystem
+- process env / global APIs (sparingly)
+
+Avoid mocking:
+
+- pure functions
+- value objects / schemas (test them directly)
+- your own domain logic (unless isolating a boundary)
+
+Prefer **dependency injection** when possible. If the unit is hard to test without heavy mocking, that’s a design smell — fix the design, not the tests.
+
+### Reset/restore rules (test isolation)
+
+This repo preloads a test setup that already does cleanup and mock reset after each test. Your tests must still follow these rules:
+
+- If you call `spyOn(...)`, ensure it’s restored (prefer `try/finally` when not automatically handled).
+- Do not leave modified globals (`process.env`, `globalThis.fetch`, etc.) behind.
+- Keep mocks **local to the test** unless a whole file shares the same mocked module.
+
+## 🧪 Unit vs Integration: Selection Guide
+
+- **Unit test** when:
+  - the unit is deterministic with inputs/outputs
+  - you can isolate a boundary with a mock
+  - you want fast, precise failure signals
+
+- **Integration test** when:
+  - behavior emerges from wiring (Nest module, interceptors/filters/guards)
+  - contracts between modules matter
+  - you’re validating real serialization/validation
+
+Start with unit tests, then add 1–2 integration tests where it meaningfully reduces risk.
+
+## 🧪 Copy/Paste: “AI Test Writer” Prompt
+
+Use this prompt when you want an AI to generate tests in this repository.
+
+```text
+You are a senior TypeScript test engineer working inside a Bun + Turborepo monorepo.
+
+## Goal
+Write high-quality unit and/or integration tests for the code I provide.
+
+## Repo Constraints (must follow)
+- Use the Bun test runner: import from `bun:test`.
+- Assume tests run with a preloaded preset configured in `bunfig.toml` (HappyDOM + Testing Library matchers + cleanup + mock reset).
+- Prefer readable, searchable, modular, extendable tests with minimal lines of code.
+- If multiple similar cases exist, create a `cases` array and iterate (table-driven tests).
+- If a mock/helper is generic and likely reused, create a shared test utility (prefer `packages/test-preset` if cross-package; otherwise package-local `src/__tests__/__utils__`).
+- Tests must be deterministic (no real network/time/randomness) unless I explicitly request an integration test.
+- Do not change production code unless it materially improves testability; if you must, make the smallest safe refactor and explain why.
+
+## What you must do before writing tests
+1) Read the code under test and list its public behaviors and edge cases.
+2) Identify dependencies/boundaries and decide what to mock vs what to run real.
+3) Propose a minimal test plan (unit + integration split).
+
+## Output Requirements
+- Output only the final test code (and any new test utilities) as file contents.
+- Use consistent naming:
+  - describe: "<package/module> - <unit under test>"
+  - it: "<expected outcome> when <condition>"
+- Use AAA structure and keep assertions focused.
+- Prefer table-driven cases over repetitive `it` blocks.
+- Include tests for:
+  - happy path
+  - important edge cases
+  - error handling / invalid input
+  - one integration test when wiring is the risk (if applicable)
+
+## Context
+- Files under test:
+  - <PASTE PATHS>
+- Relevant related files (dependencies, schemas, helpers):
+  - <PASTE PATHS>
+- What changed (PR summary):
+  - <PASTE>
+- Desired test types:
+  - [ ] Unit tests
+  - [ ] Integration tests
+  - [ ] Component tests (Testing Library)
+- Any constraints:
+  - Coverage targets / must-not-mock list / etc.
+
+Now write the tests.
+```
+
+## 🧩 Templates
+
+### Unit test template (table-driven)
+
+```ts
+import { describe, expect, it } from "bun:test";
+
+describe("<module> - <unit>", () => {
+	const cases = [
+		{
+			name: "<expected outcome> when <condition>",
+			input: <input>,
+			expected: <expected>,
+		},
+		{
+			name: "throws <error> when <condition>",
+			input: <input>,
+			expectedError: "<message>" as const,
+		},
+	] as const;
+
+	cases.forEach((tc) => {
+		it(tc.name, () => {
+			// Arrange
+
+			// Act
+			const run = () => <call(tc.input)>;
+
+			// Assert
+			if ("expectedError" in tc) {
+				expect(run).toThrow(tc.expectedError);
+				return;
+			}
+
+			expect(run()).toEqual(tc.expected);
+		});
+	});
+});
+```
+
+### Unit test template (parameterized with `test.each`)
+
+```ts
+import { describe, expect, test } from "bun:test";
+
+describe("<module> - <unit>", () => {
+	test.each([
+		{ name: "<expected outcome> when <condition>", input: <input>, expected: <expected> },
+		{ name: "throws <error> when <condition>", input: <input>, expectedError: "<message>" as const },
+	])("$name", (tc) => {
+		// Arrange
+
+		// Act
+		const run = () => <call(tc.input)>;
+
+		// Assert
+		if ("expectedError" in tc) {
+			expect(run).toThrow(tc.expectedError);
+			return;
+		}
+
+		expect(run()).toEqual(tc.expected);
+	});
+});
+```
+
+### Mock factory template
+
+```ts
+import { mock } from "bun:test";
+
+export const createMockFoo = () => {
+	return {
+		get: mock(async () => ({ ok: true })),
+		set: mock(async () => undefined),
+	};
+};
+```
+
+### Integration test template (NestJS module)
+
+```ts
+import { afterAll, beforeAll, describe, expect, it } from "bun:test";
+import type { INestApplication } from "@nestjs/common";
+import { Test, type TestingModule } from "@nestjs/testing";
+
+describe("<api> - <integration>", () => {
+	let app: INestApplication;
+
+	beforeAll(async () => {
+		const moduleFixture: TestingModule = await Test.createTestingModule({
+			imports: [/* module under test */],
+		}).compile();
+
+		app = moduleFixture.createNestApplication();
+		await app.init();
+	});
+
+	afterAll(async () => {
+		await app.close();
+	});
+
+	it("<expected outcome> when <condition>", async () => {
+		// Arrange
+
+		// Act
+		// e.g. call controller or use supertest-style request if present in repo
+
+		// Assert
+		expect(true).toBe(true);
+	});
+});
+```
+
+## 🔍 Test Review Checklist
+
+- [ ] Test names read like a spec (searchable + behavioral)
+- [ ] Uses table-driven cases for repeated patterns
+- [ ] Shared helpers extracted only when reused
+- [ ] No unnecessary mocking; boundaries only
+- [ ] No global state leaks (`process.env`, globals, timers)
+- [ ] Deterministic (no real time/network/random)
+- [ ] Fast and focused assertions
+- [ ] Passes in isolation and full suite (`bun test` + `@repo/test-preset/test-by-folder` when needed)
+
+## 🔗 Related Documentation
+
+- `docs/3_DEV_FLOWS.md` (testing commands and isolation troubleshooting)
+- `packages/test-preset/CLAUDE.md` (shared test utilities and setup)
+- `CLAUDE.md` (repo-level architecture + where standards live)
+- `bunfig.toml` (preloaded test setup files)

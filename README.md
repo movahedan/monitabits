@@ -117,6 +117,7 @@ Everything you need to build rock-solid applications is right here! We've kept i
 ### **📋 Development Rules**
 [![TypeScript Rules](https://img.shields.io/badge/🔷%20TypeScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/typescript.mdc)
 [![JavaScript Rules](https://img.shields.io/badge/🟨%20JavaScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/javascript.mdc)
+[![Testing Rules](https://img.shields.io/badge/🧪%20Testing%20Rules-495057?style=for-the-badge)](./.cursor/rules/testing.mdc)
 [![Security Guidelines](https://img.shields.io/badge/🔒%20Security%20Guidelines-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
 [![Package Management](https://img.shields.io/badge/📦%20Package%20Management-495057?style=for-the-badge)](./.cursor/rules/packages.mdc)
 

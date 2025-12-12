@@ -1,11 +1,25 @@
 import "reflect-metadata";
 import { type NestApplication, NestFactory } from "@nestjs/core";
-import { log } from "@repo/utils/logger";
+import { logger } from "@repo/utils/logger";
+import type { Request, Response } from "express";
 import { AppModule } from "./app.module";
 import { swaggerSetup } from "./swagger.setup";
 
 async function bootstrap(): Promise<void> {
-	const app = await NestFactory.create<NestApplication>(AppModule);
+	const app = await NestFactory.create<NestApplication>(AppModule, { logger: logger });
+
+	// Alias endpoint for infra/health checks that hit `/status` (without global `/api` prefix).
+	// The canonical, documented endpoint remains: GET `/api/status`.
+	const server = app.getHttpAdapter().getInstance<{
+		get: (path: string, handler: (req: Request, res: Response) => void) => void;
+	}>();
+	server.get("/status", (_req, res) => {
+		res.status(200).json({
+			success: true,
+			data: { ok: true },
+			timestamp: new Date().toISOString(),
+		});
+	});
 
 	app.enableCors({
 		origin: process.env.ALLOWED_ORIGINS?.split(",") || [
@@ -38,8 +52,7 @@ async function bootstrap(): Promise<void> {
 	await swaggerSetup(app);
 
 	await app.listen(port, host);
-	log(`API running on ${host}:${port}`);
-	console.log(`API running on ${host}:${port}`);
+	logger.info(`API running on ${host}:${port}`);
 }
 
 bootstrap().catch((error) => {

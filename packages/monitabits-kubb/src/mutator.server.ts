@@ -1,3 +1,4 @@
+import { logger } from "@repo/utils/logger";
 /**
  * Request configuration type expected by Kubb-generated hooks
  */
@@ -19,14 +20,17 @@ export type ResponseErrorConfig<TError = unknown> = TError;
  * Ensures the URL always has a protocol (http:// or https://)
  */
 function getApiBaseUrl(): string {
-	let baseUrl: string =
-		process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3003";
-	baseUrl = baseUrl.replace(/^https?:\/\//, "");
+	const DEFAULT_HOST = "localhost";
+	const DEFAULT_PORT = 3000;
+	const DEFAULT_BASE_URL = `http://${DEFAULT_HOST}:${DEFAULT_PORT}`;
 
-	const protocol =
-		baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1") ? "http://" : "https://";
+	const rawBaseUrl = (process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "").trim();
 
-	return `${protocol}${baseUrl}`.replace(/\/$/, "");
+	// Rule:
+	// - If env includes protocol (http/https): use it as-is
+	// - Otherwise: fall back to the default base URL
+	if (/^https?:\/\//i.test(rawBaseUrl)) return rawBaseUrl.replace(/\/$/, "");
+	return DEFAULT_BASE_URL;
 }
 
 /**
@@ -64,57 +68,46 @@ export async function customFetch<TData = unknown>(
 	url: string,
 	options?: RequestInit,
 ): Promise<TData> {
+	const timeInfo = getClientTimeInfo();
 	const apiBaseUrl = getApiBaseUrl();
 	const fullUrl = url.startsWith("http") ? url : `${apiBaseUrl}${url}`;
 
-	// Get time info
-	const timeInfo = getClientTimeInfo();
-
-	// Merge headers
 	const headers = new Headers(options?.headers);
 	headers.set("Content-Type", "application/json");
 	headers.set("X-Client-Time", timeInfo.clientTime);
 	headers.set("X-Timezone-Offset", String(timeInfo.timezoneOffset));
 	headers.set("X-Timezone-Name", timeInfo.timezoneName);
-
-	// Auto-inject device ID from cookie on client-side (if not already set)
 	if (!headers.has("X-Device-Id")) {
 		const deviceId = getDeviceIdFromCookie();
 		if (deviceId) {
 			headers.set("X-Device-Id", deviceId);
 		}
 	}
+	const fetchOptions = { ...options, headers };
 
-	// Make request
-	const response = await fetch(fullUrl, {
-		...options,
-		headers,
-	});
+	logger.debug("Fetching URL", { url: fullUrl, options: fetchOptions });
+	const res = await fetch(fullUrl, fetchOptions);
+	const jsonRes = await res.json().catch(() => ({
+		success: false,
+		error: "UNKNOWN_ERROR",
+		message: `HTTP ${res.status}: ${res.statusText}`,
+		statusCode: res.status,
+		timestamp: new Date().toISOString(),
+		path: url,
+	}));
 
-	// Handle errors
-	if (!response.ok) {
-		const error = await response.json().catch(() => ({
-			success: false,
-			error: "UNKNOWN_ERROR",
-			message: `HTTP ${response.status}: ${response.statusText}`,
-			statusCode: response.status,
-			timestamp: new Date().toISOString(),
-			path: url,
-		}));
-
-		throw new Error(error.message || `Request failed with status ${response.status}`);
+	if (!res.ok) {
+		logger.error("Request failed", { status: res.status, statusText: res.statusText, jsonRes });
+		throw new Error(jsonRes.message || `Request failed with status ${res.status}`);
 	}
 
-	// Parse response
-	const data = await response.json();
-
-	// Handle API error responses
-	if (data.success === false) {
-		throw new Error(data.message || data.error || "Request failed");
+	if (jsonRes.success === false) {
+		logger.error("API error response", { status: res.status, statusText: res.statusText, jsonRes });
+		throw new Error(jsonRes.message || jsonRes.error || "Request failed");
 	}
 
-	// Return data from success response
-	return data.data as TData;
+	logger.debug("Request successful", { status: res.status, statusText: res.statusText, jsonRes });
+	return jsonRes.data as TData;
 }
 
 export const client = async <TData = unknown, _TError = unknown, TRequest = unknown>(config: {

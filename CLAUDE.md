@@ -10,8 +10,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **[.cursor/rules/typescript.mdc](.cursor/rules/typescript.mdc)** - TypeScript strict practices, type safety, interfaces
 - **[.cursor/rules/security.mdc](.cursor/rules/security.mdc)** - Security best practices, regex safety, input validation
 - **[.cursor/rules/packages.mdc](.cursor/rules/packages.mdc)** - Package management and library installation
+- **[.cursor/rules/testing.mdc](.cursor/rules/testing.mdc)** - Testing standards + copy/paste AI prompt (unit/integration, mocking, table-driven cases)
 
 These rules contain detailed guidance on coding standards, security practices, and development patterns that should be followed throughout the codebase.
+
+### Separation of responsibilities (avoid duplication)
+
+- **`CLAUDE.md` files**: package/app structure, key files, and how to work inside that package/app.
+- **Cursor Rules (`.cursor/rules/`)**: standards that are meant to steer AI-assisted code generation (style, safety, testing, etc.).
 
 ## Essential Commands
 
@@ -132,6 +138,7 @@ Repository scripts provide tooling for validation, automation, and versioning. I
 
 ### Testing Conventions
 - Use Bun test runner with custom test presets from `packages/test-preset`
+- Follow the repo testing standards + AI prompt in `.cursor/rules/testing.mdc`
 - Follow AAA pattern (Arrange, Act, Assert)
 - Create reusable test utilities and mock factories
 - Group tests logically with descriptive `describe` blocks

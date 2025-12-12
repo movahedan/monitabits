@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
  * Middleware to ensure device ID cookie exists for all requests.
  * This enables both SSR and client-side requests to share the same device identifier.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
 	const response = NextResponse.next();
 
 	if (!request.cookies.get("monitabits_device_id")) {

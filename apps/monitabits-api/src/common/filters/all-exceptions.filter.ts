@@ -1,5 +1,5 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpStatus } from "@nestjs/common";
-import { log } from "@repo/utils/logger";
+import { logger } from "@repo/utils/logger";
 import { Request, Response } from "express";
 
 @Catch()
@@ -25,7 +25,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 			path: request.url,
 		};
 
-		log("Unhandled Exception", {
+		logger.error("Unhandled Exception", {
 			status,
 			error: errorResponse,
 			exception,

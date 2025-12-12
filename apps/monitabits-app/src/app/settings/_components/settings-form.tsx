@@ -46,7 +46,7 @@ export function SettingsForm({ initialLockdownMinutes }: SettingsFormProps) {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-6">
+		<form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
 			<div className="space-y-2">
 				<Label htmlFor={lockdownInputId}>Lockdown Period (minutes)</Label>
 				<Input
@@ -57,6 +57,7 @@ export function SettingsForm({ initialLockdownMinutes }: SettingsFormProps) {
 					value={lockdownMinutes}
 					onChange={(e) => handleChange(Number(e.target.value))}
 					className="w-full"
+					suppressHydrationWarning
 				/>
 				<p className="text-sm text-muted-foreground">
 					How long you need to wait before you can smoke again (1 - 10,080 minutes / 1 week max)

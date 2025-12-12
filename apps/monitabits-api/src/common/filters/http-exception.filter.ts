@@ -1,5 +1,5 @@
 import { type ArgumentsHost, Catch, type ExceptionFilter, HttpException } from "@nestjs/common";
-import { log } from "@repo/utils/logger";
+import { logger } from "@repo/utils/logger";
 import { Request, Response } from "express";
 
 @Catch(HttpException)
@@ -17,7 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 			exceptionResponse !== null &&
 			"success" in exceptionResponse
 		) {
-			log("HTTP Exception", {
+			logger.error("HTTP Exception", {
 				status,
 				error: exceptionResponse,
 				url: request.url,
@@ -47,7 +47,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 			path: request.url,
 		};
 
-		log("HTTP Exception", {
+		logger.error("HTTP Exception", {
 			status,
 			error: errorResponse,
 			url: request.url,

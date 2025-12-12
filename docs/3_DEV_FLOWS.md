@@ -264,6 +264,8 @@ bun test packages/my-package
 bun test packages/utils/src/
 ```
 
+> **AI test writing prompt & standards**: Use the repo’s testing rule at [`../.cursor/rules/testing.mdc`](../.cursor/rules/testing.mdc) when generating new tests (unit/integration), designing mock utilities, and writing table-driven test cases.
+
 ### **Test Isolation & Mocking**
 
 > **Important**: This project uses function-level mocking to prevent cross-test interference. See the test isolation patterns in `packages/test-preset` for detailed information about test isolation patterns and best practices.
