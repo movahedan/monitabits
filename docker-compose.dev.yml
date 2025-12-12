@@ -137,6 +137,8 @@ services:
     environment:
       PORT: "3002"
       HOST: "0.0.0.0"
+      API_BASE_URL: "http://monitabits-api:3003"
+      NEXT_PUBLIC_API_URL: "http://localhost:3003"
     command: bun run dev --filter=monitabits-app -- --hostname 0.0.0.0 --port 3002
     profiles: ["monitabits-app", "all"]
     healthcheck:
