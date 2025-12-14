@@ -16,15 +16,15 @@
 
 ## 🎯 Overview
 
-This application is a personal accountability tool designed to help users quit smoking by implementing time-based restrictions, tracking progress, and preventing self-sabotage through anti-cheat mechanisms. The app uses a "lockdown period" system where users must wait a specified duration before they can smoke again, with consequences for breaking the rules.
+This application is a Pomodoro timer tool designed to help users manage their time and build productive habits. The app uses a Pomodoro technique system where users work in focused intervals (work sessions) with breaks in between, helping them maintain focus and track their productivity.
 
 ### Key Principles
 
-1. **Self-Accountability**: Users hold themselves accountable by logging their actions
-2. **Time-Based Restrictions**: Lockdown periods prevent immediate relapse
-3. **Progress Tracking**: Visual feedback on time saved and progress made
-4. **Anti-Cheat Protection**: Server-side validation prevents time manipulation
-5. **Reflection & Learning**: Periodic questions help users understand their patterns
+1. **Focused Work Sessions**: Structured work periods (typically 25 minutes) for focused productivity
+2. **Regular Breaks**: Short and long breaks to maintain energy and prevent burnout
+3. **Progress Tracking**: Visual feedback on completed sessions and time spent
+4. **Flexible Configuration**: Customizable work and break durations to fit individual needs
+5. **Session Recording**: Automatic tracking of completed Pomodoro sessions for statistics
 
 ## 🎯 Problem Statement
 
@@ -38,40 +38,39 @@ Quitting smoking is challenging because:
 ## 💡 Solution Overview
 
 A full-stack application that:
-- Enforces time-based restrictions (lockdown periods)
-- Tracks progress and time saved
-- Prevents cheating through server-side time validation
-- Provides reflection prompts to understand behavior patterns
-- Saves all activity automatically for accountability
+- Provides Pomodoro timer functionality (work, short break, long break)
+- Tracks completed sessions and time spent
+- Manages timer state server-side for accuracy
+- Records completed sessions for statistics
+- Allows customizable timer durations
 
 ## 🔧 Core Features
 
 ### 1. Main Dashboard
-- **Blocked State**: Shows remaining lockdown time with countdown
-- **Active State**: Shows time ahead of plan and progress metrics
-- **Action Buttons**: 
-  - "I cheated and dishonored myself" (when blocked)
-  - "I'm choosing to harm myself" (when active)
+- **Timer Display**: Shows current timer status (idle, running, paused, completed)
+- **Countdown**: Real-time countdown display (MM:SS format)
+- **Timer Controls**: 
+  - Start buttons (Work, Short Break, Long Break) when idle
+  - Pause/Resume buttons when running/paused
+  - Reset button to return to idle state
 
 ### 2. Settings
-- Simple minutes input for lockdown period configuration
-- Separate from session data (persistent settings)
+- Work minutes configuration (1-120 minutes)
+- Short break minutes configuration (1-60 minutes)
+- Long break minutes configuration (1-120 minutes)
+- Persistent settings per device
 
-### 3. Auto-Save
-- Automatic check-in tracking
-- Session persistence across app opens
-- Activity logging for all user actions
+### 3. Timer Management
+- Server-side timer state management
+- Automatic completion when timer expires
+- Session recording for completed timers
+- Real-time countdown updates
 
-### 4. Anti-Cheat Security
-- Server-side time validation
-- Timezone detection and validation
-- Device time manipulation detection
-- NTP (Network Time Protocol) synchronization checks
-
-### 5. Reflection System
-- Periodic questions about progress
-- Behavioral pattern analysis
-- Motivational feedback
+### 4. Statistics
+- Total completed sessions
+- Work sessions, short breaks, and long breaks count
+- Total time spent
+- Today's session count
 
 ## 🛠️ Technical Requirements
 

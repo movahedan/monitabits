@@ -1,6 +1,6 @@
-# 🎨 Cigarette Quitting Application - Frontend Structure
+# 🎨 Pomodoro Timer Application - Frontend Structure
 
-> Frontend routes, features, and app-specific architecture for the Next.js application.
+> Frontend routes, features, and app-specific architecture for the Next.js Pomodoro timer application.
 
 ## 📋 Table of Contents
 
@@ -17,136 +17,201 @@
 apps/monitabits-app/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx              # Main dashboard
+│   │   ├── (dashboard)/
+│   │   │   ├── _components/
+│   │   │   │   └── pomodoro-timer.tsx    # Main Pomodoro timer component
+│   │   │   ├── actions.ts                # Server Actions for timer operations
+│   │   │   ├── page.tsx                  # Dashboard page (Server Component)
+│   │   │   ├── loading.tsx               # Loading UI
+│   │   │   └── error.tsx                 # Error boundary
 │   │   ├── settings/
-│   │   │   └── page.tsx          # Settings page
-│   │   └── layout.tsx            # Root layout
-│   ├── components/
-│   │   ├── features/
-│   │   │   ├── dashboard/
-│   │   │   │   ├── StatusCard.tsx
-│   │   │   │   ├── CountdownTimer.tsx
-│   │   │   │   ├── ActionButton.tsx
-│   │   │   │   └── ProgressMetrics.tsx
-│   │   │   ├── settings/
-│   │   │   │   └── SettingsForm.tsx
-│   │   │   └── reflection/
-│   │   │       └── ReflectionModal.tsx
-│   │   └── ui/                   # shadcn/ui components
-│   ├── lib/
-│   │   ├── api/
-│   │   │   ├── client.ts
-│   │   │   ├── sessions.ts
-│   │   │   ├── actions.ts
-│   │   │   ├── settings.ts
-│   │   │   ├── reflections.ts
-│   │   │   └── stats.ts
-│   │   ├── hooks/
-│   │   │   ├── useSession.ts
-│   │   │   ├── useSettings.ts
-│   │   │   ├── useTimeSync.ts
-│   │   │   └── useAutoSave.ts
-│   │   └── utils/
-│   │       ├── time.ts
-│   │       └── device.ts
-│   └── types/
-│       ├── session.ts
-│       ├── settings.ts
-│       └── api.ts
+│   │   │   ├── _components/
+│   │   │   │   └── settings-form.tsx     # Settings form component
+│   │   │   ├── actions.ts                # Server Actions for settings
+│   │   │   ├── page.tsx                  # Settings page (Server Component)
+│   │   │   ├── loading.tsx               # Loading UI
+│   │   │   └── error.tsx                 # Error boundary
+│   │   ├── layout.tsx                    # Root layout with providers
+│   │   ├── styles.css                    # Global styles (Tailwind)
+│   │   ├── error.tsx                     # Global error boundary
+│   │   ├── global-error.tsx              # Root error boundary
+│   │   └── not-found.tsx                 # 404 page
+│   ├── middleware.ts                     # Device ID cookie middleware
+│   └── utils/
+│       ├── api-headers.ts                # Server-side API headers helper
+│       └── register-sw.ts               # Service worker registration
+├── public/
+│   ├── manifest.json                     # PWA manifest
+│   └── sw.js                            # Service worker
+├── next.config.ts                        # Next.js configuration
+└── tsconfig.json                         # TypeScript configuration
 ```
 
 ## 🛣️ Routes
 
 ### `/` - Main Dashboard
-- Shows current session status (locked/active)
-- Displays countdown timer or time ahead
-- Action buttons based on state
-- Auto-save check-ins on mount
+- Displays Pomodoro timer component
+- Shows current timer status (idle, running, paused, completed)
+- Timer controls based on state
+- Real-time countdown for running timers
 
 ### `/settings` - Settings Page
-- Lockdown period input (minutes)
+- Pomodoro timer duration settings:
+  - Work minutes (1-120)
+  - Short break minutes (1-60)
+  - Long break minutes (1-120)
 - Save settings functionality
 
 ## 🧩 Feature Components
 
 ### Dashboard Components
 
-**StatusCard** - Displays current state (locked/active) with appropriate styling
-
-**CountdownTimer** - Real-time countdown display (HH:MM:SS format)
-
-**ActionButton** - Two variants:
-- `cheat`: "I Cheated and Dishonored Myself" (when blocked)
-- `harm`: "I'm Choosing to Harm Myself" (when active)
-
-**ProgressMetrics** - Shows time saved, streak, and statistics
+**PomodoroTimer** - Main timer component with:
+- Timer display (MM:SS format)
+- Timer type indicator (Work, Short Break, Long Break)
+- State-based controls:
+  - **Idle**: Start Work, Start Short Break, Start Long Break buttons
+  - **Running**: Pause, Reset buttons
+  - **Paused**: Resume, Reset buttons
+  - **Completed**: Start New button
+- Real-time countdown updates (1 second intervals)
+- Server-side data fetching with SWR for real-time updates
 
 ### Settings Components
 
-**SettingsForm** - Form with lockdown minutes input and save functionality
-
-### Reflection Components
-
-**ReflectionModal** - Modal that appears periodically with reflection questions
+**SettingsForm** - Form component with:
+- Work minutes input (1-120)
+- Short break minutes input (1-60)
+- Long break minutes input (1-120)
+- Save functionality with validation
 
 ## 🔄 Custom Hooks
 
-### `useSession()`
-- Fetches current session status
-- Auto-refreshes every 30 seconds
-- Returns: `{ session, loading, error, refresh }`
+### Timer Hooks
 
-### `useSettings()`
-- Manages settings state
-- Update settings functionality
-- Returns: `{ settings, loading, error, updateSettings }`
+The application uses generated SWR hooks from `@repo/monitabits-kubb`:
 
-### `useTimeSync()`
-- Syncs client time with server
-- Runs every minute
-- Returns: `{ isSynced, lastSync, error, sync }`
+- `useTimerControllerGetCurrentTimer()` - Fetches current timer status
+  - Auto-refreshes every 5 seconds
+  - Returns: `{ data, error, isLoading, mutate }`
 
-### `useAutoSave()`
-- Auto check-in on mount
-- Check-in when app becomes visible
-- Periodic check-in every 5 minutes
+### Settings Hooks
+
+- `useSettingsControllerGetSettings()` - Fetches current settings
+- `useSettingsControllerUpdateSettings()` - Updates settings
 
 ## 🔌 API Client
 
 ### Client Setup
-- Device ID management (localStorage)
-- Automatic headers: `X-Device-Id`, `X-Client-Time`, `X-Timezone-Offset`, `X-Timezone-Name`
+- Device ID management (cookies via middleware)
+- Automatic headers: `X-Device-Id`
 - Error handling
 
 ### API Functions
 
-**Sessions**
-- `getCurrentSession()` - GET `/api/sessions/current`
-- `createCheckIn()` - POST `/api/sessions/check-in`
-
-**Actions**
-- `logCheatAction()` - POST `/api/actions/cheat`
-- `logHarmAction()` - POST `/api/actions/harm`
+**Timer Operations**
+- `getCurrentTimer()` - GET `/api/timer/current`
+- `startTimer(type)` - POST `/api/timer/start`
+- `pauseTimer()` - POST `/api/timer/pause`
+- `resumeTimer()` - POST `/api/timer/resume`
+- `resetTimer()` - POST `/api/timer/reset`
 
 **Settings**
 - `getSettings()` - GET `/api/settings`
 - `updateSettings()` - PUT `/api/settings`
 
-**Reflections**
-- `getPendingReflection()` - GET `/api/reflections/pending`
-- `answerReflection()` - POST `/api/reflections/:id/answer`
-
 **Statistics**
-- `getStats()` - GET `/api/stats`
+- `getStatisticsSummary()` - GET `/api/statistics/summary`
+
+### Server Actions Pattern
+
+Server Actions are used for timer mutations:
+
+```typescript
+// app/(dashboard)/actions.ts
+'use server';
+
+import { timerControllerStartTimer, timerControllerPauseTimer } from '@repo/monitabits-kubb/server';
+import { revalidatePath } from 'next/cache';
+import { getApiHeaders } from '../../utils/api-headers';
+
+export async function startTimer(type: 'work' | 'short_break' | 'long_break') {
+  const headers = await getApiHeaders();
+  await timerControllerStartTimer({ body: { type } }, { headers });
+  revalidatePath('/');
+}
+
+export async function pauseTimer() {
+  const headers = await getApiHeaders();
+  await timerControllerPauseTimer({}, { headers });
+  revalidatePath('/');
+}
+```
 
 ## 🛠️ Utilities
 
-### `lib/utils/time.ts`
-- `formatTime(seconds)` - Format seconds to HH:MM:SS or MM:SS
-- `getClientTimeInfo()` - Get client time, timezone offset, and timezone name
+### `utils/api-headers.ts`
+Server-side helper to get API headers from cookies:
 
-### `lib/utils/device.ts`
-- `getOrCreateDeviceId()` - Get or generate device ID from localStorage
+```typescript
+import { cookies } from 'next/headers';
+
+export async function getApiHeaders(): Promise<{ 'X-Device-Id': string }> {
+  const cookieStore = await cookies();
+  const deviceId = cookieStore.get('monitabits_device_id')?.value ?? '';
+  return { 'X-Device-Id': deviceId };
+}
+```
+
+### `middleware.ts`
+Device ID cookie management:
+
+```typescript
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+export function middleware(request: NextRequest) {
+  const deviceId = request.cookies.get('monitabits_device_id')?.value;
+  
+  if (!deviceId) {
+    // Generate device ID and set cookie
+    const newDeviceId = crypto.randomUUID();
+    const response = NextResponse.next();
+    response.cookies.set('monitabits_device_id', newDeviceId);
+    return response;
+  }
+  
+  return NextResponse.next();
+}
+```
+
+## 🎯 Timer State Management
+
+### Timer States
+
+1. **Idle**: Timer is not running, ready to start
+2. **Running**: Timer is actively counting down
+3. **Paused**: Timer is stopped but can be resumed
+4. **Completed**: Timer has finished, session recorded
+
+### Timer Flow
+
+```
+Idle → (start) → Running → (pause) → Paused → (resume) → Running
+  ↑                                                              ↓
+  └────────────────────────── (reset) ←──────────────────────────┘
+                                                                    ↓
+                                                              Completed
+                                                                    ↓
+                                                              (start new) → Idle
+```
+
+### Real-time Updates
+
+- **Server Component**: Fetches initial timer state on page load
+- **Client Component**: Uses SWR hook with 5-second refresh interval
+- **Local State**: Maintains local countdown for smooth UI updates (1-second intervals)
+- **Synchronization**: Local countdown syncs with server data every 5 seconds
 
 ## 🔗 Related Documentation
 
@@ -157,4 +222,4 @@ apps/monitabits-app/
 
 ---
 
-**Note**: Using standard Next.js App Router, Tailwind CSS, and shadcn/ui components. Focus on app-specific logic and structure.
+**Note**: Using standard Next.js App Router, Tailwind CSS, and shadcn/ui components. The Pomodoro timer component handles real-time countdown and state management with server-side timer operations.

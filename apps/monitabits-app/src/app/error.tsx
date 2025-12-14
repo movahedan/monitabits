@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@repo/utils/logger";
 import { useEffect } from "react";
 
 interface ErrorProps {
@@ -14,7 +15,7 @@ interface ErrorProps {
 export default function ErrorComponent({ error, reset }: ErrorProps) {
 	useEffect(() => {
 		// Log error to an error reporting service
-		console.error("Application error:", error);
+		logger.error("Application error:", error);
 	}, [error]);
 
 	return (

@@ -13,76 +13,37 @@ model Device {
 	createdAt DateTime  @default(now())
 	updatedAt DateTime  @updatedAt
 
-	sessions     Session[]
-	actions      Action[]
-	checkIns     CheckIn[]
-	settings     Settings?
-	followUps    FollowUp[]
-	securityLogs SecurityLog[]
+	timer     Timer?
+	settings  Settings?
+	sessions  PomodoroSession[]
 
 	@@map("devices")
 }
 
-model Session {
+model Timer {
 	id              String   @id @default(uuid())
-	deviceId        String
-	status          String   // "active" | "locked" | "completed"
-	startTime       DateTime
-	endTime         DateTime?
-	lockdownMinutes Int      @default(60)
-	timeRemaining   Int?     // in seconds
-	timeAhead       Int?     // in seconds
+	deviceId        String   @unique
+	status          String   // "idle" | "running" | "paused" | "completed"
+	type            String   // "work" | "short_break" | "long_break"
+	durationSeconds Int      // Total duration in seconds
+	remainingSeconds Int     // Remaining time in seconds
+	startedAt       DateTime?
+	pausedAt        DateTime?
 	createdAt       DateTime @default(now())
 	updatedAt       DateTime @updatedAt
 
 	device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-	actions         Action[]
-	checkIns        CheckIn[]
 
 	@@index([deviceId])
-	@@index([deviceId, status])
-	@@map("sessions")
-}
-
-model Action {
-	id                String   @id @default(uuid())
-	deviceId          String
-	sessionId         String?
-	type              String   // "cheat" | "harm"
-	serverTime        DateTime
-	lockdownStarted   Boolean  @default(false)
-	consequences      Json?    // { message?: string, additionalLockdown?: number }
-	createdAt         DateTime @default(now())
-
-	device            Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-	session           Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-	followUps         FollowUp[]
-
-	@@index([deviceId])
-	@@index([sessionId])
-	@@map("actions")
-}
-
-model CheckIn {
-	id         String   @id @default(uuid())
-	deviceId   String
-	sessionId  String?
-	type       String   // "check_in" | "check_out"
-	serverTime DateTime
-	createdAt  DateTime @default(now())
-
-	device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-	session    Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-
-	@@index([deviceId])
-	@@index([sessionId])
-	@@map("check_ins")
+	@@map("timers")
 }
 
 model Settings {
 	id              String   @id @default(uuid())
 	deviceId        String   @unique
-	lockdownMinutes Int      @default(60)
+	workMinutes     Int      @default(25)
+	shortBreakMinutes Int    @default(5)
+	longBreakMinutes Int     @default(15)
 	updatedAt       DateTime @updatedAt
 
 	device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
@@ -90,36 +51,17 @@ model Settings {
 	@@map("settings")
 }
 
-model FollowUp {
-	id        String   @id @default(uuid())
-	deviceId  String
-	actionId  String?
-	question  String
-	answer    String
-	harmIds   String[] // Array of action IDs
-	createdAt DateTime @default(now())
+model PomodoroSession {
+	id              String   @id @default(uuid())
+	deviceId        String
+	type            String   // "work" | "short_break" | "long_break"
+	durationSeconds Int      // Actual duration completed
+	completedAt     DateTime @default(now())
+	createdAt       DateTime @default(now())
 
-	device    Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-	action    Action?  @relation(fields: [actionId], references: [id], onDelete: SetNull)
+	device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
 	@@index([deviceId])
-	@@map("follow_ups")
-}
-
-model SecurityLog {
-	id             String   @id @default(uuid())
-	deviceId       String
-	eventType      String   // "time_manipulation" | "timezone_change" | "suspicious_activity" | "validation_failure"
-	details        Json     // Additional event details
-	serverTime     DateTime
-	clientTime     DateTime
-	timezoneOffset Int      // Client timezone offset in minutes
-	createdAt      DateTime @default(now())
-
-	device         Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-
-	@@index([deviceId])
-	@@index([eventType])
-	@@index([createdAt])
-	@@map("security_logs")
+	@@index([deviceId, completedAt])
+	@@map("pomodoro_sessions")
 }

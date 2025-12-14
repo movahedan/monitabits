@@ -31,7 +31,8 @@ export class SettingsController {
 	@Get()
 	@ApiOperation({
 		summary: "Get user settings",
-		description: "Returns the current user settings, primarily the lockdown period.",
+		description:
+			"Returns the current Pomodoro timer settings (work, short break, long break durations).",
 	})
 	@ApiResponse({
 		status: HttpStatus.OK,
@@ -51,7 +52,7 @@ export class SettingsController {
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({
 		summary: "Update user settings",
-		description: "Updates user settings, primarily the lockdown period in minutes.",
+		description: "Updates Pomodoro timer durations (work, short break, long break).",
 	})
 	@ApiBody({ type: UpdateSettingsRequestDto })
 	@ApiResponse({
@@ -68,6 +69,11 @@ export class SettingsController {
 		@DeviceId() deviceId: string,
 		@Body(new ZodValidationPipe(UpdateSettingsRequestSchema)) updateDto: UpdateSettingsRequest,
 	): Promise<Settings> {
-		return this.settingsService.updateSettings(deviceId, updateDto.lockdownMinutes);
+		return this.settingsService.updateSettings(
+			deviceId,
+			updateDto.workMinutes,
+			updateDto.shortBreakMinutes,
+			updateDto.longBreakMinutes,
+		);
 	}
 }

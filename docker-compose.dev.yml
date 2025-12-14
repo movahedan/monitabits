@@ -108,22 +108,6 @@ services:
       retries: 3
       start_period: 30s
 
-  monitabits-swagger:
-    extends:
-      service: apps
-    expose:
-      - "3005"
-    ports:
-      - "3005:3005"
-    command: bun run dev --filter=monitabits-swagger
-    profiles: ["monitabits-api", "all"]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://monitabits-swagger:3005"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
   monitabits-app:
     extends:
       service: apps

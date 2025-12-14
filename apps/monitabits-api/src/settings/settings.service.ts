@@ -29,26 +29,45 @@ export class SettingsService {
 		const settings = await this.prisma.settings.upsert({
 			where: { deviceId },
 			update: {},
-			create: { deviceId, lockdownMinutes: 60 },
+			create: {
+				deviceId,
+				workMinutes: 25,
+				shortBreakMinutes: 5,
+				longBreakMinutes: 15,
+			},
 		});
 
 		return {
-			lockdownMinutes: settings.lockdownMinutes,
+			workMinutes: settings.workMinutes,
+			shortBreakMinutes: settings.shortBreakMinutes,
+			longBreakMinutes: settings.longBreakMinutes,
 			updatedAt: settings.updatedAt.toISOString(),
 		};
 	}
 
-	async updateSettings(deviceId: string, lockdownMinutes: number): Promise<Settings> {
+	async updateSettings(
+		deviceId: string,
+		workMinutes: number,
+		shortBreakMinutes: number,
+		longBreakMinutes: number,
+	): Promise<Settings> {
 		await this.ensureDevice(deviceId);
 
 		const settings = await this.prisma.settings.upsert({
 			where: { deviceId },
-			update: { lockdownMinutes },
-			create: { deviceId, lockdownMinutes },
+			update: { workMinutes, shortBreakMinutes, longBreakMinutes },
+			create: {
+				deviceId,
+				workMinutes,
+				shortBreakMinutes,
+				longBreakMinutes,
+			},
 		});
 
 		return {
-			lockdownMinutes: settings.lockdownMinutes,
+			workMinutes: settings.workMinutes,
+			shortBreakMinutes: settings.shortBreakMinutes,
+			longBreakMinutes: settings.longBreakMinutes,
 			updatedAt: settings.updatedAt.toISOString(),
 		};
 	}

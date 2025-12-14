@@ -6,8 +6,20 @@
 export type UpdateSettingsRequestDto = {
 	/**
 	 * @minLength 1
-	 * @maxLength 10080
+	 * @maxLength 120
 	 * @type number
 	 */
-	lockdownMinutes: number;
+	workMinutes: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 60
+	 * @type number
+	 */
+	shortBreakMinutes: number;
+	/**
+	 * @minLength 1
+	 * @maxLength 120
+	 * @type number
+	 */
+	longBreakMinutes: number;
 };

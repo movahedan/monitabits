@@ -6,6 +6,8 @@
 import { z } from "zod/v4";
 
 export const settingsDtoSchema = z.object({
-	lockdownMinutes: z.number().min(1).max(10080),
+	workMinutes: z.number().min(1).max(120),
+	shortBreakMinutes: z.number().min(1).max(60),
+	longBreakMinutes: z.number().min(1).max(120),
 	updatedAt: z.string().datetime(),
 });

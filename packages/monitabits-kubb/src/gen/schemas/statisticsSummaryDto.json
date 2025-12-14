@@ -1,23 +1,20 @@
 {
 	"type": "object",
 	"properties": {
-		"totalTimeSaved": { "type": "number" },
-		"currentStreak": { "type": "number" },
-		"longestStreak": { "type": "number" },
-		"totalCheckIns": { "type": "number" },
-		"totalActions": { "type": "number" },
-		"averageTimeBetweenActions": { "type": "number", "nullable": true },
-		"lastRelapse": { "type": "string", "format": "date-time", "nullable": true },
-		"sessionReport": {
-			"type": "object",
-			"properties": {
-				"checkInsDuringLockdown": { "type": "number", "minimum": 0 },
-				"timeSpentOnPageDuringLockdown": { "type": "number", "minimum": 0 }
-			},
-			"required": ["checkInsDuringLockdown", "timeSpentOnPageDuringLockdown"],
-			"x-readme-ref-name": "SessionReportDto"
-		}
+		"totalCompleted": { "type": "number" },
+		"totalWorkSessions": { "type": "number" },
+		"totalShortBreaks": { "type": "number" },
+		"totalLongBreaks": { "type": "number" },
+		"totalTimeSeconds": { "type": "number" },
+		"todayCount": { "type": "number" }
 	},
-	"required": ["totalTimeSaved", "currentStreak", "longestStreak", "totalCheckIns", "totalActions"],
+	"required": [
+		"totalCompleted",
+		"totalWorkSessions",
+		"totalShortBreaks",
+		"totalLongBreaks",
+		"totalTimeSeconds",
+		"todayCount"
+	],
 	"x-readme-ref-name": "StatisticsSummaryDto"
 }

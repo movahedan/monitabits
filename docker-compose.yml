@@ -28,29 +28,6 @@ services:
       retries: 5
       start_period: 10s
 
-  monitabits-swagger:
-    build:
-      context: .
-      dockerfile: apps/monitabits-swagger/Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL:-http://monitabits-api:5003/api}
-    ports:
-      - "5005:5005"
-    networks:
-      - prod-network
-    environment:
-      - PORT=5005
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-    depends_on:
-      - monitabits-api
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5005"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
   monitabits-api:
     build:
       context: .

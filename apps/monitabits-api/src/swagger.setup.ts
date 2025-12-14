@@ -3,23 +3,16 @@ import { resolve } from "node:path";
 import type { NestApplication } from "@nestjs/core";
 import { DocumentBuilder, type OpenAPIObject, SwaggerModule } from "@nestjs/swagger";
 import { logger } from "@repo/utils/logger";
-import * as ActionModels from "./actions/action.model";
 import { BaseDto } from "./common/models/dto.model";
 import * as ResponseModels from "./common/models/response.model";
-import * as SessionModels from "./sessions/session.model";
 import * as SettingsModels from "./settings/settings.model";
 import * as StatisticsModels from "./statistics/statistics.model";
+import * as TimerModels from "./timer/timer.model";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-const customSiteTitle = "Monitabits Quit Smoking API";
-const allDtoModules = [
-	ActionModels,
-	ResponseModels,
-	SessionModels,
-	SettingsModels,
-	StatisticsModels,
-] as const;
+const customSiteTitle = "Monitabits Pomodoro Timer API";
+const allDtoModules = [ResponseModels, SettingsModels, StatisticsModels, TimerModels] as const;
 
 type AnyConstructor = new (...args: Array<unknown>) => unknown;
 function isDtoClass(value: unknown): value is AnyConstructor {
@@ -64,13 +57,12 @@ async function generateKubbPackage(): Promise<void> {
 const swaggerConfig = new DocumentBuilder()
 	.setTitle(customSiteTitle)
 	.setDescription(
-		`API for the cigarette quitting accountability application.
+		`API for the Pomodoro timer application.
 
 This API uses device-based authentication where each device has a unique ID.
-All time-sensitive operations are validated server-side to prevent cheating.
+Each device can manage its own Pomodoro timer sessions and track completed work sessions.
 
-**Security**: All requests must include time validation headers to prevent time manipulation.
-The server handles all timezone calculations internally based on the user's request context.`,
+**Security**: All requests must include device ID header for authentication.`,
 	)
 	.setVersion("1.0.0")
 	.addApiKey(
@@ -82,19 +74,9 @@ The server handles all timezone calculations internally based on the user's requ
 		},
 		"DeviceAuth",
 	)
-	.addApiKey(
-		{
-			type: "apiKey",
-			in: "header",
-			name: "X-Client-Time",
-			description: "Client-reported timestamp (ISO-8601)",
-		},
-		"TimeValidation",
-	)
 	.addServer("http://localhost:3003", "Development server")
 	.addServer("https://api.monitabits.com", "Production server")
-	.addTag("Sessions", "Session management and check-ins")
-	.addTag("Actions", "User actions (cheat, harm, follow-up)")
-	.addTag("Settings", "User settings management")
-	.addTag("Statistics", "User statistics and progress")
+	.addTag("Timer", "Pomodoro timer management (start, pause, resume, reset)")
+	.addTag("Settings", "Timer duration settings (work, short break, long break)")
+	.addTag("Statistics", "Completed Pomodoro session statistics")
 	.build();

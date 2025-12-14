@@ -1,9 +1,11 @@
 {
 	"type": "object",
 	"properties": {
-		"lockdownMinutes": { "type": "number", "minimum": 1, "maximum": 10080 },
+		"workMinutes": { "type": "number", "minimum": 1, "maximum": 120 },
+		"shortBreakMinutes": { "type": "number", "minimum": 1, "maximum": 60 },
+		"longBreakMinutes": { "type": "number", "minimum": 1, "maximum": 120 },
 		"updatedAt": { "type": "string", "format": "date-time" }
 	},
-	"required": ["lockdownMinutes", "updatedAt"],
+	"required": ["workMinutes", "shortBreakMinutes", "longBreakMinutes", "updatedAt"],
 	"x-readme-ref-name": "SettingsDto"
 }
