@@ -30,8 +30,8 @@ export function statisticsControllerGetSummaryQueryOptions(
 }
 
 /**
- * @description Returns comprehensive user statistics including time saved, streaks, activity metrics,and session report data (check-ins during lockdown, time spent on page during lockdown, etc.).Fewer check-ins and less time spent on page during lockdown are better indicators.
- * @summary Get comprehensive statistics summary
+ * @description Returns statistics about completed Pomodoro sessions including counts and total time.
+ * @summary Get Pomodoro statistics summary
  * {@link /api/stats/summary}
  */
 export function useStatisticsControllerGetSummary(

@@ -13,7 +13,7 @@ import { statisticsSummaryDtoSchema } from "../statisticsSummaryDtoSchema";
 export const statisticsControllerGetSummary200Schema = z.lazy(() => statisticsSummaryDtoSchema);
 
 /**
- * @description Time validation failed
+ * @description Invalid request
  */
 export const statisticsControllerGetSummary400Schema = z.lazy(() => errorResponseDtoSchema);
 

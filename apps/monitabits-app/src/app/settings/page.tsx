@@ -4,8 +4,8 @@ import { getApiHeaders } from "../../utils/api-headers";
 import { SettingsForm } from "./_components/settings-form";
 
 export const metadata = {
-	title: "Settings | Monitabits",
-	description: "Configure your quit smoking settings",
+	title: "Settings | Pomodoro Timer",
+	description: "Configure your Pomodoro timer durations",
 };
 
 /**
@@ -16,7 +16,9 @@ export default async function SettingsPage() {
 	// Fetch settings on the server with device ID from cookies
 	const headers = await getApiHeaders();
 	const settings = await settingsControllerGetSettings({ headers });
-	const lockdownMinutes = settings?.lockdownMinutes ?? 60;
+	const workMinutes = settings?.workMinutes ?? 25;
+	const shortBreakMinutes = settings?.shortBreakMinutes ?? 5;
+	const longBreakMinutes = settings?.longBreakMinutes ?? 15;
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -40,16 +42,20 @@ export default async function SettingsPage() {
 							d="M15 19l-7-7 7-7"
 						/>
 					</svg>
-					Back to Dashboard
+					Back to Timer
 				</a>
 
 				<Card>
 					<CardHeader>
 						<CardTitle>Settings</CardTitle>
-						<CardDescription>Configure your lockdown period and preferences</CardDescription>
+						<CardDescription>Configure your Pomodoro timer durations</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<SettingsForm initialLockdownMinutes={lockdownMinutes} />
+						<SettingsForm
+							initialWorkMinutes={workMinutes}
+							initialShortBreakMinutes={shortBreakMinutes}
+							initialLongBreakMinutes={longBreakMinutes}
+						/>
 					</CardContent>
 				</Card>
 			</div>

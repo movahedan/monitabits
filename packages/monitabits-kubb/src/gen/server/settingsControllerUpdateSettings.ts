@@ -17,7 +17,7 @@ function getSettingsControllerUpdateSettingsUrl() {
 }
 
 /**
- * @description Updates user settings, primarily the lockdown period in minutes.
+ * @description Updates Pomodoro timer durations (work, short break, long break).
  * @summary Update user settings
  * {@link /api/settings}
  */

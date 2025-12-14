@@ -1,108 +1,82 @@
 "use server";
 
 import {
-	actionsControllerCheat,
-	actionsControllerHarm,
-	actionsControllerSubmitFollowUp,
-	sessionsControllerCheckIn,
-	sessionsControllerCheckOut,
+	timerControllerPauseTimer,
+	timerControllerResetTimer,
+	timerControllerResumeTimer,
+	timerControllerStartTimer,
 } from "@repo/monitabits-kubb/server";
+import { logger } from "@repo/utils/logger";
 import { revalidatePath } from "next/cache";
 import { getApiHeaders } from "../../utils/api-headers";
 
-/**
- * Server Action to record a cheat action.
- * Called when user admits to cheating during lockdown.
- */
-export async function recordCheat(): Promise<{ success: boolean; error?: string }> {
-	try {
-		const headers = await getApiHeaders();
-		await actionsControllerCheat({ headers });
-		revalidatePath("/");
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to record cheat:", error);
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to record action",
-		};
-	}
-}
-
-/**
- * Server Action to record a harm action.
- * Called when user chooses to harm themselves (start new lockdown).
- */
-export async function recordHarm(): Promise<{ success: boolean; error?: string }> {
-	try {
-		const headers = await getApiHeaders();
-		await actionsControllerHarm({ headers });
-		revalidatePath("/");
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to record harm:", error);
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to record action",
-		};
-	}
-}
-
-/**
- * Server Action to perform check-in.
- * Called when user opens the app or page becomes visible.
- */
-export async function performCheckIn(): Promise<{ success: boolean; error?: string }> {
-	try {
-		const headers = await getApiHeaders();
-		await sessionsControllerCheckIn({ headers });
-		revalidatePath("/");
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to check in:", error);
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to check in",
-		};
-	}
-}
-
-/**
- * Server Action to perform check-out.
- * Called when user leaves the app or page becomes hidden.
- */
-export async function performCheckOut(): Promise<{ success: boolean; error?: string }> {
-	try {
-		const headers = await getApiHeaders();
-		await sessionsControllerCheckOut({ headers });
-		return { success: true };
-	} catch (error) {
-		console.error("Failed to check out:", error);
-		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Failed to check out",
-		};
-	}
-}
-
-/**
- * Server Action to submit a follow-up reflection answer.
- * Called when user submits a reflection answer.
- */
-export async function submitFollowUp(
-	answer: string,
-	harmIds: string[] = [],
+export async function startTimer(
+	type: "work" | "short_break" | "long_break",
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const headers = await getApiHeaders();
-		await actionsControllerSubmitFollowUp({ answer, harmIds }, { headers });
+		await timerControllerStartTimer({ type }, { headers });
 		revalidatePath("/");
 		return { success: true };
 	} catch (error) {
-		console.error("Failed to submit follow-up:", error);
+		logger.error("Failed to start timer:", error);
 		return {
 			success: false,
-			error: error instanceof Error ? error.message : "Failed to submit reflection",
+			error: error instanceof Error ? error.message : "Failed to start timer",
+		};
+	}
+}
+
+/**
+ * Server Action to pause the timer.
+ */
+export async function pauseTimer(): Promise<{ success: boolean; error?: string }> {
+	try {
+		const headers = await getApiHeaders();
+		await timerControllerPauseTimer({ headers });
+		revalidatePath("/");
+		return { success: true };
+	} catch (error) {
+		logger.error("Failed to pause timer:", error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to pause timer",
+		};
+	}
+}
+
+/**
+ * Server Action to resume the timer.
+ */
+export async function resumeTimer(): Promise<{ success: boolean; error?: string }> {
+	try {
+		const headers = await getApiHeaders();
+		await timerControllerResumeTimer({ headers });
+		revalidatePath("/");
+		return { success: true };
+	} catch (error) {
+		logger.error("Failed to resume timer:", error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to resume timer",
+		};
+	}
+}
+
+/**
+ * Server Action to reset the timer.
+ */
+export async function resetTimer(): Promise<{ success: boolean; error?: string }> {
+	try {
+		const headers = await getApiHeaders();
+		await timerControllerResetTimer({ headers });
+		revalidatePath("/");
+		return { success: true };
+	} catch (error) {
+		logger.error("Failed to reset timer:", error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to reset timer",
 		};
 	}
 }

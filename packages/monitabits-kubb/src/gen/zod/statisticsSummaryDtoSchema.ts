@@ -4,17 +4,12 @@
  */
 
 import { z } from "zod/v4";
-import { sessionReportDtoSchema } from "./sessionReportDtoSchema";
 
 export const statisticsSummaryDtoSchema = z.object({
-	totalTimeSaved: z.number(),
-	currentStreak: z.number(),
-	longestStreak: z.number(),
-	totalCheckIns: z.number(),
-	totalActions: z.number(),
-	averageTimeBetweenActions: z.number().nullish(),
-	lastRelapse: z.string().datetime().nullish(),
-	get sessionReport() {
-		return sessionReportDtoSchema.optional();
-	},
+	totalCompleted: z.number(),
+	totalWorkSessions: z.number(),
+	totalShortBreaks: z.number(),
+	totalLongBreaks: z.number(),
+	totalTimeSeconds: z.number(),
+	todayCount: z.number(),
 });

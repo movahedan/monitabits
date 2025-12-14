@@ -12,7 +12,7 @@ import type { StatisticsSummaryDto } from "./StatisticsSummaryDto";
 export type StatisticsControllerGetSummary200 = StatisticsSummaryDto;
 
 /**
- * @description Time validation failed
+ * @description Invalid request
  */
 export type StatisticsControllerGetSummary400 = ErrorResponseDto;
 

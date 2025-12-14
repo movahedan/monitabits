@@ -1,0 +1,22 @@
+{
+	"type": "object",
+	"properties": {
+		"id": { "type": "string" },
+		"status": { "type": "string", "enum": ["idle", "running", "paused", "completed"] },
+		"type": { "type": "string", "enum": ["work", "short_break", "long_break"] },
+		"durationSeconds": { "type": "number" },
+		"remainingSeconds": { "type": "number" },
+		"startedAt": { "type": "string", "nullable": true },
+		"pausedAt": { "type": "string", "nullable": true }
+	},
+	"required": [
+		"id",
+		"status",
+		"type",
+		"durationSeconds",
+		"remainingSeconds",
+		"startedAt",
+		"pausedAt"
+	],
+	"x-readme-ref-name": "TimerDto"
+}

@@ -29,7 +29,7 @@ export function settingsControllerGetSettingsQueryOptions(
 }
 
 /**
- * @description Returns the current user settings, primarily the lockdown period.
+ * @description Returns the current Pomodoro timer settings (work, short break, long break durations).
  * @summary Get user settings
  * {@link /api/settings}
  */

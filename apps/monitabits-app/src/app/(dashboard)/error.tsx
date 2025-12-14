@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@repo/utils/logger";
 import { useEffect } from "react";
 
 interface DashboardErrorProps {
@@ -13,7 +14,7 @@ interface DashboardErrorProps {
  */
 export default function DashboardError({ error, reset }: DashboardErrorProps) {
 	useEffect(() => {
-		console.error("Dashboard error:", error);
+		logger.error("Dashboard error:", error);
 	}, [error]);
 
 	return (

@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@repo/utils/logger";
 import { useEffect } from "react";
 
 interface SettingsErrorProps {
@@ -13,7 +14,7 @@ interface SettingsErrorProps {
  */
 export default function SettingsError({ error, reset }: SettingsErrorProps) {
 	useEffect(() => {
-		console.error("Settings error:", error);
+		logger.error("Settings error:", error);
 	}, [error]);
 
 	return (

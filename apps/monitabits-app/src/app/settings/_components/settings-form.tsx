@@ -5,26 +5,54 @@ import { useId, useState, useTransition } from "react";
 import { updateSettings } from "../actions";
 
 interface SettingsFormProps {
-	readonly initialLockdownMinutes: number;
+	readonly initialWorkMinutes: number;
+	readonly initialShortBreakMinutes: number;
+	readonly initialLongBreakMinutes: number;
 }
 
 /**
  * Settings form with Server Actions.
  * Receives initial settings from server and handles updates via Server Actions.
  */
-export function SettingsForm({ initialLockdownMinutes }: SettingsFormProps) {
-	const [lockdownMinutes, setLockdownMinutes] = useState<number>(initialLockdownMinutes);
+export function SettingsForm({
+	initialWorkMinutes,
+	initialShortBreakMinutes,
+	initialLongBreakMinutes,
+}: SettingsFormProps) {
+	const [workMinutes, setWorkMinutes] = useState<number>(initialWorkMinutes);
+	const [shortBreakMinutes, setShortBreakMinutes] = useState<number>(initialShortBreakMinutes);
+	const [longBreakMinutes, setLongBreakMinutes] = useState<number>(initialLongBreakMinutes);
 	const [hasChanges, setHasChanges] = useState(false);
 	const [isPending, startTransition] = useTransition();
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
-	const lockdownInputId = useId();
+	const workInputId = useId();
+	const shortBreakInputId = useId();
+	const longBreakInputId = useId();
 
-	const handleChange = (value: number) => {
-		setLockdownMinutes(value);
-		setHasChanges(value !== initialLockdownMinutes);
+	const checkChanges = () => {
+		const changed =
+			workMinutes !== initialWorkMinutes ||
+			shortBreakMinutes !== initialShortBreakMinutes ||
+			longBreakMinutes !== initialLongBreakMinutes;
+		setHasChanges(changed);
 		setError(null);
 		setSuccessMessage(null);
+	};
+
+	const handleWorkChange = (value: number) => {
+		setWorkMinutes(value);
+		checkChanges();
+	};
+
+	const handleShortBreakChange = (value: number) => {
+		setShortBreakMinutes(value);
+		checkChanges();
+	};
+
+	const handleLongBreakChange = (value: number) => {
+		setLongBreakMinutes(value);
+		checkChanges();
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -33,7 +61,7 @@ export function SettingsForm({ initialLockdownMinutes }: SettingsFormProps) {
 		setSuccessMessage(null);
 
 		startTransition(async () => {
-			const result = await updateSettings(lockdownMinutes);
+			const result = await updateSettings(workMinutes, shortBreakMinutes, longBreakMinutes);
 
 			if (result.success) {
 				setSuccessMessage("Settings saved successfully!");
@@ -48,19 +76,51 @@ export function SettingsForm({ initialLockdownMinutes }: SettingsFormProps) {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
 			<div className="space-y-2">
-				<Label htmlFor={lockdownInputId}>Lockdown Period (minutes)</Label>
+				<Label htmlFor={workInputId}>Work Duration (minutes)</Label>
 				<Input
-					id={lockdownInputId}
+					id={workInputId}
 					type="number"
 					min={1}
-					max={10080}
-					value={lockdownMinutes}
-					onChange={(e) => handleChange(Number(e.target.value))}
+					max={120}
+					value={workMinutes}
+					onChange={(e) => handleWorkChange(Number(e.target.value))}
 					className="w-full"
 					suppressHydrationWarning
 				/>
 				<p className="text-sm text-muted-foreground">
-					How long you need to wait before you can smoke again (1 - 10,080 minutes / 1 week max)
+					Standard Pomodoro work session (1-120 minutes)
+				</p>
+			</div>
+
+			<div className="space-y-2">
+				<Label htmlFor={shortBreakInputId}>Short Break (minutes)</Label>
+				<Input
+					id={shortBreakInputId}
+					type="number"
+					min={1}
+					max={60}
+					value={shortBreakMinutes}
+					onChange={(e) => handleShortBreakChange(Number(e.target.value))}
+					className="w-full"
+					suppressHydrationWarning
+				/>
+				<p className="text-sm text-muted-foreground">Break between work sessions (1-60 minutes)</p>
+			</div>
+
+			<div className="space-y-2">
+				<Label htmlFor={longBreakInputId}>Long Break (minutes)</Label>
+				<Input
+					id={longBreakInputId}
+					type="number"
+					min={1}
+					max={120}
+					value={longBreakMinutes}
+					onChange={(e) => handleLongBreakChange(Number(e.target.value))}
+					className="w-full"
+					suppressHydrationWarning
+				/>
+				<p className="text-sm text-muted-foreground">
+					Extended break after multiple sessions (1-120 minutes)
 				</p>
 			</div>
 

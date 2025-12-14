@@ -3,39 +3,29 @@
  * Do not edit manually.
  */
 
-import type { SessionReportDto } from "./SessionReportDto";
-
 export type StatisticsSummaryDto = {
 	/**
 	 * @type number
 	 */
-	totalTimeSaved: number;
+	totalCompleted: number;
 	/**
 	 * @type number
 	 */
-	currentStreak: number;
+	totalWorkSessions: number;
 	/**
 	 * @type number
 	 */
-	longestStreak: number;
+	totalShortBreaks: number;
 	/**
 	 * @type number
 	 */
-	totalCheckIns: number;
+	totalLongBreaks: number;
 	/**
 	 * @type number
 	 */
-	totalActions: number;
+	totalTimeSeconds: number;
 	/**
 	 * @type number
 	 */
-	averageTimeBetweenActions?: number | null;
-	/**
-	 * @type string, date-time
-	 */
-	lastRelapse?: string | null;
-	/**
-	 * @type object | undefined
-	 */
-	sessionReport?: SessionReportDto;
+	todayCount: number;
 };

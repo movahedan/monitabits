@@ -1,0 +1,6 @@
+{
+	"type": "object",
+	"properties": { "type": { "type": "string", "enum": ["work", "short_break", "long_break"] } },
+	"required": ["type"],
+	"x-readme-ref-name": "StartTimerRequestDto"
+}

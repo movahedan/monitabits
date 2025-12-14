@@ -1,6 +1,7 @@
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { logger } from "@repo/utils/logger";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
@@ -21,7 +22,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 		} catch (error) {
 			// Silently fail if database is not available (e.g., during OpenAPI generation)
 			if (process.env.NODE_ENV !== "production") {
-				console.warn(
+				logger.warn(
 					"Prisma connection skipped:",
 					error instanceof Error ? error.message : String(error),
 				);

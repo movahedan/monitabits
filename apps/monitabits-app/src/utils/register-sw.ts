@@ -1,3 +1,5 @@
+import { logger } from "@repo/utils/logger";
+
 /**
  * Register the service worker for PWA functionality
  */
@@ -21,7 +23,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
 		return registration;
 	} catch (error) {
-		console.error("Service Worker registration failed:", error);
+		logger.error("Service Worker registration failed:", error);
 		return null;
 	}
 }
