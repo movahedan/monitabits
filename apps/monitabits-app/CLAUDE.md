@@ -45,9 +45,8 @@ apps/monitabits-app/
 │   │   │   └── providers.tsx      # React providers (SWR, themes)
 │   │   ├── (dashboard)/           # Dashboard route group
 │   │   │   ├── _components/       # Dashboard-specific components
-│   │   │   │   ├── dashboard-client.tsx  # Client component with real-time updates
-│   │   │   │   └── reflection-modal.tsx  # Follow-up questions modal
-│   │   │   ├── actions.ts         # Server Actions for dashboard
+│   │   │   │   └── pomodoro-timer.tsx  # Pomodoro timer component
+│   │   │   ├── actions.ts         # Server Actions for timer operations
 │   │   │   ├── page.tsx           # Dashboard page (Server Component)
 │   │   │   ├── loading.tsx        # Loading UI
 │   │   │   └── error.tsx          # Error boundary
@@ -81,19 +80,19 @@ Use for initial data fetching and static content:
 
 ```typescript
 // app/(dashboard)/page.tsx - Server Component
-import { sessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/server';
+import { timerControllerGetCurrentTimer } from '@repo/monitabits-kubb/server';
 import { getApiHeaders } from '../../utils/api-headers';
-import { DashboardClient } from './_components/dashboard-client';
+import { PomodoroTimer } from './_components/pomodoro-timer';
 
 export default async function DashboardPage() {
   // Fetch data on the server
   const headers = await getApiHeaders();
-  const data = await sessionsControllerGetCurrentSession({ headers });
+  const data = await timerControllerGetCurrentTimer({ headers });
   
   return (
     <main>
       {/* Pass server data to client component */}
-      <DashboardClient initialSession={data?.session ?? null} />
+      <PomodoroTimer initialTimer={data?.timer ?? null} />
     </main>
   );
 }
@@ -105,22 +104,24 @@ Use for interactivity and real-time updates:
 ```typescript
 'use client';
 
-import { useSessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/hooks';
-import { ActionButton, StatusCard } from '@repo/ui/molecules';
+import { useTimerControllerGetCurrentTimer } from '@repo/monitabits-kubb/hooks';
+import { Button, Card } from '@repo/ui/atoms';
 
-export function DashboardClient({ initialSession }) {
+export function PomodoroTimer({ initialTimer }) {
   // Real-time updates with SWR
-  const { data, mutate } = useSessionsControllerGetCurrentSession({
-    query: { refreshInterval: 30000 },
+  const { data, mutate } = useTimerControllerGetCurrentTimer({
+    query: { refreshInterval: 5000 },
   });
   
   // Use server data as fallback
-  const session = data?.session ?? initialSession;
+  const timer = data?.timer ?? initialTimer;
   
   return (
-    <StatusCard status={session?.status}>
-      {/* Interactive content */}
-    </StatusCard>
+    <Card>
+      {/* Timer display and controls */}
+      <div>{timer?.remainingSeconds}</div>
+      <Button onClick={handleStart}>Start</Button>
+    </Card>
   );
 }
 ```
@@ -132,13 +133,19 @@ Use for mutations triggered from client components:
 // app/(dashboard)/actions.ts
 'use server';
 
-import { sessionsControllerCheckIn } from '@repo/monitabits-kubb/server';
+import { timerControllerStartTimer, timerControllerPauseTimer } from '@repo/monitabits-kubb/server';
 import { revalidatePath } from 'next/cache';
 import { getApiHeaders } from '../../utils/api-headers';
 
-export async function performCheckIn() {
+export async function startTimer(type: 'work' | 'short_break' | 'long_break') {
   const headers = await getApiHeaders();
-  await sessionsControllerCheckIn({}, { headers });
+  await timerControllerStartTimer({ body: { type } }, { headers });
+  revalidatePath('/');
+}
+
+export async function pauseTimer() {
+  const headers = await getApiHeaders();
+  await timerControllerPauseTimer({}, { headers });
   revalidatePath('/');
 }
 ```
@@ -164,21 +171,21 @@ export async function getApiHeaders(): Promise<{ 'X-Device-Id': string }> {
 
 ```typescript
 // Server Components - use server functions
-import { sessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/server';
-import { Card, CardContent, CardHeader } from '@repo/ui/atoms';
+import { timerControllerGetCurrentTimer } from '@repo/monitabits-kubb/server';
+import { Card, CardContent } from '@repo/ui/atoms';
 
 // Client Components - use hooks
 'use client';
-import { useSessionsControllerGetCurrentSession } from '@repo/monitabits-kubb/hooks';
-import { ActionButton, StatusCard } from '@repo/ui/molecules';
+import { useTimerControllerGetCurrentTimer } from '@repo/monitabits-kubb/hooks';
+import { Button, Card } from '@repo/ui/atoms';
 ```
 
 ### Data Fetching Strategy
 
-1. **Server Components** - Initial data fetch with server functions
-2. **Client Components** - Real-time updates with SWR hooks
+1. **Server Components** - Initial data fetch with server functions (timer state)
+2. **Client Components** - Real-time updates with SWR hooks (5 second refresh interval)
 3. **Hydration** - Pass server data as initial props to client components
-4. **Server Actions** - Mutations with `revalidatePath` for cache invalidation
+4. **Server Actions** - Mutations (start, pause, resume, reset) with `revalidatePath` for cache invalidation
 
 ### Loading and Error States
 
@@ -241,8 +248,9 @@ The app is configured as a Progressive Web App:
 - **@repo/utils** - Shared utilities
 
 ### API Communication
-- **Server-side**: Uses `@repo/monitabits-kubb/server` functions
-- **Client-side**: Uses `@repo/monitabits-kubb/hooks` SWR hooks
+- **Server-side**: Uses `@repo/monitabits-kubb/server` functions (timerControllerGetCurrentTimer)
+- **Client-side**: Uses `@repo/monitabits-kubb/hooks` SWR hooks (useTimerControllerGetCurrentTimer)
+- **Timer Operations**: Server actions for start, pause, resume, reset operations
 - **API base URL**: Configured via `NEXT_PUBLIC_API_URL` environment variable
 
 ## Testing Patterns
@@ -260,4 +268,4 @@ describe('StatusCard', () => {
 });
 ```
 
-When working with this application, follow the Server Components first approach - fetch data on the server, pass to client components for interactivity. Use the generated API client appropriately: server functions for Server Components, SWR hooks for Client Components.
+When working with this application, follow the Server Components first approach - fetch timer data on the server, pass to client components for interactivity. The Pomodoro timer component handles real-time countdown and timer controls. Use the generated API client appropriately: server functions for Server Components, SWR hooks for Client Components.

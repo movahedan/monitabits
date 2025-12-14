@@ -34,13 +34,16 @@
 ### Color Palette
 
 #### Primary Colors
-- **Lockdown/Blocked State**: 
-  - Primary: `#DC2626` (Red-600) - Urgency, restriction
-  - Background: `#FEE2E2` (Red-100) - Soft warning
-- **Active/Free State**: 
-  - Primary: `#059669` (Green-600) - Success, progress
+- **Timer Running State**: 
+  - Primary: `#3B82F6` (Blue-600) - Active, focused
+  - Background: `#DBEAFE` (Blue-100) - Calm, productive
+- **Timer Paused State**: 
+  - Primary: `#F59E0B` (Amber-500) - Paused, attention
+  - Background: `#FEF3C7` (Amber-100) - Soft warning
+- **Timer Completed State**: 
+  - Primary: `#059669` (Green-600) - Success, achievement
   - Background: `#D1FAE5` (Green-100) - Positive reinforcement
-- **Neutral States**: 
+- **Timer Idle State**: 
   - Primary: `#6B7280` (Gray-500) - Information, neutral
   - Background: `#F9FAFB` (Gray-50) - Clean, minimal
 

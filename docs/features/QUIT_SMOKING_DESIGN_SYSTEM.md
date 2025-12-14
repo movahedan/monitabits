@@ -46,10 +46,9 @@
 │                    Data Layer                                 │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │  PostgreSQL Database                                  │   │
-│  │  - User Sessions                                      │   │
-│  │  - Check-ins & Actions                                │   │
+│  │  - Timer State                                        │   │
+│  │  - Pomodoro Sessions                                  │   │
 │  │  - Settings                                           │   │
-│  │  - Security Logs                                      │   │
 │  └──────────────────────────────────────────────────────┘   │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -129,14 +128,14 @@
   - Time validation
   - Security enforcement
   - Database operations
-  - Session management
+  - Timer management
 
 #### 2. Database (PostgreSQL)
 - **Purpose**: Persistent data storage
 - **Schema**: See [Database & API Design](./QUIT_SMOKING_DATABASE_API.md)
 - **Tables**:
   - `users` - Device-based user records
-  - `sessions` - Active lockdown sessions
+  - `timer` - Current Pomodoro timer state
   - `check_ins` - Activity logging
   - `settings` - User preferences
   - `reflections` - Reflection responses
@@ -165,27 +164,22 @@ User Action (Frontend)
     ↓
 Client Component (React)
     ↓
-API Client (lib/api/client.ts)
-    ├─ Device ID (localStorage)
-    ├─ Client Time (new Date())
-    ├─ Timezone Offset
-    └─ Timezone Name
+API Client (Server Actions / SWR Hooks)
+    ├─ Device ID (cookies)
     ↓
 HTTP Request (fetch)
-    ├─ Headers: X-Device-Id, X-Client-Time, X-Timezone-Offset
+    ├─ Headers: X-Device-Id
     └─ Body: Request payload
     ↓
-NestJS Middleware
-    ├─ Time Validation
+NestJS Guards
     ├─ Device Authentication
     └─ Request Logging
     ↓
 Controller (Route Handler)
     ↓
 Service (Business Logic)
-    ├─ Time Validation Service
-    ├─ Session Service
-    └─ Security Service
+    ├─ Timer Service
+    └─ Settings Service
     ↓
 Repository/ORM (Database Access)
     ↓
@@ -198,52 +192,48 @@ Response (JSON)
 Frontend (Update UI)
 ```
 
-### Time Validation Flow
+### Timer State Management Flow
 
 ```
-Client Request
+Timer Operation Request
     ↓
-Extract Headers:
-    ├─ X-Client-Time
-    ├─ X-Timezone-Offset
-    └─ X-Timezone-Name
+Device Authentication
+    ├─ Validate X-Device-Id
+    └─ Ensure Device Exists
     ↓
-Time Validation Service
-    ├─ Get Server Time (NTP-synced)
-    ├─ Compare Client vs Server Time
-    ├─ Check Timezone Consistency
-    ├─ Detect Time Manipulation
-    └─ Log Security Events
+Timer Service
+    ├─ Get Current Timer State
+    ├─ Validate Operation (e.g., can't pause if not running)
+    ├─ Update Timer State
+    ├─ Calculate Remaining Time (if running)
+    └─ Record Session (if completed)
     ↓
-Validation Result
-    ├─ Valid: Process Request
-    └─ Invalid: Return 400 Error
+Response
+    ├─ Success: Return Updated Timer
+    └─ Error: Return Error Message
 ```
 
-### Session Management Flow
+### Timer Management Flow
 
 ```
 App Open
     ↓
-Auto Check-in (useAutoSave hook)
-    ↓
-POST /api/sessions/check-in
+GET /api/timer/current
     ├─ Device ID
-    ├─ Client Time
-    └─ Timezone Info
     ↓
-Backend: Get or Create User
+Backend: Get or Create Device
     ↓
-Backend: Get Current Session
-    ├─ Check Active Sessions
-    ├─ Calculate Time Remaining
-    └─ Determine Status (locked/active)
+Backend: Get Current Timer
+    ├─ Check Timer State (idle/running/paused/completed)
+    ├─ Calculate Remaining Time (if running)
+    └─ Return Timer Data
     ↓
-Response: Session Data
+Response: Timer Data
     ↓
 Frontend: Update UI
-    ├─ Show Countdown (if locked)
-    └─ Show Time Ahead (if active)
+    ├─ Show Timer Display
+    ├─ Show Countdown (if running)
+    └─ Show Controls (based on state)
 ```
 
 ## 🔒 Security Architecture
@@ -251,8 +241,7 @@ Frontend: Update UI
 ### Security Layers
 
 #### 1. Client-Side Security
-- **Device ID**: Generated and stored in localStorage
-- **Time Headers**: Always sent with requests
+- **Device ID**: Generated and stored in cookies (via middleware)
 - **HTTPS Only**: All API calls over HTTPS
 - **Input Validation**: Client-side validation before submission
 
@@ -263,36 +252,35 @@ Frontend: Update UI
 - **Request Validation**: All requests validated
 
 #### 3. Server-Side Security
-- **Time Validation**: Every request validated
-- **Device Authentication**: Device ID verified
+- **Device Authentication**: Device ID verified on all requests
+- **Timer State Management**: Server-side timer state prevents manipulation
 - **Input Sanitization**: All inputs sanitized
-- **SQL Injection Prevention**: Parameterized queries
-- **Security Logging**: All security events logged
+- **SQL Injection Prevention**: Parameterized queries (Prisma)
+- **State Validation**: Timer operations validated (e.g., can't pause if not running)
 
-### Anti-Cheat Mechanisms
+### Timer State Management
 
 ```
 ┌─────────────────────────────────────────┐
-│      Time Validation Pipeline            │
+│      Timer State Pipeline                │
 ├─────────────────────────────────────────┤
-│ 1. Extract Client Time from Headers     │
-│ 2. Get Server Time (NTP-synced)         │
-│ 3. Calculate Time Difference             │
-│ 4. Check Tolerance (5 seconds)            │
-│ 5. Validate Timezone Consistency         │
-│ 6. Detect Backward Time Jumps            │
-│ 7. Detect Forward Time Jumps             │
-│ 8. Log Security Event if Invalid         │
-│ 9. Return Validation Result              │
+│ 1. Get Current Timer from Database      │
+│ 2. Calculate Remaining Time (if running)│
+│ 3. Check if Timer Completed             │
+│ 4. Update State Based on Operation      │
+│ 5. Store Remaining Time (if paused)      │
+│ 6. Record Session (if completed)       │
+│ 7. Return Updated Timer State           │
 └─────────────────────────────────────────┘
 ```
 
-### Security Event Types
+### Timer State Transitions
 
-- `time_manipulation` - Client time doesn't match server time
-- `timezone_change` - Sudden timezone change detected
-- `suspicious_activity` - Pattern of suspicious requests
-- `validation_failure` - Time validation failed
+- `idle` → `running` - Start timer operation
+- `running` → `paused` - Pause timer operation
+- `paused` → `running` - Resume timer operation
+- `running` → `completed` - Timer expires automatically
+- `*` → `idle` - Reset timer operation
 
 ## 🚀 Deployment Architecture
 
@@ -449,7 +437,7 @@ Error:
 ### Current Design (Single User)
 
 - **Stateless API**: Easy to scale horizontally
-- **Device-Based Auth**: No session storage needed
+- **Device-Based Auth**: Device ID stored in cookies, no session storage needed
 - **Database**: Single user, minimal load
 
 ### Future Scalability (If Multi-User)
@@ -463,7 +451,7 @@ Error:
 ### Performance Optimizations
 
 - **Database Indexing**: Indexed on frequently queried columns
-- **API Response Caching**: Cache session data (with TTL)
+- **API Response Caching**: Cache timer data (with TTL)
 - **Frontend Caching**: Service worker for offline support
 - **Code Splitting**: Next.js automatic code splitting
 - **Image Optimization**: Next.js Image component

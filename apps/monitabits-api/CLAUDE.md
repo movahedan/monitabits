@@ -41,14 +41,12 @@ apps/monitabits-api/
 ├── src/
 │   ├── common/
 │   │   ├── decorators/       # Custom decorators
-│   │   │   ├── client-time.decorator.ts
 │   │   │   └── device-id.decorator.ts
 │   │   ├── filters/          # Exception filters
 │   │   │   ├── all-exceptions.filter.ts
 │   │   │   └── http-exception.filter.ts
 │   │   ├── guards/           # Authentication guards
-│   │   │   ├── device-auth.guard.ts
-│   │   │   └── time-validation.guard.ts
+│   │   │   └── device-auth.guard.ts
 │   │   ├── interceptors/     # Response transformation
 │   │   │   └── transform.interceptor.ts
 │   │   ├── models/           # Shared response DTOs
@@ -60,16 +58,11 @@ apps/monitabits-api/
 │   │   │   └── prisma.service.ts
 │   │   └── validators/       # Header validation
 │   │       └── headers.ts
-│   ├── actions/              # Actions module (cheat, harm, follow-up)
-│   │   ├── action.model.ts
-│   │   ├── actions.controller.ts
-│   │   ├── actions.module.ts
-│   │   └── actions.service.ts
-│   ├── sessions/             # Sessions module (check-in/out, current)
-│   │   ├── session.model.ts  # Session, CheckIn, UserStats, CurrentSessionResponse
-│   │   ├── sessions.controller.ts
-│   │   ├── sessions.module.ts
-│   │   └── sessions.service.ts
+│   ├── timer/                # Timer module (Pomodoro timer)
+│   │   ├── timer.model.ts    # Timer, TimerResponse, StartTimerRequest
+│   │   ├── timer.controller.ts
+│   │   ├── timer.module.ts
+│   │   └── timer.service.ts
 │   ├── settings/             # Settings module
 │   │   ├── settings.model.ts
 │   │   ├── settings.controller.ts
@@ -94,37 +87,53 @@ apps/monitabits-api/
 Each module has its own model file defining DTOs with `@ApiProperty` decorators:
 
 ```typescript
-// src/sessions/session.model.ts
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+// src/timer/timer.model.ts
+import { ApiProperty } from "@nestjs/swagger";
 import { z } from "zod";
 
-export class SessionDto {
-  @ApiProperty({ type: String, format: "uuid" })
+export class TimerDto {
+  @ApiProperty({ type: String })
   readonly id!: string;
 
-  @ApiProperty({ enum: ["active", "locked", "completed"] })
-  readonly status!: SessionStatus;
+  @ApiProperty({ enum: ["idle", "running", "paused", "completed"] })
+  readonly status!: "idle" | "running" | "paused" | "completed";
 
-  @ApiPropertyOptional({ type: Number, nullable: true })
-  readonly timeRemaining?: number | null;
+  @ApiProperty({ enum: ["work", "short_break", "long_break"] })
+  readonly type!: "work" | "short_break" | "long_break";
+
+  @ApiProperty({ type: Number })
+  readonly durationSeconds!: number;
+
+  @ApiProperty({ type: Number })
+  readonly remainingSeconds!: number;
+
+  @ApiProperty({ type: String, nullable: true })
+  readonly startedAt!: string | null;
+
+  @ApiProperty({ type: String, nullable: true })
+  readonly pausedAt!: string | null;
 }
 
 // Zod schema for runtime validation
-export const SessionSchema = z.object({
-  id: z.string().uuid(),
-  status: z.enum(["active", "locked", "completed"]),
-  timeRemaining: z.number().int().nullable().optional(),
+export const TimerSchema = z.object({
+  id: z.string(),
+  status: z.enum(["idle", "running", "paused", "completed"]),
+  type: z.enum(["work", "short_break", "long_break"]),
+  durationSeconds: z.number(),
+  remainingSeconds: z.number(),
+  startedAt: z.string().nullable(),
+  pausedAt: z.string().nullable(),
 });
 
 // TypeScript type
-export type Session = z.infer<typeof SessionSchema>;
+export type Timer = z.infer<typeof TimerSchema>;
 ```
 
-### Key Session Types
+### Key Timer Types
 
-- **Session**: Current lockdown session state (id, status, timeRemaining, timeAhead)
-- **UserStats**: User progress stats (totalTimeSaved, currentStreak, lastRelapse)
-- **CurrentSessionResponse**: Combined session + user stats for `/sessions/current`
+- **Timer**: Current Pomodoro timer state (id, status, type, durationSeconds, remainingSeconds, startedAt, pausedAt)
+- **TimerResponse**: Wrapped timer response for `/timer/current` and timer operations
+- **StartTimerRequest**: Request to start a timer with type (work, short_break, long_break)
 
 ### OpenAPI Generation Flow
 
@@ -143,29 +152,56 @@ When the API starts in dev mode:
 ### Controller Pattern
 
 ```typescript
-@Controller("sessions")
-@ApiTags("Sessions")
-@UseGuards(DeviceAuthGuard, TimeValidationGuard)
-export class SessionsController {
-  constructor(private readonly sessionsService: SessionsService) {}
+@Controller("timer")
+@ApiTags("Timer")
+@UseGuards(DeviceAuthGuard)
+export class TimerController {
+  constructor(private readonly timerService: TimerService) {}
 
   @Get("current")
-  @ApiOperation({ summary: "Get current session and user stats" })
-  @ApiResponse({ status: 200, type: CurrentSessionResponseDto })
-  async getCurrentSession(
+  @ApiOperation({ summary: "Get current timer status" })
+  @ApiResponse({ status: 200, type: TimerResponseDto })
+  async getCurrentTimer(
     @DeviceId() deviceId: string,
-  ): Promise<CurrentSessionResponse> {
-    return this.sessionsService.getCurrentSession(deviceId);
+  ): Promise<TimerResponse> {
+    return this.timerService.getTimer(deviceId);
   }
 
-  @Post("check-in")
-  @ApiOperation({ summary: "Create check-in" })
-  @ApiResponse({ status: 201, type: CheckInResponseDto })
-  async checkIn(
+  @Post("start")
+  @ApiOperation({ summary: "Start a timer" })
+  @ApiResponse({ status: 200, type: TimerResponseDto })
+  async startTimer(
     @DeviceId() deviceId: string,
-    @ClientTime() clientTime: Date,
-  ): Promise<CheckInResponse> {
-    return this.sessionsService.createCheckIn(deviceId, clientTime, "check_in");
+    @Body(new ZodValidationPipe(StartTimerRequestSchema)) request: StartTimerRequest,
+  ): Promise<TimerResponse> {
+    return this.timerService.startTimer(deviceId, request);
+  }
+
+  @Post("pause")
+  @ApiOperation({ summary: "Pause the timer" })
+  @ApiResponse({ status: 200, type: TimerResponseDto })
+  async pauseTimer(
+    @DeviceId() deviceId: string,
+  ): Promise<TimerResponse> {
+    return this.timerService.pauseTimer(deviceId);
+  }
+
+  @Post("resume")
+  @ApiOperation({ summary: "Resume the timer" })
+  @ApiResponse({ status: 200, type: TimerResponseDto })
+  async resumeTimer(
+    @DeviceId() deviceId: string,
+  ): Promise<TimerResponse> {
+    return this.timerService.resumeTimer(deviceId);
+  }
+
+  @Post("reset")
+  @ApiOperation({ summary: "Reset the timer" })
+  @ApiResponse({ status: 200, type: TimerResponseDto })
+  async resetTimer(
+    @DeviceId() deviceId: string,
+  ): Promise<TimerResponse> {
+    return this.timerService.resetTimer(deviceId);
   }
 }
 ```
@@ -179,11 +215,9 @@ export class SessionsController {
 ### Models
 
 - **Device** - Device identification
-- **Session** - Lockdown sessions
-- **Action** - User actions (cheat, harm)
-- **CheckIn** - Session check-ins
-- **Settings** - Device settings
-- **FollowUp** - Follow-up questions/answers
+- **Timer** - Pomodoro timer state (idle, running, paused, completed)
+- **PomodoroSession** - Completed Pomodoro sessions (work, short_break, long_break)
+- **Settings** - Device settings (workMinutes, shortBreakMinutes, longBreakMinutes)
 
 ### Running Migrations
 
@@ -201,12 +235,10 @@ bun run db:migrate:deploy
 
 All requests require:
 - `X-Device-Id` - UUID device identifier
-- `X-Client-Time` - ISO-8601 timestamp (validated ±5 minutes of server time)
 
 ### Guards
 
 - **DeviceAuthGuard** - Validates `X-Device-Id` header
-- **TimeValidationGuard** - Validates `X-Client-Time` header, prevents time manipulation
 
 ## Response Format
 
