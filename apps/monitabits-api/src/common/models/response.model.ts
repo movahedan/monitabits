@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { z } from "zod";
+import { BaseDto } from "./dto.model";
 
-export class SuccessResponseDto<TData = unknown> {
+export class SuccessResponseDto<TData = unknown> extends BaseDto {
 	@ApiProperty({ type: Boolean, default: true })
 	readonly success!: boolean;
 
@@ -24,7 +25,7 @@ export const SuccessResponseSchema = z.object({
 	timestamp: z.string().datetime().optional(),
 });
 
-export class ErrorResponseDto {
+export class ErrorResponseDto extends BaseDto {
 	@ApiProperty({ type: Boolean, default: false })
 	readonly success!: boolean;
 

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { z } from "zod";
+import { BaseDto } from "../common/models/dto.model";
 
 export const sessionStatusEnum = {
 	active: "active",
@@ -9,7 +10,7 @@ export const sessionStatusEnum = {
 
 export type SessionStatus = (typeof sessionStatusEnum)[keyof typeof sessionStatusEnum];
 
-export class SessionDto {
+export class SessionDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 
@@ -60,7 +61,7 @@ export const checkInTypeEnum = {
 
 export type CheckInType = (typeof checkInTypeEnum)[keyof typeof checkInTypeEnum];
 
-export class CheckInDto {
+export class CheckInDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 
@@ -89,7 +90,7 @@ export const CheckInSchema = z.object({
 	createdAt: z.string().datetime(),
 });
 
-export class CheckInResponseDto {
+export class CheckInResponseDto extends BaseDto {
 	@ApiProperty({ type: () => CheckInDto })
 	readonly checkIn!: CheckIn;
 
@@ -108,7 +109,7 @@ export const CheckInResponseSchema = z.object({
 });
 
 // User stats for current session response
-export class UserStatsDto {
+export class UserStatsDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 
@@ -137,7 +138,7 @@ export const UserStatsSchema = z.object({
 });
 
 // Current session response
-export class CurrentSessionResponseDto {
+export class CurrentSessionResponseDto extends BaseDto {
 	@ApiProperty({ type: () => SessionDto, nullable: true })
 	readonly session!: Session | null;
 

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { z } from "zod";
+import { BaseDto } from "../common/models/dto.model";
 import { type Session, SessionDto, SessionSchema } from "../sessions/session.model";
 
 export const actionTypeEnum = {
@@ -9,7 +10,7 @@ export const actionTypeEnum = {
 
 export type ActionType = (typeof actionTypeEnum)[keyof typeof actionTypeEnum];
 
-export class ActionConsequencesDto {
+export class ActionConsequencesDto extends BaseDto {
 	@ApiPropertyOptional({ type: String })
 	readonly message?: string;
 
@@ -27,7 +28,7 @@ export const ActionConsequencesSchema = z.object({
 	additionalLockdown: z.number().int().optional(),
 });
 
-export class ActionDto {
+export class ActionDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 
@@ -61,7 +62,7 @@ export const ActionSchema = z.object({
 	lockdownStarted: z.boolean().optional(),
 });
 
-export class ActionResponseDto {
+export class ActionResponseDto extends BaseDto {
 	@ApiProperty({ type: () => ActionDto })
 	readonly action!: Action;
 
@@ -79,7 +80,7 @@ export const ActionResponseSchema = z.object({
 	session: SessionSchema,
 });
 
-export class PendingFollowUpQuestionDto {
+export class PendingFollowUpQuestionDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 
@@ -97,7 +98,7 @@ export const PendingFollowUpQuestionSchema = z.object({
 	text: z.string(),
 });
 
-export class PendingFollowUpResponseDto {
+export class PendingFollowUpResponseDto extends BaseDto {
 	@ApiProperty({ type: Boolean })
 	readonly hasPending!: boolean;
 
@@ -125,7 +126,7 @@ export const PendingFollowUpResponseSchema = z.object({
 	cyclesMissed: z.number().int().min(0).nullable().optional(),
 });
 
-export class FollowUpRequestDto {
+export class FollowUpRequestDto extends BaseDto {
 	@ApiProperty({ type: String, minLength: 1 })
 	readonly answer!: string;
 
@@ -143,7 +144,7 @@ export const FollowUpRequestSchema = z.object({
 	harmIds: z.array(z.string().uuid()).optional(),
 });
 
-export class FollowUpResponseDto {
+export class FollowUpResponseDto extends BaseDto {
 	@ApiProperty({ type: String, format: "uuid" })
 	readonly id!: string;
 

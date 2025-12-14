@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { z } from "zod";
+import { BaseDto } from "../common/models/dto.model";
 
-export class SettingsDto {
+export class SettingsDto extends BaseDto {
 	@ApiProperty({ type: Number, minimum: 1, maximum: 10080 })
 	readonly lockdownMinutes!: number;
 
@@ -19,7 +20,7 @@ export const SettingsSchema = z.object({
 	updatedAt: z.string().datetime(),
 });
 
-export class UpdateSettingsRequestDto {
+export class UpdateSettingsRequestDto extends BaseDto {
 	@ApiProperty({ type: Number, minimum: 1, maximum: 10080 })
 	readonly lockdownMinutes!: number;
 }

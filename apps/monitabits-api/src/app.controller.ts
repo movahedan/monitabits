@@ -1,9 +1,9 @@
 import { Controller, Get, HttpStatus } from "@nestjs/common";
 import { ApiOperation, ApiProperty, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { z } from "zod";
-import { ErrorResponseDto, SuccessResponseDto } from "./common/models";
+import { BaseDto, ErrorResponseDto, SuccessResponseDto } from "./common/models";
 
-export class AppDto {
+export class AppDto extends BaseDto {
 	@ApiProperty({ type: Boolean })
 	readonly ok!: boolean;
 }
@@ -12,7 +12,7 @@ export const AppSchema = z.object({
 	ok: z.boolean(),
 });
 
-export class AppResponseDto {
+export class AppResponseDto extends BaseDto {
 	@ApiProperty({ type: () => AppDto })
 	readonly data!: AppDto;
 }

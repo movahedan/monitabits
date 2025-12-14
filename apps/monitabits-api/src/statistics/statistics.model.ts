@@ -1,8 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { z } from "zod";
+import { BaseDto } from "../common/models/dto.model";
 import { type SessionStatus } from "../sessions/session.model";
 
-export class LockdownNowResponseDto {
+export class LockdownNowResponseDto extends BaseDto {
 	@ApiProperty({ type: Boolean })
 	readonly isLocked!: boolean;
 
@@ -25,7 +26,7 @@ export const LockdownNowResponseSchema = z.object({
 	sessionId: z.string().uuid().nullable().optional(),
 });
 
-export class SessionReportDto {
+export class SessionReportDto extends BaseDto {
 	@ApiProperty({ type: Number, minimum: 0 })
 	readonly checkInsDuringLockdown!: number;
 
@@ -43,7 +44,7 @@ export const SessionReportSchema = z.object({
 	timeSpentOnPageDuringLockdown: z.number().int().min(0),
 });
 
-export class StatisticsSummaryDto {
+export class StatisticsSummaryDto extends BaseDto {
 	@ApiProperty({ type: Number })
 	readonly totalTimeSaved!: number;
 
@@ -91,7 +92,7 @@ export const StatisticsSummarySchema = z.object({
 	sessionReport: SessionReportSchema.optional(),
 });
 
-export class TimeTableEntryDto {
+export class TimeTableEntryDto extends BaseDto {
 	@ApiProperty({ type: String, format: "date" })
 	readonly date!: string;
 
@@ -139,7 +140,7 @@ export const TimeTableEntrySchema = z.object({
 	timeSpentOnPage: z.number().int(),
 });
 
-export class StatisticsDetailsResponseDto {
+export class StatisticsDetailsResponseDto extends BaseDto {
 	@ApiProperty({ type: [TimeTableEntryDto] })
 	readonly entries!: TimeTableEntry[];
 
@@ -167,7 +168,7 @@ export const StatisticsDetailsResponseSchema = z.object({
 	totalEntries: z.number().int(),
 });
 
-export class StatsDetailsQueryParamsDto {
+export class StatsDetailsQueryParamsDto extends BaseDto {
 	@ApiProperty({ type: String, format: "date" })
 	readonly startDate!: string;
 
