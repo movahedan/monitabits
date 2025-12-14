@@ -6,14 +6,13 @@ import { AppModule } from "./app.module";
 import { swaggerSetup } from "./swagger.setup";
 
 async function bootstrap(): Promise<void> {
-	const app = await NestFactory.create<NestApplication>(AppModule, { logger: logger });
+	const app = await NestFactory.create<NestApplication>(AppModule, { logger });
 
 	// Alias endpoint for infra/health checks that hit `/status` (without global `/api` prefix).
 	// The canonical, documented endpoint remains: GET `/api/status`.
-	const server = app.getHttpAdapter().getInstance<{
-		get: (path: string, handler: (req: Request, res: Response) => void) => void;
-	}>();
-	server.get("/status", (_req, res) => {
+	const server = app.getHttpAdapter().getInstance();
+
+	server.get("/status", (_req: Request, res: Response) => {
 		res.status(200).json({
 			success: true,
 			data: { ok: true },
@@ -23,11 +22,7 @@ async function bootstrap(): Promise<void> {
 
 	app.enableCors({
 		origin: process.env.ALLOWED_ORIGINS?.split(",") || [
-			"http://localhost:3000",
-			"http://localhost:3001",
 			"http://localhost:3002",
-			"http://localhost:3003",
-			"http://localhost:3004",
 			"http://localhost:3005",
 		],
 		credentials: true,
@@ -44,12 +39,12 @@ async function bootstrap(): Promise<void> {
 
 	app.setGlobalPrefix("api");
 
-	const host = process.env.HOST || "localhost";
-	const port = process.env.PORT ? Number(process.env.PORT) : 3003;
-
 	// Always set up Swagger (serves /api-docs and /api-docs-json)
 	// File generation and Kubb only run in development (handled in swaggerSetup)
 	await swaggerSetup(app);
+
+	const host = process.env.HOST || "localhost";
+	const port = process.env.PORT ? Number(process.env.PORT) : 3003;
 
 	await app.listen(port, host);
 	logger.info(`API running on ${host}:${port}`);

@@ -38,7 +38,6 @@
 	"conventionalCommits.scopes": [
 		"root",
 		"monitabits-api",
-		"monitabits-swagger",
 		"monitabits-app",
 		"@repo/ui",
 		"@repo/utils",
