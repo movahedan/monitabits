@@ -1,0 +1,49 @@
+# Production Stack Configuration
+# ===============================
+# This file contains NON-SECRET configuration values.
+#
+# REQUIRED SECRETS (must be set via CLI):
+#   pulumi config set --secret rds:password "<secure-password>"
+#
+# REQUIRED CONFIGURATION (update before deploying):
+#   - compute:allowedSshCidrs: Replace with your actual IP address(es)
+#
+# PRODUCTION SECURITY NOTES:
+#   - Multi-AZ is ENABLED for high availability
+#   - Deletion protection is enabled for RDS
+#   - 30-day backup retention
+#   - Performance Insights enabled
+#
+config:
+  # Project Configuration
+  project:name: monitabits-infra
+  project:environment: prod
+
+  # VPC Configuration
+  vpc:cidr: "10.2.0.0/16"
+  vpc:publicSubnetCidrs:
+    - "10.2.1.0/24"
+    - "10.2.2.0/24"
+    - "10.2.3.0/24"
+  vpc:privateSubnetCidrs:
+    - "10.2.10.0/24"
+    - "10.2.11.0/24"
+    - "10.2.12.0/24"
+  vpc:availabilityZones: []
+
+  # Compute Configuration
+  compute:instanceType: t3.medium
+  compute:diskSize: 50
+  # SECURITY: Update with your actual IP address(es) for SSH access
+  # Consider using VPN or bastion host instead of direct SSH in production
+  # Never use 0.0.0.0/0 - this is blocked by validation
+  compute:allowedSshCidrs: []
+
+  # RDS Configuration
+  rds:instanceClass: db.t3.medium
+  rds:allocatedStorage: 100
+  rds:backupRetentionDays: 30
+  rds:multiAz: true
+
+  # Storage Configuration
+  s3:bucketSuffix: "prod001"

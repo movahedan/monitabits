@@ -1,0 +1,151 @@
+# =============================================================================
+# Pulumi Stack Configuration Example
+# =============================================================================
+#
+# This is an EXAMPLE configuration file. Copy this to create a new stack:
+#
+#   cp Pulumi.example.yaml Pulumi.<stack-name>.yaml
+#
+# Then configure the required values and secrets.
+#
+# =============================================================================
+# REQUIRED SECRETS (set via CLI, never in this file)
+# =============================================================================
+#
+# These secrets MUST be set before deployment:
+#
+#   # RDS database password (required)
+#   pulumi config set --secret rds:password "<secure-password>"
+#
+#   # Generate a secure password:
+#   openssl rand -base64 32
+#
+# =============================================================================
+# CONFIGURATION STRUCTURE
+# =============================================================================
+
+config:
+  # ---------------------------------------------------------------------------
+  # Project Configuration
+  # ---------------------------------------------------------------------------
+  # project:name - Application name (used in resource naming)
+  # project:environment - Environment name (dev, stg, prod)
+  project:name: monitabits-infra
+  project:environment: dev  # Change to: dev, stg, or prod
+
+  # ---------------------------------------------------------------------------
+  # VPC Configuration
+  # ---------------------------------------------------------------------------
+  # vpc:cidr - VPC CIDR block (e.g., 10.0.0.0/16)
+  #   - Must be between /16 and /28
+  #   - Each environment should use non-overlapping CIDRs
+  #   - Example ranges: 10.0.0.0/16 (dev), 10.1.0.0/16 (stg), 10.2.0.0/16 (prod)
+  vpc:cidr: "10.0.0.0/16"
+
+  # vpc:publicSubnetCidrs - Public subnet CIDR blocks
+  #   - Hosts EC2 instances with public IPs
+  #   - At least 2 subnets recommended for HA
+  vpc:publicSubnetCidrs:
+    - "10.0.1.0/24"
+    - "10.0.2.0/24"
+
+  # vpc:privateSubnetCidrs - Private subnet CIDR blocks
+  #   - Hosts RDS and other private resources
+  #   - At least 2 subnets required for RDS Multi-AZ
+  vpc:privateSubnetCidrs:
+    - "10.0.10.0/24"
+    - "10.0.11.0/24"
+
+  # vpc:availabilityZones - Specific AZs to use (optional)
+  #   - Leave empty to auto-detect available AZs
+  #   - Example: ["us-east-1a", "us-east-1b"]
+  vpc:availabilityZones: []
+
+  # ---------------------------------------------------------------------------
+  # Compute Configuration
+  # ---------------------------------------------------------------------------
+  # compute:instanceType - EC2 instance type
+  #   - dev: t3.micro (free tier eligible)
+  #   - stg: t3.small
+  #   - prod: t3.medium or larger
+  compute:instanceType: t3.micro
+
+  # compute:diskSize - Root EBS volume size in GB
+  compute:diskSize: 20
+
+  # compute:allowedSshCidrs - CIDR blocks allowed for SSH access
+  #   ⚠️  SECURITY: Never use 0.0.0.0/0
+  #   - Use your specific IP: "203.0.113.50/32"
+  #   - For VPN: "10.100.0.0/16"
+  #   - Get your IP: curl -s https://checkip.amazonaws.com
+  #
+  #   IMPORTANT: This is validated and MUST NOT be empty or 0.0.0.0/0
+  compute:allowedSshCidrs:
+    - "YOUR_IP_ADDRESS/32"  # Replace with actual IP
+
+  # ---------------------------------------------------------------------------
+  # RDS Configuration
+  # ---------------------------------------------------------------------------
+  # rds:instanceClass - RDS instance class
+  #   - dev: db.t3.micro (free tier eligible)
+  #   - stg: db.t3.small
+  #   - prod: db.t3.medium or larger (consider db.r6g for memory-intensive)
+  rds:instanceClass: db.t3.micro
+
+  # rds:allocatedStorage - Storage size in GB
+  #   - Minimum: 20 GB
+  #   - Recommended: dev=20, stg=50, prod=100+
+  rds:allocatedStorage: 20
+
+  # rds:backupRetentionDays - Backup retention period in days
+  #   - Minimum for prod: 14 days (enforced by validation)
+  #   - Maximum: 35 days
+  rds:backupRetentionDays: 7
+
+  # rds:multiAz - Enable Multi-AZ deployment
+  #   - dev: false (cost savings)
+  #   - stg: false or true (testing)
+  #   - prod: true (REQUIRED for HA)
+  rds:multiAz: false
+
+  # ---------------------------------------------------------------------------
+  # Storage Configuration
+  # ---------------------------------------------------------------------------
+  # s3:bucketSuffix - Suffix for S3 bucket name
+  #   - Bucket name format: monitabits-{env}-assets-{suffix}
+  #   - Must be globally unique
+  s3:bucketSuffix: "unique-suffix-here"
+
+# =============================================================================
+# POST-DEPLOYMENT
+# =============================================================================
+#
+# After deployment, retrieve important outputs:
+#
+#   # View all outputs
+#   pulumi stack output
+#
+#   # Get specific values
+#   pulumi stack output ec2InstancePublicIp
+#   pulumi stack output rdsEndpoint
+#   pulumi stack output ecrRepositoryUri
+#
+#   # Get RDS secret from Secrets Manager
+#   aws secretsmanager get-secret-value \
+#     --secret-id $(pulumi stack output rdsSecretName)
+#
+# =============================================================================
+# CI/CD SETUP
+# =============================================================================
+#
+# The stack creates an IAM role for CI/CD (GitHub Actions):
+#
+#   # Get role ARN
+#   pulumi stack output ciCdRoleArn
+#
+# Configure GitHub Actions OIDC:
+#   1. Create OIDC provider in AWS IAM
+#   2. Update role trust policy with your repo
+#   3. Use aws-actions/configure-aws-credentials with role-to-assume
+#
+# =============================================================================

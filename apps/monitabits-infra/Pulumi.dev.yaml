@@ -1,0 +1,40 @@
+# Development Stack Configuration
+# ================================
+# This file contains NON-SECRET configuration values.
+#
+# REQUIRED SECRETS (must be set via CLI):
+#   pulumi config set --secret rds:password "<secure-password>"
+#
+# REQUIRED CONFIGURATION (update before deploying):
+#   - compute:allowedSshCidrs: Replace with your actual IP address(es)
+#
+config:
+  # Project Configuration
+  project:name: monitabits-infra
+  project:environment: dev
+  # VPC Configuration
+  vpc:cidr: "10.0.0.0/16"
+  vpc:publicSubnetCidrs:
+    - "10.0.1.0/24"
+    - "10.0.2.0/24"
+  vpc:privateSubnetCidrs:
+    - "10.0.10.0/24"
+    - "10.0.11.0/24"
+  vpc:availabilityZones: []
+  # Compute Configuration
+  compute:instanceType: t3.micro
+  compute:diskSize: 30  # Minimum 30GB required by Amazon Linux 2023 AMI
+  # SECURITY: Update with your actual IP address(es) for SSH access
+  # Example: "203.0.113.50/32" for a single IP
+  # Never use 0.0.0.0/0 - this is blocked by validation
+  compute:allowedSshCidrs: ["91.141.165.157/32"]
+  # RDS Configuration
+  rds:instanceClass: db.t3.micro
+  rds:allocatedStorage: 20
+  rds:backupRetentionDays: 1
+  rds:multiAz: "false"
+  # Storage Configuration
+  s3:bucketSuffix: "dev001"
+  aws:region: us-east-1
+  rds:password:
+    secure: AAABAIWTf3XS4HbQhy2N2lP8Tr4g83qCwOFOx/aoa4Z1L2z225lFQrbqkYymxEb76pLLRrUqLZK8o0PJDZ5JZWGeu9XGicUec3D1kQ==
