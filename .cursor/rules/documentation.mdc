@@ -23,8 +23,31 @@ git log --oneline -- docs/ # Check recent documentation updates
 
 find .cursor/rules -type f # Find all general cursor rules files
 find . -name "CLAUDE.md" -type f # Find all CLAUDE docs files
+find . -name "CLAUDE.local.md" -type f # Find personal CLAUDE files
 find docs/ -type f # Find all Developer specific docs files
 ```
+
+### **CLAUDE.md Content Guidelines**
+
+CLAUDE.md files should include:
+
+- **Common Commands**: Frequently used bash/npm/bun commands with examples
+- **Core Files**: Important files Claude should know about and their purposes
+- **Code Style**: Project-specific coding conventions and patterns
+- **Testing Instructions**: How to run tests, what to test, testing patterns
+- **Workflow Patterns**: Common development workflows and best practices
+- **Repository Etiquette**: Branch naming, merge vs rebase, commit conventions
+- **Environment Setup**: Required tools, versions, setup steps
+- **Unexpected Behaviors**: Known quirks, warnings, or gotchas
+- **Tool Integration**: Custom bash tools, MCP servers, or other integrations
+
+**Format**: No required format, but keep it concise and scannable. Use clear sections and bullet points.
+
+**Maintenance**: 
+- Refine like any prompt - iterate based on effectiveness
+- Use `#` key in Claude Code to auto-incorporate instructions
+- Consider running through prompt improver periodically
+- Add emphasis with "IMPORTANT" or "YOU MUST" for critical instructions
 
 ## 🏗️ Three-Tier Documentation Structure
 
@@ -32,9 +55,18 @@ This project maintains three distinct types of documentation, each serving diffe
 
 ### **1. CLAUDE.md Files** 📋
 - **Location**: Root directory `CLAUDE.md` and each project/app `(packages|apps)/<package-name>/CLAUDE.md`
-- **Purpose**: Project-level architecture and main description
-- **Audience**: Developers, architects, project stakeholders
-- **Content**: High-level architecture, project structure, key decisions
+- **Purpose**: Context for Claude Code - automatically pulled into prompts when working in that directory
+- **Audience**: AI assistants (Claude Code), developers using agentic coding tools
+- **Content**: Common commands, core files, code style, testing instructions, workflow patterns, project-specific context
+- **Best Practices** (from [Anthropic's Claude Code Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices)):
+  - Keep concise and human-readable
+  - Document frequently used commands and tools
+  - Include code style guidelines and patterns
+  - Note any unexpected behaviors or warnings
+  - Update iteratively based on effectiveness
+  - Use `#` key in Claude Code to automatically incorporate instructions into CLAUDE.md
+  - Can be placed in root, parent directories (for monorepos), child directories (on-demand), or `~/.claude/CLAUDE.md` (global)
+  - Check into git to share with team, or use `CLAUDE.local.md` and `.gitignore` for personal notes
 
 ### **2. Cursor Rules (.cursor/rules/)** ⚙️
 - **Location**: `.cursor/rules/` directory
