@@ -1,4 +1,4 @@
-#!/bin/bun
+#!/usr/bin/env bun
 import { $ } from "bun";
 import { EntityCompose, EntityPackage } from "intershell/entities";
 
@@ -16,16 +16,19 @@ interface RdsSecret {
 	password: string;
 }
 
+const INFRA_DIR = new URL(".", import.meta.url).pathname;
+const ROOT_DIR = new URL("../../..", import.meta.url).pathname;
+
 async function getPulumiOutputs(stack: string): Promise<PulumiOutputs> {
 	console.log(`📦 Getting Pulumi stack outputs (${stack})...`);
 	const ecrRepo = (
-		await $`pulumi stack output ecrRepositoryUri -s ${stack} --show-secrets`.text()
+		await $`cd ${INFRA_DIR} && pulumi stack output ecrRepositoryUri -s ${stack} --show-secrets`.text()
 	).trim();
 	const ec2InstanceId = (
-		await $`pulumi stack output ec2InstanceId -s ${stack} --show-secrets`.text()
+		await $`cd ${INFRA_DIR} && pulumi stack output ec2InstanceId -s ${stack} --show-secrets`.text()
 	).trim();
 	const rdsSecretName = (
-		await $`pulumi stack output rdsSecretName -s ${stack} --show-secrets`.text()
+		await $`cd ${INFRA_DIR} && pulumi stack output rdsSecretName -s ${stack} --show-secrets`.text()
 	).trim();
 
 	console.log(`  ECR Repository: ${ecrRepo}`);
@@ -39,13 +42,22 @@ async function buildAndPushImages(ecrRepo: string, imageTag: string): Promise<st
 	console.log("🏗️ Building and pushing Docker images...");
 	const builtServices: string[] = [];
 
-	const rootPackage = new EntityPackage("root");
-	const rootPath = rootPackage.getPath();
-	const affectedServices = await new EntityCompose(
-		`${rootPath}/docker-compose.yml`,
-	).getAffectedServices();
+	const compose = new EntityCompose(`${ROOT_DIR}/docker-compose.yml`);
+	const services = await compose.getServices();
 
-	for (const service of affectedServices) {
+	for (const service of services) {
+		try {
+			new EntityPackage(service.name);
+		} catch (error) {
+			if (error instanceof Error) {
+				console.error(`  Skipping ${service.name} (no package): ${error.message}`);
+			} else {
+				console.error(`  Skipping ${service.name} (no package): ${error}`);
+			}
+			console.error(`  Skipping ${service.name} (no package)`);
+			continue;
+		}
+
 		const pkgEntity = new EntityPackage(service.name);
 		const packageName = pkgEntity.getName();
 		const packagePath = pkgEntity.getPath();
@@ -99,9 +111,7 @@ async function deployToEc2(
 	await $`aws ssm wait instance-in-status --instance-ids ${ec2InstanceId} --status-type Online --region ${region}`.nothrow();
 
 	// Read docker-compose.yml and base64 encode it
-	const rootPackage = new EntityPackage("root");
-	const rootPath = rootPackage.getPath();
-	const composeFile = await Bun.file(`${rootPath}/docker-compose.yml`).text();
+	const composeFile = await Bun.file(`${ROOT_DIR}/docker-compose.yml`).text();
 	const composeBase64 = Buffer.from(composeFile).toString("base64");
 
 	const databaseUrl = buildDatabaseUrl(rdsSecret);
@@ -155,10 +165,24 @@ async function deployToEc2(
 	console.log("✅ Deployment completed successfully!");
 }
 
+function parseArgs(): { env: string } {
+	const args = process.argv.slice(2);
+	let env = "dev";
+
+	for (let i = 0; i < args.length; i++) {
+		if (args[i] === "--env" && args[i + 1]) {
+			env = args[i + 1];
+		}
+	}
+
+	return { env };
+}
+
 async function main() {
+	const { env } = parseArgs();
 	const imageTag = process.env.IMAGE_TAG || process.env.GITHUB_SHA || "latest";
 	const region = process.env.AWS_REGION || "us-east-1";
-	const stack = process.env.PULUMI_STACK || "dev";
+	const stack = process.env.PULUMI_STACK || env;
 
 	try {
 		const outputs = await getPulumiOutputs(stack);
@@ -172,7 +196,11 @@ async function main() {
 		const rdsSecret = await getRdsSecret(outputs.rdsSecretName, region);
 		await deployToEc2(outputs.ec2InstanceId, outputs.ecrRepo, rdsSecret, region, imageTag);
 	} catch (error) {
-		console.error("Error:", error instanceof Error ? error.message : error);
+		if (error instanceof Error) {
+			console.error("Error:", error.message, error.stack, error.cause);
+		} else {
+			console.error("Error:", error);
+		}
 		process.exit(1);
 	}
 }

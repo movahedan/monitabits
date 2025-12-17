@@ -1,20 +1,17 @@
-name: Main
+name: Production
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  workflow_run:
-    workflows: ["Check"]
-    types:
-      - completed
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy-prod" to confirm production deployment'
+        required: true
+        type: string
 
 jobs:
-  build-and-deploy:
-    name: Build
-    if: github.event.workflow_run.conclusion == 'success'
+  deploy-to-prod:
+    name: 🚀 Deploy to Production
+    if: github.event.inputs.confirm == 'deploy-prod'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -30,7 +27,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
-          role-session-name: GitHubActions-Deploy
+          role-session-name: GitHubActions-Deploy-Prod
 
       - name: 📦 Setup Pulumi
         uses: pulumi/actions@v6
@@ -62,13 +59,11 @@ jobs:
         run: bun install -E --no-save
 
       - name: 🔍 Quick check
-        run: bun run check && bun run test
+        run: bun run check && bun run check:types && bun run test
 
-      - name: 🚀 Build, Push & Deploy
+      - name: 🚀 Deploy to Production
         env:
           IMAGE_TAG: ${{ github.sha }}
           AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          PULUMI_STACK: dev
-        working-directory: apps/monitabits-infra
-        run: bun run src/deploy.ts
+        run: bun --filter=monitabits-infra run deploy:prod

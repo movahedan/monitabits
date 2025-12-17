@@ -11,7 +11,10 @@
 		"preview": "pulumi preview",
 		"up": "pulumi up",
 		"destroy": "pulumi destroy",
-		"refresh": "pulumi refresh"
+		"refresh": "pulumi refresh",
+		"deploy:dev": "bun run src/deploy.ts --env dev",
+		"deploy:stg": "bun run src/deploy.ts --env stg",
+		"deploy:prod": "bun run src/deploy.ts --env prod"
 	},
 	"dependencies": {
 		"@pulumi/aws": "7.0.0",
