@@ -29,7 +29,10 @@ services:
       start_period: 10s
 
   monitabits-api:
-    image: ${ECR_REPO}/api:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/monitabits-api/Dockerfile
+    image: ${ECR_REPO:-monitabits}/api:${IMAGE_TAG:-latest}
     ports:
       - "5003:5003"
     networks:
@@ -50,7 +53,10 @@ services:
       start_period: 30s
   
   monitabits-app:
-    image: ${ECR_REPO}/app:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/monitabits-app/Dockerfile
+    image: ${ECR_REPO:-monitabits}/app:${IMAGE_TAG:-latest}
     ports:
       - "5002:5002"
     networks:
