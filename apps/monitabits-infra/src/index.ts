@@ -25,14 +25,14 @@ const secrets = createSecrets(config);
 const storage = createStorage(config);
 const ciCd = createCiCd(config);
 const data = createData(config, network, security, secrets);
-const compute = createCompute(
+const compute = createCompute({
 	config,
 	network,
 	security,
 	secrets,
-	storage.s3Bucket.bucket,
-	ciCd.ecrRepository.repositoryUrl,
-);
+	s3BucketName: storage.s3Bucket.bucket,
+	ecrRepositoryUri: ciCd.ecrRepository.repositoryUrl,
+});
 
 // ============================================================================
 // Stack Outputs

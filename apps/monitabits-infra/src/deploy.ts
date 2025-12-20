@@ -93,13 +93,16 @@ function buildDatabaseUrl(rds: RdsSecret): string {
 	return `postgresql://${rds.username}:${rds.password}@${rds.host}:${rds.port}/${rds.dbname}?schema=public`;
 }
 
-async function deployToEc2(
-	ec2InstanceId: string,
-	ecrRepo: string,
-	rdsSecret: RdsSecret,
-	region: string,
-	imageTag: string,
-): Promise<void> {
+interface DeployToEc2Options {
+	readonly ec2InstanceId: string;
+	readonly ecrRepo: string;
+	readonly rdsSecret: RdsSecret;
+	readonly region: string;
+	readonly imageTag: string;
+}
+
+async function deployToEc2(options: DeployToEc2Options): Promise<void> {
+	const { ec2InstanceId, ecrRepo, rdsSecret, region, imageTag } = options;
 	console.log("🚀 Deploying to EC2...");
 
 	if (!ec2InstanceId) {
@@ -194,7 +197,13 @@ async function main() {
 		}
 
 		const rdsSecret = await getRdsSecret(outputs.rdsSecretName, region);
-		await deployToEc2(outputs.ec2InstanceId, outputs.ecrRepo, rdsSecret, region, imageTag);
+		await deployToEc2({
+			ec2InstanceId: outputs.ec2InstanceId,
+			ecrRepo: outputs.ecrRepo,
+			rdsSecret,
+			region,
+			imageTag,
+		});
 	} catch (error) {
 		if (error instanceof Error) {
 			console.error("Error:", error.message, error.stack, error.cause);

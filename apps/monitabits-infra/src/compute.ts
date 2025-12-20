@@ -11,17 +11,20 @@ export interface ComputeResources {
 	readonly instanceProfile: aws.iam.InstanceProfile;
 }
 
+interface CreateComputeOptions {
+	readonly config: InfrastructureConfig;
+	readonly network: NetworkResources;
+	readonly security: SecurityResources;
+	readonly secrets: SecretsResources;
+	readonly s3BucketName: pulumi.Output<string>;
+	readonly ecrRepositoryUri: pulumi.Output<string>;
+}
+
 /**
  * Creates EC2 instance with IAM role for S3, ECR, and Secrets Manager access
  */
-export const createCompute = (
-	config: InfrastructureConfig,
-	network: NetworkResources,
-	security: SecurityResources,
-	secrets: SecretsResources,
-	s3BucketName: pulumi.Output<string>,
-	ecrRepositoryUri: pulumi.Output<string>,
-): ComputeResources => {
+export const createCompute = (options: CreateComputeOptions): ComputeResources => {
+	const { config, network, security, secrets, s3BucketName, ecrRepositoryUri } = options;
 	const { compute, project } = config;
 
 	// Get latest Amazon Linux 2023 AMI
