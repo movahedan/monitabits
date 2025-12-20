@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the UI component library package.
 
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
+
 ## Package Overview
 
 **@repo/ui** is a React component library built with modern tools using **Atomic Design** methodology. It provides tree-shakable, type-safe components organized into atoms, molecules, hooks, and utilities. Built on Radix UI primitives, Tailwind CSS 4, and includes comprehensive Storybook documentation.

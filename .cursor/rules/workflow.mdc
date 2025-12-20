@@ -1,0 +1,199 @@
+---
+description: Complete interactive git workflow - branch management, testing, commits, PRs, with developer interaction
+alwaysApply: false
+---
+
+# Workflow
+
+## Complete Interactive Workflow
+
+### 1. Analyze Recent Changes
+```bash
+git log --oneline -10
+git log HEAD..main --oneline
+git status
+git diff
+git diff --cached
+git diff HEAD
+git diff --stat
+git diff --name-only
+```
+
+### 2. Branch Management
+```bash
+git branch
+git branch -a
+
+# Find/create appropriate branch name
+# Format: type/description (e.g., feat/auth-system, fix/login-bug)
+git checkout -b feat/feature-name
+```
+
+**If unclear on branch name or need direction:**
+> Ask developer for branch name/type
+
+### 3. Test Changes
+```bash
+bun run check:fix
+bun run check:types
+bun test --affected
+bun test --filter=@repo/ui
+bun run build --affected
+```
+
+**If tests fail, errors found, or something unexpected happens:**
+> "Found these issues: [list]. How should we proceed?"
+
+Otherwise proceed.
+
+### 4. Documentation Check
+Use documentation discovery from `documentation.mdc` to find related docs.
+
+**If documentation needs updates:**
+> "Found these docs that might need updates: [list]. Update them?"
+
+Otherwise proceed.
+
+### 5. Commit in Meaningful Chunks
+
+**Analyze and group changes:**
+```bash
+git diff --cached
+git status
+```
+
+**If changes are logically separable:**
+Group related files and commit together. If unclear, ask developer.
+
+### 6. Commit Message Format
+
+**Types:** feat, fix, docs, style, refactor, perf, test, ci, chore, deps, revert, merge
+
+**Format:**
+```bash
+type(scope): subject
+
+- Body point 1
+- Body point 2
+
+BREAKING CHANGE: description (or use ! before :)
+```
+
+**Examples:**
+```bash
+feat(@repo/ui): add button component variants
+fix(monitabits-api): resolve authentication token expiry
+docs(root): update installation guide
+feat(app-name,@repo/package-name): multiple scopes
+```
+
+**Rules:**
+- Lowercase for type, scope, subject
+- Scope: package name (prefix with @repo/ for packages), app name, or root
+- Multiple scopes: `type(scope1,scope2): subject`
+- Subject max 72 chars
+
+### 7. Handle Errors/Issues
+
+**If commit fails, conflicts occur, or unexpected issues:**
+> "Encountered [error/issue]. How should we proceed?"
+
+Otherwise proceed.
+
+### 8. Push Changes
+```bash
+# After committing, ask
+```
+
+**Ask developer:**
+> "Changes committed. Should I push to remote?"
+
+```bash
+# If yes
+git push origin branch-name
+git push -u origin branch-name  # Set upstream
+```
+
+**If push fails or issues:**
+> "Push failed: [error]. How should we proceed?"
+
+Otherwise proceed.
+
+### 9. Create Pull Request
+```bash
+gh pr create
+gh pr create --fill  # Auto-fill from commits
+gh pr create --draft
+gh pr create --base develop
+```
+
+**PR Description Format (max 1500 chars):**
+```markdown
+#### 📊 Summary
+Brief description (1-2 sentences)
+
+- Key change 1
+- Key change 2
+- Key change 3
+```
+
+**If PR creation fails:**
+> "PR creation failed: [error]. How should we proceed?"
+
+Otherwise provide PR link.
+
+### 10. Summary Report
+```
+## 📋 Workflow Summary
+
+**Branch:** [branch name]
+**Changes Made:** [list]
+**Documentation Updated:** [list]
+**Commits:** [list with messages]
+**Pull Request:** [PR link]
+**Next Steps:** [any follow-up]
+```
+
+## Planning Process
+
+1. **Research**: Web search + feature analysis
+2. **Collaborate**: Discuss with developer to clarify requirements
+3. **Document**: Current state → Desired state → Action plan → Testing → Estimates
+
+## Planning Document Structure
+```markdown
+# 🎯 [Feature] Planning
+
+## 🔍 Current State
+- What exists now
+- Current limitations
+
+## 🎯 Desired State
+- What we want to achieve
+- Success indicators
+
+## 🚀 Action Plan
+### Phase 1: Foundation
+- [ ] Task 1.1: Description
+- [ ] Task 1.2: Description
+
+## 🧪 Testing & Validation
+- Unit tests: [what]
+- Integration tests: [what]
+
+## ⏱️ Time & Size Estimates
+- Phase 1: X weeks (Small/Medium/Large)
+- Total: X weeks
+
+## ✅ Success Criteria
+- [ ] Must have 1
+- [ ] Must have 2
+```
+
+## Critical Rules
+
+1. If anything goes wrong or unclear → ask developer
+2. Otherwise → proceed autonomously
+3. Always test before committing
+4. Always use proper commit message format
+5. Always provide summary at end

@@ -59,7 +59,7 @@ bun run local:setup
 bun install
 
 # Verify setup
-bun run check:quick
+bun run check:affected
 ```
 
 ## 🎮 Enhanced Setup System
@@ -131,7 +131,7 @@ bun run check:types
 
 ```bash
 # Quick quality check
-bun run check:quick
+bun run check:affected
 
 # Full quality check
 bun run check
@@ -261,7 +261,7 @@ The setup automatically installs recommended extensions:
 bun run dev:check
 
 # Local environment check
-bun run check:quick
+bun run check:affected
 
 # Full system check
 bun run check

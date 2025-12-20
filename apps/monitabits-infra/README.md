@@ -35,20 +35,6 @@ pulumi up
 
 **Need detailed instructions?** See [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Security Features](#security-features)
-- [Prerequisites](#prerequisites)
-- [Setup](#setup)
-- [Configuration](#configuration)
-- [Secrets Management](#secrets-management)
-- [Deployment](#deployment)
-- [CI/CD Integration](#cicd-integration)
-- [Outputs](#outputs)
-- [Troubleshooting](#troubleshooting)
-
 ## Overview
 
 This infrastructure project provisions AWS resources for the Monitabits application:
@@ -123,30 +109,14 @@ This infrastructure implements security best practices:
 7. **IMDSv2 Required**: EC2 instances require IMDSv2 for enhanced security
 8. **SSH Restrictions**: SSH access is blocked from 0.0.0.0/0 by validation
 
-## Prerequisites
+## Prerequisites & Setup
 
-> **👋 New to AWS or Pulumi?** Start with the [Complete Beginner's Setup Guide](./SETUP_GUIDE.md) - it walks you through everything step-by-step!
+**Requirements:** AWS Account, AWS CLI configured, Pulumi CLI installed, Node.js/Bun
 
-1. **AWS Account** with appropriate permissions
-2. **AWS CLI** configured with credentials
-   ```bash
-   aws configure
-   ```
-3. **Pulumi CLI** installed
-   ```bash
-   # macOS
-   brew install pulumi
+> **👋 New to AWS/Pulumi?** See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for detailed setup instructions.
 
-   # Other platforms
-   curl -fsSL https://get.pulumi.com | sh
-   ```
-4. **Node.js/Bun** for TypeScript execution
-
-## Setup
-
-> **📚 First time setting up?** See the detailed [SETUP_GUIDE.md](./SETUP_GUIDE.md) for step-by-step instructions.
-
-1. **Install dependencies**:
+**Quick setup:**
+1. **Install dependencies:**
    ```bash
    cd apps/monitabits-infra
    bun install
@@ -166,9 +136,7 @@ This infrastructure implements security best practices:
    pulumi stack init dev
    ```
 
-4. **Configure required values** (see [Configuration](#configuration))
-
-5. **Set required secrets** (see [Secrets Management](#secrets-management))
+3. **Configure** (see Configuration & Secrets sections below)
 
 ## Configuration
 
