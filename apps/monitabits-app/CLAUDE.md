@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the monitabits-app application.
 
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
+
 ## Application Overview
 
 **monitabits-app** is a Next.js frontend application for tracking quit smoking progress. It runs on **port 3002** in the monorepo setup and uses the Next.js App Router architecture with Server Components and Server Actions.

@@ -39,6 +39,7 @@
 		"root",
 		"monitabits-api",
 		"monitabits-app",
+		"monitabits-infra",
 		"@repo/ui",
 		"@repo/utils",
 		"@repo/typescript-config",

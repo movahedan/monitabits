@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-This file describes **`@repo/test-preset`**: what it contains, how it is wired into the monorepo, and how to use its utilities when working on this package.
+This file provides guidance to Claude Code (claude.ai/code) when working with the test-preset package.
+
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
 
 ## 🎯 Purpose
 

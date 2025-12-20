@@ -17,3 +17,7 @@ bin
 out
 coverage
 .CHANGELOG*.md
+
+# Pulumi state (use Pulumi Cloud or S3 backend)
+.pulumi/
+*.stack

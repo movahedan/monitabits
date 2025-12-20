@@ -192,7 +192,7 @@ bun run local:setup
 ✅ Local development setup completed successfully!
 
 💡 Useful commands:
- - bun run check:quick # Quick verification
+ - bun run check:affected # Quick verification
  - bun run dev:setup # Setup DevContainer environment
  - bun run local:cleanup # Clean everything
 ```
@@ -201,7 +201,7 @@ bun run local:setup
 
 ```bash
 # Run a quick verification
-bun run check:quick
+bun run check:affected
 ```
 
 **Expected Output:**
@@ -357,7 +357,7 @@ Examples:
 
 ```bash
 # Run comprehensive verification
-bun run check:quick
+bun run check:affected
 ```
 
 **Expected Output:**
@@ -587,7 +587,7 @@ After successful installation:
 2. **Read Documentation**: Review the [docs](./docs) for detailed guides
 3. **Start Developing**: Begin with the application in the [apps](./apps) directory
 4. **Run Tests**: Use `bun run test` to run the test suite
-5. **Check Quality**: Use `bun run check:quick` for code quality verification
+5. **Check Quality**: Use `bun run check:affected` for code quality verification
 
 ---
 

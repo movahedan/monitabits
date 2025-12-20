@@ -1,238 +1,226 @@
 ---
-description: Comprehensive documentation standards and workflow for the project, emphasizing documentation-first approach and maintaining three-tier documentation structure
-globs: ["**/*.md", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+description: How to discover and identify documentation files that need updates based on code changes, understand documentation structure and relationships
+globs: ["**/*.md", "**/*.mdc", "**/CLAUDE.md", "**/README.md", "**/*.json"]
 alwaysApply: true
 ---
 
-## 🎯 Core Principles
+# Documentation
 
-**ALWAYS read and understand the project documentation before implementing any changes.**
-**NEVER assume anything not in the repository**
-**ALWAYS verify file paths and scripts exist**
-**ALWAYS update documentation when making changes**
+## Four-Tier Documentation Structure
 
-This project maintains a comprehensive documentation ecosystem that must be consulted before any modifications. Documentation is not just a reference—it's the foundation for all development decisions.
+1. **`.cursor/rules/`** - Code standards, patterns, workflows (AI-focused)
+2. **`CLAUDE.md`** - Project context, commands, architecture (AI-focused)
+3. **`README.md`** - Project description, architecture ideas, development tips (Human-focused)
+4. **`docs/`** - Developer guides, setup, technical details (Human-focused)
 
-### **Quick Search Commands**
-```bash
-grep -r "keyword" docs/ # Search for specific topics
-grep -r "keyword" .cursor/rules/ # Search cursor rules for specific topics
-grep -r "keyword" **/CLAUDE.md # Search CLAUDEs for specific topics
+## Documentation Relationships
 
-git log --oneline -- docs/ # Check recent documentation updates
+### Connection Graph
+```
+README.md ──────┐
+                ├─→ Complementary pair (different audiences, same project)
+CLAUDE.md ──────┘
+      │
+      ├─→ References → .cursor/rules/ (for standards)
+      │
+      └─→ Points to → docs/ (for detailed guides)
 
-find .cursor/rules -type f # Find all general cursor rules files
-find . -name "CLAUDE.md" -type f # Find all CLAUDE docs files
-find docs/ -type f # Find all Developer specific docs files
+.cursor/rules/ ──→ AI uses → CLAUDE.md (for project context)
+
+docs/ ──→ Human reads → README.md (for overview)
 ```
 
-## 🏗️ Three-Tier Documentation Structure
+### README.md ↔ CLAUDE.md Relationship
 
-This project maintains three distinct types of documentation, each serving different purposes:
+**README.md and CLAUDE.md are complementary and should be kept in sync:**
+- **README.md**: Human-first overview, describes what the project is, architectural ideas, development mindset
+- **CLAUDE.md**: AI-first context, detailed commands, package structure, how to work in the project
+- Both cover the same project but from different angles
+- README is marketing/onboarding for humans
+- CLAUDE is technical/operational for AI tools
+- When architecture changes, update both
+- README has "tips" → CLAUDE has "detailed usage"
 
-### **1. CLAUDE.md Files** 📋
-- **Location**: Root directory `CLAUDE.md` and each project/app `(packages|apps)/<package-name>/CLAUDE.md`
-- **Purpose**: Project-level architecture and main description
-- **Audience**: Developers, architects, project stakeholders
-- **Content**: High-level architecture, project structure, key decisions
+## Best Practices by Document Type
 
-### **2. Cursor Rules (.cursor/rules/)** ⚙️
-- **Location**: `.cursor/rules/` directory
-- **Purpose**: Generic development best practices, documentation standards, commit workflow
-- **Audience**: AI assistants, development tools, automated processes
-- **Content**: Coding standards, workflow rules, automation guidelines
-
-### **3. Developer Documentation (docs/)** 👨‍💻
-- **Location**: `docs/` directory
-- **Purpose**: Developer guides, setup instructions, technical details
-- **Audience**: Human developers, team members
-- **Content**: Brief, summarized, clear, friendly, and enjoyable to read
-
-## 📝 Documentation Standards
-
-### **File Naming and Organization**
-- Use numbered prefixes for ordered developer documentation (e.g., `1_DOCKER.md`, `2_DEVCONTAINER.md`)
-- Group related documentation in the `docs/` folder
-- Use descriptive, action-oriented names that indicate the content
-
-### **Document Structure**
-Always include these sections in order:
-1. **Title with emoji** - Clear, descriptive title with relevant emoji
-2. **Brief description** - One-line summary of what the document covers
-3. **Table of Contents** - Comprehensive navigation with anchor links
-4. **Overview section** - High-level explanation of the topic
-5. **Detailed sections** - Main content organized logically
-6. **Examples and code blocks** - Practical implementations
-7. **Related links** - Cross-references to other documentation
-
-### **Headers and Navigation**
-- Use emojis in main section headers for visual hierarchy
-- Include a comprehensive table of contents with anchor links
-- Use consistent header levels (H1 for title, H2 for main sections, H3 for subsections)
-- Make headers descriptive and action-oriented
-
-### **Code Examples**
-- Provide complete, runnable code examples
-- Include both simple and complex use cases
-- Show before/after comparisons when demonstrating improvements
-- Use TypeScript for all code examples unless specifically demonstrating other languages
-- Include error handling and edge cases in examples
-
-### **Technical Writing**
-- Write in clear, concise language
-- Use active voice and present tense
-- Include step-by-step instructions for complex processes
-- Provide context for why certain approaches are recommended
-- Include troubleshooting sections for common issues
-
-### **Markdown Structure Template**
+### .cursor/rules/ (AI-Focused Rules)
 ```markdown
-# 🎯 Document Title
-
-> Brief description of what this document covers
-
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Usage Examples](#-usage-examples)
-- [Advanced Topics](#-advanced-topics)
-
-## 🎯 Overview
-
-Clear explanation of the topic with context and purpose.
-
-## 🔧 Key Features
-
-- **Feature 1**: Description with benefits
-- **Feature 2**: Description with benefits
-- **Feature 3**: Description with benefits
-
-## 📝 Usage Examples
-
-### Basic Usage
-```typescript
-// Complete, runnable example
-const example = () => {
-  // Implementation
-};
+# Code-first, compact, scannable
+- Focus on patterns, not explanations
+- Show ✅ good vs ❌ bad code examples
+- Keep under 500 lines per rule
+- Use globs/alwaysApply metadata correctly
+- Reference files with @filename when needed
+- Remove explanations, trust linter
 ```
 
-### Advanced Usage
-```typescript
-// More complex example with error handling
-const advancedExample = async () => {
-  try {
-    // Implementation
-  } catch (error) {
-    // Error handling
-  }
-};
+### CLAUDE.md (AI-Focused Context)
+```markdown
+# Project context and commands
+- List essential commands with examples
+- Document package/app structure
+- Reference .cursor/rules/ for standards
+- Include key files and their purposes
+- Document project-specific workflows
+- Keep commands grouped by purpose
+- Link to nested CLAUDE.md files in packages/apps
+- Sync commands with package.json scripts
 ```
 
-## 🔗 Related Documentation
-
-- [Related Doc 1](./related-doc-1.md)
-- [Related Doc 2](./related-doc-2.md)
+### README.md (Human-Focused Overview)
+```markdown
+# Project description and architecture
+- What the project is and why it exists
+- Architectural ideas and design decisions
+- Development mindset and philosophy
+- Quick start tips (detailed usage in CLAUDE.md)
+- Visual badges and emojis for scannability
+- High-level overview, not implementation details
+- Keep in sync with CLAUDE.md for same project context
 ```
 
-### **Visual Elements**
-- Use emojis consistently for section headers
-- Include badges for tools and technologies mentioned
-- Use code blocks with appropriate syntax highlighting
-- Include diagrams or screenshots when helpful
-- Use blockquotes for important notes and warnings
+### docs/ (Human-Focused Guides)
+```markdown
+# Brief, summarized developer guides (NOT exhaustive)
+- Friendly, enjoyable to read
+- Examples that actually work
+- Table of contents with anchor links
+- Numbered prefixes for ordered docs (1_INSTALLATION.md)
+- Troubleshooting guides (concise)
+- Technical summaries (not deep-dives)
+- Workflow overviews (brief)
+- Keep it summarized - developers want quick answers, not novels
+```
 
-## 🔄 Documentation Update Workflow
+## Syncing with package.json and tsconfig.json
 
-### **Before Making Changes**
-1. **Read Relevant Documentation**: Always consult existing docs before implementation
-2. **Understand Current State**: Know what exists and how it works
-3. **Identify Impact**: Determine what documentation needs updates
-4. **Plan Updates**: Decide what needs to be added, modified, or removed
+**Keep documentation in sync with package.json and tsconfig.json:**
 
-### **During Implementation**
-1. **Keep Documentation Current**: Update docs as you implement features
-2. **Document Decisions**: Record architectural decisions and their rationale
-3. **Update Examples**: Ensure code examples match the actual implementation
-4. **Cross-Reference**: Link related documentation sections
+### package.json
+- **Scripts**: Sync CLAUDE.md commands with `package.json` scripts
+- **Dependencies**: Reference actual dependencies from `package.json`
+- **When scripts change**: Update CLAUDE.md and docs/ to match
+- **Verification**: Check `package.json` when documenting commands
 
-### **After Implementation**
-1. **Verify Accuracy**: Test all documentation examples and procedures
-2. **Update Related Docs**: Ensure consistency across all documentation
-3. **Review Completeness**: Check that all new features are documented
-4. **Validate Links**: Ensure all internal and external links work
+### tsconfig.json
+- **Package relationships**: Understand relationships through `tsconfig.json` references
+- **Module resolution**: Document import paths based on actual tsconfig settings
+- **Cross-package dependencies**: Use tsconfig to trace how packages relate
 
-### **Documentation Update Guidelines**
+### Documentation Sync Principles
+1. Check `package.json` when documenting commands or scripts
+2. Check `tsconfig.json` to understand package relationships
+3. Keep docs in sync - update when these files change
+4. Documentation should reflect actual configuration
 
-#### **Always Assume Latest Version**
-- **NO historical context**: Focus on current functionality, not past versions
-- **Current state only**: Document what exists now, not what used to exist
-- **Forward-looking**: Emphasize current best practices and approaches
-- **Remove outdated information**: Delete references to deprecated features
+## When to Update What
 
-#### **Content Guidelines**
-- **Technical Accuracy**: Verify all code examples work as written
-- **Version Information**: Include current version numbers for tools and libraries
-- **Complete Examples**: Provide full, runnable code examples
-- **Error Handling**: Include common error messages and their solutions
-- **Troubleshooting**: Add sections for common issues and their resolution
+- **`.cursor/rules/`**: Code standards, patterns, workflows change
+- **`CLAUDE.md`**: Project structure, commands, scripts, package/app context change
+- **`README.md`**: Architecture changes, project description, development philosophy change
+- **`docs/`**: Workflows, processes, setup instructions, technical details change
 
-#### **Maintenance Standards**
-- **Regular Reviews**: Update documentation with each major release
-- **Prompt Updates**: Remove outdated information immediately
-- **Feature Coverage**: Document all new features as they're added
-- **API Consistency**: Keep examples current with latest APIs
+**Important**: When architecture/project structure changes, update both README.md AND CLAUDE.md
 
-#### **Cross-References**
-- **Internal Links**: Link to related documentation within the project
-- **External Resources**: Include links to official documentation and resources
-- **Terminology**: Maintain consistent terminology across all documents
-- **Navigation**: Ensure table of contents reflects current structure
+## Discovery Process
 
-## ✅ Quality Checklist
+When code changes are made, discover related documentation:
 
-Before publishing or updating documentation, ensure:
+### 1. Search by Keywords from Changes
+```bash
+# Extract key terms from changed files
+grep -r "keyword" docs/
+grep -r "keyword" **/CLAUDE.md
+grep -r "keyword" **/README.md
+grep -r "keyword" .cursor/rules/
 
-### **Content Quality**
-- [ ] All code examples are tested and working
-- [ ] Technical accuracy is verified
-- [ ] Examples cover all major use cases
-- [ ] Troubleshooting section is included
-- [ ] Grammar and spelling are correct
+# Search git history for recent doc changes
+git log --oneline -- docs/ | grep -i "keyword"
+git log --oneline -- README.md CLAUDE.md
+```
 
-### **Structure and Navigation**
-- [ ] Table of contents is complete and accurate
-- [ ] All links are valid and working
-- [ ] Headers use consistent emoji patterns
-- [ ] Navigation flows logically
+### 2. Search by File/Path Patterns
+```bash
+# If code in apps/monitabits-api changed
+grep -r "monitabits-api\|API\|api" docs/
+grep -r "monitabits-api" **/CLAUDE.md **/README.md
 
-### **Maintenance and Updates**
-- [ ] Version information is current
-- [ ] Related documentation is cross-referenced
-- [ ] Outdated information is removed
-- [ ] Security implications are documented where relevant
+# If code in packages/ui changed
+grep -r "ui\|component\|UI" docs/
+grep -r "ui" **/README.md **/CLAUDE.md
 
-### **Developer Experience**
-- [ ] Content is brief and summarized
-- [ ] Language is clear and friendly
-- [ ] Reading experience is enjoyable
-- [ ] Information is easily scannable
+# If docker-compose or Dockerfile changed
+grep -r "docker\|Docker\|container" docs/
+```
 
-## 🔗 Related Documentation
+### 3. Search by Commands/Scripts
+```bash
+# If package.json scripts changed
+grep -r "bun run\|npm run\|script" docs/
+grep -r "bun run" CLAUDE.md README.md
 
-- [Development Flows](../docs/3_DEV_FLOWS.md)
-- [Setup Flows](../docs/2_SETUP_FLOWS.md)
-- [Planning Documentation](./planning-documentation.mdc)
-- [Commit Workflow](./commit-and-documentation-workflow.mdc)
+# If CI/CD files changed
+grep -r "github\|actions\|CI\|deploy" docs/
+```
 
----
+### 4. Search by Technology/Framework
+```bash
+# If React code changed
+grep -r "react\|React\|component\|frontend" docs/ README.md
 
-**Remember**: This project's documentation is comprehensive and must be consulted before any changes. Always read the docs first, then update them to reflect current reality. Focus on the present, not the past, and maintain the three-tier structure that serves different audiences and purposes.
+# If NestJS code changed
+grep -r "nestjs\|NestJS\|backend\|API" docs/ README.md
 
-**Key Takeaway**: Each tier has its own purpose and structure - CLAUDE.md for project overview, Cursor Rules for technical standards, and Developer Docs for friendly, practical guidance. Keep it simple, keep it friendly, and keep it useful! 🚀
+# If database code changed
+grep -r "database\|db\|prisma\|PostgreSQL" docs/
+```
 
+### 5. Recent Changes Context
+```bash
+# Check what docs were recently updated
+git log --oneline --since="2 weeks ago" -- docs/ README.md CLAUDE.md
 
----
+# Check what code files changed alongside docs
+git log --name-only -- docs/ README.md | grep -E "\.(ts|tsx|js|jsx)$"
 
-**Remember**: This project's documentation is comprehensive and must be consulted before any changes. Always read the docs first, then update them to reflect current reality. Focus on the present, not the past, and maintain the three-tier structure that serves different audiences and purposes.
+# Find docs that mention files you're changing
+grep -r "apps/monitabits-api\|packages/ui" docs/ README.md CLAUDE.md
+```
+
+### 6. Cross-Reference Search
+```bash
+# Find docs that reference each other
+grep -r "3_DEV_FLOWS\|2_SETUP_FLOWS\|5_DOCKER" docs/
+grep -r "CLAUDE.md\|README.md" docs/
+
+# Find README.md and CLAUDE.md files
+find . -name "README.md" -o -name "CLAUDE.md"
+```
+
+## Quick Reference Commands
+```bash
+# List all docs
+find docs/ -name "*.md" -type f
+find . -name "README.md" -type f
+find . -name "CLAUDE.md" -type f
+find .cursor/rules -name "*.mdc" -type f
+
+# Search across all doc types
+grep -r "keyword" docs/ .cursor/rules/ --include="*.md" --include="*.mdc"
+grep -r "keyword" **/README.md **/CLAUDE.md
+
+# Check git history
+git log --oneline -- docs/ README.md CLAUDE.md
+git log --oneline -- .cursor/rules/
+```
+
+## Update Process
+
+1. Use discovery methods above to find related docs
+2. Check `package.json` scripts and `tsconfig.json` relationships
+3. Check README.md and CLAUDE.md together (they're complementary)
+4. Read found docs to understand current state
+5. Sync documentation with `package.json` scripts and `tsconfig.json`
+6. Update docs to reflect changes (remove outdated info)
+7. Verify examples still work
+8. Cross-reference related docs for consistency

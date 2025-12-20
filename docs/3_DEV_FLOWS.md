@@ -53,7 +53,7 @@ bun run dev:logs
 
 ```bash
 # Quick quality check
-bun run check:quick
+bun run check:affected
 
 # Full quality check
 bun run check
@@ -102,7 +102,7 @@ bun run local:setup
 bun install
 
 # Run quality checks
-bun run check:quick
+bun run check:affected
 
 # Start development
 bun run dev
@@ -233,7 +233,7 @@ bun run version:prepare --package root --from-version 0.0.2 --to-version 0.1.0
 
 ```bash
 # Quick quality check (affected packages only)
-bun run check:quick
+bun run check:affected
 
 # Full quality check
 bun run check
@@ -314,7 +314,7 @@ bun run local:vscode   # Setup VS Code
 
 # Quality assurance
 bun run check          # Full quality check
-bun run check:quick    # Quick quality check
+bun run check:affected    # Quick quality check
 bun run check:fix      # Fix linting issues
 bun run check:types    # Type checking
 ```

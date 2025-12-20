@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the typescript-config package.
 
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
+
 ## Package Overview
 
 **@repo/typescript-config** provides shared TypeScript configuration files for all packages and applications in the monorepo, ensuring consistent TypeScript settings across the entire codebase.
