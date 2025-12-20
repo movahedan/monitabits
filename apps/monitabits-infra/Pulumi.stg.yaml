@@ -1,0 +1,40 @@
+# Staging Stack Configuration
+# ============================
+# This file contains NON-SECRET configuration values.
+#
+# REQUIRED SECRETS (must be set via CLI):
+#   pulumi config set --secret rds:password "<secure-password>"
+#
+# REQUIRED CONFIGURATION (update before deploying):
+#   - compute:allowedSshCidrs: Replace with your actual IP address(es)
+#
+config:
+  # Project Configuration
+  project:name: monitabits-infra
+  project:environment: stg
+
+  # VPC Configuration
+  vpc:cidr: "10.1.0.0/16"
+  vpc:publicSubnetCidrs:
+    - "10.1.1.0/24"
+    - "10.1.2.0/24"
+  vpc:privateSubnetCidrs:
+    - "10.1.10.0/24"
+    - "10.1.11.0/24"
+  vpc:availabilityZones: []
+
+  # Compute Configuration
+  compute:instanceType: t3.small
+  compute:diskSize: 30
+  # SECURITY: Update with your actual IP address(es) for SSH access
+  # Never use 0.0.0.0/0 - this is blocked by validation
+  compute:allowedSshCidrs: []
+
+  # RDS Configuration
+  rds:instanceClass: db.t3.small
+  rds:allocatedStorage: 50
+  rds:backupRetentionDays: 14
+  rds:multiAz: false
+
+  # Storage Configuration
+  s3:bucketSuffix: "stg001"

@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the utils package.
 
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
+
 ## Package Overview
 
 **@repo/utils** provides essential utility functions used across the monorepo, specifically for CSS class manipulation and logging functionality.

@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance for working with the Monitabits Kubb package.
+This file provides guidance to Claude Code (claude.ai/code) when working with the Monitabits Kubb package.
+
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
 
 ## Package Overview
 

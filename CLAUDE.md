@@ -6,11 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **IMPORTANT: Always refer to `.cursor/rules/` first for comprehensive development standards:**
 
-- **[.cursor/rules/javascript.mdc](.cursor/rules/javascript.mdc)** - JavaScript, React, naming conventions, JSDoc
-- **[.cursor/rules/typescript.mdc](.cursor/rules/typescript.mdc)** - TypeScript strict practices, type safety, interfaces
+- **[.cursor/rules/coding.mdc](.cursor/rules/coding.mdc)** - TypeScript, JavaScript, React code standards - patterns, naming, conventions
 - **[.cursor/rules/security.mdc](.cursor/rules/security.mdc)** - Security best practices, regex safety, input validation
-- **[.cursor/rules/packages.mdc](.cursor/rules/packages.mdc)** - Package management and library installation
+- **[.cursor/rules/monorepo.mdc](.cursor/rules/monorepo.mdc)** - Monorepo architecture, Bun, Turborepo, Intershell, Biome, Renovate
 - **[.cursor/rules/testing.mdc](.cursor/rules/testing.mdc)** - Testing standards + copy/paste AI prompt (unit/integration, mocking, table-driven cases)
+- **[.cursor/rules/workflow.mdc](.cursor/rules/workflow.mdc)** - Git workflow, commits, PRs, planning
+- **[.cursor/rules/documentation.mdc](.cursor/rules/documentation.mdc)** - Documentation structure and discovery
+- **[.cursor/rules/advisor.mdc](.cursor/rules/advisor.mdc)** - Critical engineering advisor - challenge decisions, expose blind spots
 
 These rules contain detailed guidance on coding standards, security practices, and development patterns that should be followed throughout the codebase.
 
@@ -30,7 +32,7 @@ These rules contain detailed guidance on coding standards, security practices, a
 - `bun run check` - Run Biome linter/formatter check
 - `bun run check:fix` - Auto-fix linting/formatting issues
 - `bun run check:types` - Run TypeScript type checking across all packages
-- `bun run check:quick` - Run comprehensive quick check (fix, types, test affected, build affected)
+- `bun run check:affected` - Run comprehensive quick check (fix, types, test affected, build affected)
 
 ### Testing
 - `bun test` - Run tests across all packages
@@ -180,4 +182,4 @@ For detailed information about working with specific packages and applications, 
 
 **When working on a specific package or application, always read its CLAUDE.md file first for detailed guidance, architecture patterns, and development practices specific to that component.**
 
-When working with this codebase, always run `bun run check:quick` before committing to ensure code quality and type safety.
+When working with this codebase, always run `bun run check:affected` before committing to ensure code quality and type safety.

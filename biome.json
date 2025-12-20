@@ -44,6 +44,22 @@
 				"useHookAtTopLevel": "error",
 				"noUnusedImports": "error"
 			},
+			"nursery": {
+				"useMaxParams": "error"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": {
+					"options": {
+						"maxAllowedComplexity": 10
+					}
+				},
+				"noExcessiveLinesPerFunction": {
+					"options": {
+						"maxLines": 80,
+						"skipBlankLines": true
+					}
+				}
+			},
 			"style": {
 				"useLiteralEnumMembers": "error",
 				"useNodejsImportProtocol": "error",

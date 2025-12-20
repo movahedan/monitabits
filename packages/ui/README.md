@@ -2,119 +2,48 @@
 
 A React component library built with Vite, providing tree-shakable components with individual exports for optimal performance.
 
-## Features
+Tree-shakable components with individual exports, full TypeScript support, and Vite-powered builds.
 
-- ✅ **Tree-shakable** - Only import what you need
-- ✅ **Individual exports** - Import specific components
-- ✅ **Barrel exports** - Convenient bulk imports
-- ✅ **TypeScript support** - Full type definitions
-- ✅ **Vite-powered** - Fast builds and development
-- ✅ **No package.json mutation** - Clean, maintainable setup
-
-## Installation
+## Installation & Usage
 
 ```bash
 bun add @repo/ui
 ```
 
-## Usage
-
-### Individual Component Imports (Recommended)
-
-For optimal tree-shaking and bundle size:
+**Individual imports (recommended for tree-shaking):**
 
 ```typescript
 import { Button } from '@repo/ui/button/button';
 import { Link } from '@repo/ui/link/link';
-import { CounterButton } from '@repo/ui/counter-button/counter-button';
 ```
 
-### Barrel Import (Convenience)
-
-For easier imports when you need multiple components:
-
+**Barrel import (convenience):**
 ```typescript
-import { Button, Link, CounterButton } from '@repo/ui';
+import { Button, Link } from '@repo/ui';
 ```
 
-## Development
-
-### Build
-
+**Common commands:**
 ```bash
-bun run build
-```
-
-### Development Mode
-
-```bash
-bun run dev
-```
-
-### Type Checking
-
-```bash
-bun run check:types
-```
-
-### Testing
-
-```bash
-bun run test
+bun run dev           # Start Storybook
+bun run build         # Build library
+bun run check:types   # Type check
+bun run test          # Run tests
 ```
 
 ## Architecture
 
-This library uses Vite's library mode with dynamic entry point discovery:
+Built with Atomic Design methodology:
+- **Atoms**: Basic UI primitives (Button, Input, Card, etc.)
+- **Molecules**: Composed components (ActionButton, StatusCard, etc.)
+- **Tree-shakable**: Only import what you need for optimal bundle size
+- **Type-safe**: Full TypeScript support with proper types
+- **Storybook**: Comprehensive component documentation and testing
 
-- **Automatic component discovery** - No manual configuration needed
-- **Dynamic exports generation** - Exports are generated automatically from file system
-- **Shared component discovery logic** - Single source of truth for component detection
-- **Individual component builds** - Each component is built separately
-- **Perfect tree-shaking** - Unused components are excluded from bundles
-- **TypeScript declarations** - Full type support for all components
-- **Zero manual exports management** - Just add components to `src/` and they're automatically exported
+For detailed architecture, component patterns, and development guidelines, see **[packages/ui/CLAUDE.md](./CLAUDE.md)**
 
-## Adding New Components
+## Key Features
 
-1. Create a new component directory in `src/`
-2. Add an `index.ts` file that exports your component
-3. Run `bun run build` - the component is automatically included and exported!
-
-Example:
-```
-src/
-├── button/
-│   ├── button.tsx
-│   └── index.ts
-├── link/
-│   ├── counter-button.tsx
-│   └── index.ts
-└── new-component/
-    ├── new-component.tsx
-    └── index.ts  ← Add this
-```
-
-The component will be automatically:
-- ✅ Built by Vite
-- ✅ Added to exports.json
-- ✅ Available for import: `import { NewComponent } from '@repo/ui/new-component'`
-
-## Build Output
-
-The library generates both ESM and CommonJS formats:
-
-```
-dist/
-├── index.mjs          # Main barrel export (ESM)
-├── index.js           # Main barrel export (CommonJS)
-├── button/
-│   ├── button.mjs     # Individual component (ESM)
-│   └── button.js      # Individual component (CommonJS)
-├── link/
-│   ├── link.mjs       # Individual component (ESM)
-│   └── link.js        # Individual component (CommonJS)
-└── counter-button/
-    ├── counter-button.mjs  # Individual component (ESM)
-    └── counter-button.js   # Individual component (CommonJS)
-``` 
+- **Atomic Design**: Organized into atoms (primitives) and molecules (composed)
+- **Category-based Imports**: Import from `@repo/ui/atoms` or `@repo/ui/molecules`
+- **Automatic Exports**: Components are automatically discovered and exported
+- **Multiple Formats**: ESM and CommonJS outputs for maximum compatibility 

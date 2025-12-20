@@ -1,0 +1,14 @@
+# Pulumi state (use Pulumi Cloud or S3 backend instead)
+.pulumi/
+*.stack
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

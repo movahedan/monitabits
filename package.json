@@ -64,7 +64,17 @@
 		"//ci": "////////////////////////////////////////////////////////////////////////////// ci //",
 		"ci:act": "intershell ci:act",
 		"ci:attach:affected": "intershell ci:attach-affected",
-		"ci:attach:service-ports": "intershell ci:attach-service-ports"
+		"ci:attach:service-ports": "intershell ci:attach-service-ports",
+		"//infra": "////////////////////////////////////////////////////////////////////////// infra //",
+		"infra:preview:dev": "cd apps/monitabits-infra && pulumi preview -s dev",
+		"infra:up:dev": "cd apps/monitabits-infra && pulumi up -s dev --yes",
+		"infra:destroy:dev": "cd apps/monitabits-infra && pulumi destroy -s dev",
+		"infra:preview:stg": "cd apps/monitabits-infra && pulumi preview -s stg",
+		"infra:up:stg": "cd apps/monitabits-infra && pulumi up -s stg --yes",
+		"infra:destroy:stg": "cd apps/monitabits-infra && pulumi destroy -s stg",
+		"infra:preview:prod": "cd apps/monitabits-infra && pulumi preview -s prod",
+		"infra:up:prod": "cd apps/monitabits-infra && pulumi up -s prod --yes",
+		"infra:destroy:prod": "cd apps/monitabits-infra && pulumi destroy -s prod"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.7",
