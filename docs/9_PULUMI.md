@@ -113,7 +113,14 @@ const storage = createStorage(config);
 const ciCd = createCiCd(config);
 
 // 6. Compute (needs network, security, secrets, storage, CI/CD)
-const compute = createCompute(config, network, security, secrets, ...);
+const compute = createCompute({
+	config,
+	network,
+	security,
+	secrets,
+	s3BucketName: storage.s3Bucket.bucket,
+	ecrRepositoryUri: ciCd.ecrRepository.repositoryUrl,
+});
 
 // 7. Data (needs network, security, secrets)
 const data = createData(config, network, security, secrets);
