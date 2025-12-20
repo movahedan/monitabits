@@ -1,6 +1,8 @@
-# Monitabits Infrastructure - Claude Code Guide
+# CLAUDE.md
 
-This file provides context for Claude Code when working with the Monitabits infrastructure project.
+This file provides guidance to Claude Code (claude.ai/code) when working with the Monitabits infrastructure project.
+
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
 
 ## Project Overview
 

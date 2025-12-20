@@ -1,0 +1,437 @@
+---
+description: Bun + TypeScript + Turborepo monorepo best practices with Intershell, Biome, and Renovate
+globs: ["package.json", "turbo.json", "bunfig.toml", "tsconfig.json", "renovate.json", "biome.json"]
+alwaysApply: true
+---
+
+# Monorepo
+
+## Stack
+- **Package Manager**: Bun
+- **Build System**: Turborepo
+- **Language**: TypeScript (shared configs)
+- **CLI Framework**: Intershell (auto versioning)
+- **Code Quality**: Biome (linting/formatting)
+- **Dependency Management**: Renovate (auto dependency pinning)
+
+## Bun Package Management
+```bash
+# ✅ Always use package manager commands (not manual package.json edits)
+bun add react
+bun add -D @types/react
+
+# ❌ Don't manually edit package.json versions
+```
+
+## Workspace Patterns
+```bash
+# Install to specific workspace
+bun add react --filter=@repo/ui
+bun add -D typescript --filter=packages/utils
+
+# Install to root
+bun add -D turbo --filter=root
+
+# Shared dependencies go in root
+bun add -D typescript  # Root level for all packages
+```
+
+## Turborepo Tasks
+```bash
+# Run tasks across all packages
+turbo run build
+turbo run test
+turbo run check:types
+
+# Run for specific package
+turbo run build --filter=@repo/ui
+turbo run dev --filter=monitabits-app
+
+# Run only affected packages
+turbo run build --affected
+turbo run test --affected
+```
+
+## Turborepo Configuration
+```json
+// turbo.json patterns
+{
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],  // Depends on dependencies' build
+      "outputs": ["dist/**", ".next/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["**/*.test.ts", "$TURBO_DEFAULT$"]
+    }
+  }
+}
+```
+
+## TypeScript Shared Configs
+```bash
+# Packages use shared TypeScript configs
+packages/typescript-config/  # Shared tsconfig presets
+
+# Package references in tsconfig.json
+{
+  "extends": "@repo/typescript-config/base.json",
+  "references": [
+    { "path": "../ui" },
+    { "path": "../utils" }
+  ]
+}
+```
+
+## Intershell Entity-Driven Architecture
+```bash
+# Intershell powers repository scripts
+# Entity system handles:
+- Affected package detection
+- Git branch operations
+- Commit parsing/validation
+- Docker Compose parsing
+- Package version management
+- Changelog generation
+
+# Usage via package.json scripts
+bun run commit              # Interactive commit creation
+bun run version:prepare     # Version bump and changelog
+bun run dev:setup          # Docker dev environment setup
+```
+
+**Reference**: `docs/4_INTERSHELL.md` for detailed Intershell architecture
+
+## Biome Code Quality
+```bash
+# Linting and formatting
+bun run check              # Biome check
+bun run check:fix          # Auto-fix issues
+
+# Biome replaces ESLint + Prettier
+# Configuration: biome.json
+```
+
+## Renovate Auto Version Pinning
+```bash
+# Renovate automatically:
+- Creates PRs for dependency updates
+- Pins versions (except peer dependencies)
+- Groups updates intelligently
+- Handles security alerts
+
+# Configuration: renovate.json
+# Key settings:
+- "rangeStrategy": "bump"
+- ":pinAllExceptPeerDependencies"
+- Groups for monorepo (apps/, packages/)
+- Disables updates for internal @repo/* packages
+```
+
+**Reference**: `docs/6_RENOVATE.md` for detailed Renovate configuration
+
+## Auto Versioning (Conventional Commits)
+
+**Description**: Automated versioning based on conventional commit messages. Monorepo-aware version management with automatic changelog generation and git tag creation.
+
+```bash
+# Version workflow: prepare → apply → CI
+# Prepare version bumps and changelogs
+bun run version:prepare --package root
+bun run version:prepare --package root --bump-type major
+bun run version:prepare --from-version 1.0.0 --to-version 1.2.0
+
+# Apply version changes and create tags
+bun run version:apply
+bun run version:apply --package api
+bun run version:apply --no-push
+
+# Complete CI workflow (dry-run for preview)
+bun run version:ci --dry-run
+```
+
+**Key Features**:
+- Automatic version bump detection from conventional commits
+- Keep a Changelog format generation
+- Monorepo-aware (handles multiple packages)
+- Git tag automation with package-specific prefixes
+- Commit grouping with PR detection
+- Version-to-tag conversion for intuitive ranges¯
+
+**Reference**: `docs/7_AUTO_VERSIONING.md` for detailed versioning system
+
+## Development Flows
+
+**Description**: Docker-first development with interactive CLI wizards. Entity-driven architecture provides sophisticated automation with step-by-step guidance and validation.
+
+```bash
+# Setup workflows
+bun run local:setup        # Local development setup
+bun run dev:setup         # DevContainer setup (recommended)
+
+# Docker development
+bun run dev:up            # Start all services
+bun run dev:check         # Check service health
+bun run dev:logs          # View service logs
+bun run dev:restart       # Restart services
+bun run dev:cleanup       # Clean up resources
+
+# Quality gates
+bun run check:affected       # Fix, types, test affected, build affected
+bun run check             # Biome lint/format check
+bun run check:types       # TypeScript validation
+bun run test --affected       # Test only affected packages
+
+# Interactive tools
+bun run commit            # Interactive commit creation wizard
+bun run version:prepare   # Version preparation wizard
+```
+
+## Verification
+```bash
+# Check everything
+bun run check:affected      # Fix, types, test affected, build affected
+bun run check:types      # TypeScript check across all packages
+bun test                 # Run all tests
+bun run build            # Build all packages
+```
+
+## Common Patterns
+```bash
+# Daily development
+bun run dev              # Start all dev servers
+bun run dev --filter=monitabits-app  # Start specific app
+bun run check:affected      # Full quality check before commit
+
+# Quality gates
+bun run check            # Biome lint/format
+bun run check:types      # TypeScript validation
+bun test --affected      # Test only affected packages
+
+# Version management
+bun run version:prepare  # Prepare version and changelog
+bun run version:apply    # Apply version changes
+bun run version:ci       # Complete CI version workflow
+
+# Build and deploy
+turbo run build --filter=monitabits-app  # Build specific app
+turbo prune --scope=monitabits-app --docker  # Docker pruning
+
+# Interactive tools
+bun run commit           # Interactive commit wizard
+```
+
+**Key Features**:
+- Interactive CLI with step-by-step wizards
+- Entity-based architecture for modular automation
+- Docker-first approach (DevContainer recommended)
+- Affected package detection for CI/CD optimization
+- Quality gates before committing
+- Real-time validation and error handling
+
+**Workflow Pattern**:
+1. Setup environment (local or DevContainer)
+2. Start services (Docker or local)
+3. Make changes
+4. Run quality checks (`check:affected`)
+5. Use interactive commit tool
+6. Version management when ready
+
+**Reference**: `docs/3_DEV_FLOWS.md` for detailed development workflows
+
+## Monorepo Structure
+```
+root/
+├── apps/                  # Applications
+│   ├── monitabits-app/   # Next.js frontend
+│   └── monitabits-api/   # NestJS backend
+├── packages/             # Shared packages
+│   ├── ui/              # React component library
+│   ├── utils/           # Shared utilities
+│   ├── typescript-config/  # Shared TS configs
+│   └── test-preset/     # Shared test configs
+├── turbo.json           # Turborepo config
+├── bunfig.toml         # Bun configuration
+├── biome.json          # Biome config
+└── renovate.json       # Renovate config
+```
+
+## Architecture Principles
+
+### Directory Structure
+
+**Flat hierarchy preferred. Nested directories only for business logic/routes:**
+
+```ts
+// ✅ Good - Flat structure for utilities
+packages/utils/
+  src/
+    logger.ts
+    validator.ts
+    formatter.ts
+
+// ✅ Good - Nested for business routes/logic
+apps/monitabits-app/
+  app/
+    dashboard/
+      page.tsx
+      components.tsx
+    settings/
+      page.tsx
+
+// ❌ Bad - Unnecessary nesting
+packages/utils/
+  src/
+    helpers/
+      logger.ts
+      validator.ts
+```
+
+### Import Direction
+
+**Prefer importing from children, not parents. Prevents unnecessary nested directories:**
+
+```ts
+// ✅ Good - Import from child
+import { formatDate } from './formatters/date';
+
+// ⚠️ Acceptable - Parent import (not preferred but acceptable)
+import { validateInput } from '../validators';
+
+// ❌ Bad - Circular dependencies
+// Module A imports B, B imports A
+```
+
+### File Organization
+
+**Keep related utilities in same file. Split only when module becomes large:**
+
+```ts
+// ✅ Good - Related utilities together
+export const formatDate = (date: Date): string => {};
+export const formatCurrency = (amount: number): string => {};
+export const formatPhone = (phone: string): string => {};
+
+// ✅ Good - Split only when module is large
+// user.types.ts
+// user.utils.ts
+// user.hooks.ts
+// user.styles.ts
+
+// ❌ Bad - Too many small files
+// formatDate.ts
+// formatCurrency.ts
+// formatPhone.ts
+```
+
+**File naming pattern (only for large modules):**
+- `module.types.ts` - Type definitions
+- `module.utils.ts` - Utility functions
+- `module.hooks.ts` - React hooks
+- `module.styles.ts` - Styling
+- `module.const.ts` - Constants
+
+### Reusability Strategy
+
+**Page components stay in app directory, not component library:**
+
+```tsx
+// ✅ Good - Page-specific components in app
+apps/monitabits-app/
+  app/
+    dashboard/
+      page.tsx
+      DashboardStats.tsx  // Only used here
+      DashboardChart.tsx
+
+// ✅ Good - Truly reusable components in library
+packages/ui/
+  Button.tsx
+  Input.tsx
+  Card.tsx  // Used across multiple apps/pages
+
+// ❌ Bad - Premature extraction to library
+packages/ui/
+  DashboardStats.tsx  // Only used in one place
+```
+
+### Code Organization
+
+**Declarative over imperative. Data structures first, then iterate:**
+
+```ts
+// ✅ Good - Declarative with data structures
+const actions = [
+  { type: 'increment', payload: 1 },
+  { type: 'decrement', payload: 1 },
+] as const;
+
+const reducer = (state: number, action: typeof actions[number]) => {
+  switch (action.type) {
+    case 'increment': return state + action.payload;
+    case 'decrement': return state - action.payload;
+  }
+};
+
+// ❌ Bad - Imperative approach
+let count = 0;
+function increment() { count++; }
+function decrement() { count--; }
+```
+
+### Abstraction Layers
+
+**Extract concerns but limit to 2-3 layers. Keep logic at starting point:**
+
+```ts
+// ✅ Good - 2-3 layers max
+// page.tsx (starting point)
+export default async function DashboardPage() {
+  const data = await getDashboardData();
+  const processed = processDashboardData(data);
+  return <DashboardView data={processed} />;
+}
+
+// ❌ Bad - Too many abstraction layers
+// page.tsx → service.ts → repository.ts → data-access.ts → db.ts
+// Everything happens in service layer, page just calls service
+```
+
+### Dependency Rules
+
+**NO circular dependencies. Unidirectional flow enforced:**
+
+```ts
+// ✅ Good - Unidirectional
+// packages/utils → packages/types
+// apps/monitabits-app → packages/ui → packages/utils
+
+// ❌ Bad - Circular
+// packages/ui → packages/utils
+// packages/utils → packages/ui  // CIRCULAR!
+```
+
+**Verify with:**
+```bash
+# Check for circular dependencies
+# Use tools or manual inspection of import graph
+```
+
+## Package Relationships
+```bash
+# Understand relationships via tsconfig.json references
+# Check package.json workspace dependencies
+# Use turbo.json task dependencies
+
+# Trace dependencies
+- Apps depend on packages/
+- Packages can depend on other packages (one-way only)
+- Root manages shared tooling (TypeScript, Biome, etc.)
+- NO circular dependencies between packages
+```

@@ -42,10 +42,16 @@ bun run db:migrate    # Run migrations
 bun run dev
 ```
 
-This will:
-1. Start the API on port 3003
-2. Generate `openapi.yaml` from DTOs
-3. Run Kubb to generate types/hooks/zod in `@repo/monitabits-kubb`
+This will start the API on port 3003, generate `openapi.yaml` from DTOs, and run Kubb to generate types/hooks/zod in `@repo/monitabits-kubb`.
+
+**Database commands:**
+```bash
+bun run db:generate       # Generate Prisma Client
+bun run db:migrate        # Create and apply migrations
+bun run db:studio         # Open Prisma Studio GUI
+```
+
+**API Documentation:** Swagger UI at http://localhost:3005 (via `monitabits-swagger` app)
 
 ## Project Structure
 
@@ -71,38 +77,11 @@ apps/monitabits-api/
 └── package.json
 ```
 
-## Database Commands
-
-```bash
-bun run db:generate       # Generate Prisma Client
-bun run db:migrate        # Create and apply migrations
-bun run db:migrate:deploy # Apply migrations (production)
-bun run db:studio         # Open Prisma Studio GUI
-bun run db:reset          # Reset database (WARNING: deletes data)
-```
-
-## API Documentation
-
-- **Swagger UI**: http://localhost:3005 (via `monitabits-swagger` app)
-- **OpenAPI spec**: Auto-generated at `packages/monitabits-kubb/src/openapi.yaml`
-
 ## Architecture
 
-### DTOs as Source of Truth
+- **DTOs as Source of Truth**: DTOs use `@ApiProperty` decorators that generate OpenAPI schema
+- **Automatic Code Generation**: OpenAPI spec triggers Kubb to generate frontend types/hooks
+- **Validation**: Headers validated by guards, request bodies by Zod schemas
+- **Response Format**: Consistent response wrapping via interceptors
 
-DTOs in `src/common/models/` use `@ApiProperty` decorators:
-
-```typescript
-export class SettingsDto {
-  @ApiProperty({ type: Number, minimum: 1, maximum: 10080 })
-  readonly lockdownMinutes!: number;
-}
-```
-
-These generate the OpenAPI schema, which Kubb uses to generate frontend code.
-
-### Validation Flow
-
-1. **Headers** validated by guards (`DeviceAuthGuard`, `TimeValidationGuard`)
-2. **Request bodies** validated by `ZodValidationPipe` with Zod schemas
-3. **Response format** wrapped by `TransformInterceptor`
+For detailed architecture and implementation patterns, see **[apps/monitabits-api/CLAUDE.md](./CLAUDE.md)**

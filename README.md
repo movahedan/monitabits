@@ -115,11 +115,10 @@ Everything you need to build rock-solid applications is right here! We've kept i
 [![MCP Integration](https://img.shields.io/badge/🔌%20MCP%20Integration-495057?style=for-the-badge)](./.mcp.json)
 
 ### **📋 Development Rules**
-[![TypeScript Rules](https://img.shields.io/badge/🔷%20TypeScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/typescript.mdc)
-[![JavaScript Rules](https://img.shields.io/badge/🟨%20JavaScript%20Rules-495057?style=for-the-badge)](./.cursor/rules/javascript.mdc)
+[![Code Standards](https://img.shields.io/badge/💻%20Code%20Standards-495057?style=for-the-badge)](./.cursor/rules/coding.mdc)
 [![Testing Rules](https://img.shields.io/badge/🧪%20Testing%20Rules-495057?style=for-the-badge)](./.cursor/rules/testing.mdc)
 [![Security Guidelines](https://img.shields.io/badge/🔒%20Security%20Guidelines-495057?style=for-the-badge)](./.cursor/rules/security.mdc)
-[![Package Management](https://img.shields.io/badge/📦%20Package%20Management-495057?style=for-the-badge)](./.cursor/rules/packages.mdc)
+[![Monorepo](https://img.shields.io/badge/📦%20Monorepo-495057?style=for-the-badge)](./.cursor/rules/monorepo.mdc)
 
 ## � **What's Inside**
 
@@ -161,7 +160,7 @@ bun run local:setup && bun run dev:setup && bun run dev:up && bun run dev:check
 bun run dev:cleanup && bun run local:cleanup
 
 # Don't want to use devcontainer? Not recommended though!
-bun run local:setup && bun run check:quick && bun run dev
+bun run local:setup && bun run check:affected && bun run dev
 ```
 
 [![Star](https://img.shields.io/badge/⭐%20Star%20This%20Repo-Support%20Us-00D4AA?style=for-the-badge)](https://github.com/movahedan/monitabits)

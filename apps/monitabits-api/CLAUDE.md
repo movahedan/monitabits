@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-This file provides guidance for working with the monitabits-api application.
+This file provides guidance to Claude Code (claude.ai/code) when working with the monitabits-api application.
+
+**IMPORTANT: Always refer to `.cursor/rules/` for development standards.**
 
 ## Application Overview
 
